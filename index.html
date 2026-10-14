@@ -1,0 +1,2865 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hari Pendigitalan MOTAC - Cop Digital, e-Sijil & Live Draw</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- QRCode.js (Jana Kod QR untuk Admin) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Html5-QRCode (Pengimbas Kamera Peserta) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- SheetJS (Baca & Eksport Fail Excel / CSV) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Confetti (Keraian Pemenang Cabutan Pentas) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Jana e-Sijil PDF untuk lampiran emel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    /* Latar Belakang Rasmi Aplikasi */
+    body {
+      background-color: #030712;
+      background-image: 
+        linear-gradient(rgba(3, 7, 18, 0.45), rgba(3, 7, 18, 0.62)),
+        url("./background-motac.png"),
+        radial-gradient(circle at 80% 20%, rgba(30, 64, 175, 0.45) 0%, transparent 40%),
+        radial-gradient(circle at 20% 80%, rgba(147, 51, 234, 0.35) 0%, transparent 40%),
+        linear-gradient(to bottom, rgba(3, 7, 18, 0.85), rgba(3, 7, 18, 0.92));
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    /* Kad Kaca Cyber Glassmorphism */
+    .glass-card {
+      background: rgba(10, 18, 38, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.6), 0 0 20px 2px rgba(14, 165, 233, 0.12);
+    }
+
+    .glass-header {
+      background: rgba(8, 14, 29, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    @keyframes goldenPulse {
+      0%, 100% {
+        box-shadow: 0 0 25px rgba(245, 158, 11, 0.4), inset 0 0 15px rgba(245, 158, 11, 0.2);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 45px rgba(245, 158, 11, 0.75), inset 0 0 25px rgba(245, 158, 11, 0.4);
+        transform: scale(1.015);
+      }
+    }
+
+    .golden-banner-glow {
+      animation: goldenPulse 2.8s ease-in-out infinite;
+    }
+
+    @keyframes floatSoft {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .anim-float {
+      animation: floatSoft 4s ease-in-out infinite;
+    }
+
+    /* Gaya Bekas e-Sijil */
+    .cert-backdrop-container {
+      background-color: #030a21;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ============================================================== */
+    /* TETAPAN CETAKAN TEPAT (WYSIWYG: PERSIS SKRIN PRATONTON)        */
+    /* ============================================================== */
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+
+    @media print {
+      /* 1. Mod Cetak e-Sijil Rasmi A4 Landscape */
+      body.printing-cert {
+        display: block !important;
+        background: #030a21 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        overflow: hidden !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      body.printing-cert > :not(#certificateModal) {
+        display: none !important;
+      }
+
+      body.printing-cert #certificateModal {
+        display: block !important;
+        position: fixed !important;
+        inset: 0 !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        overflow: hidden !important;
+      }
+
+      body.printing-cert #certificateModal > :not(#printableCertificateArea) {
+        display: none !important;
+      }
+
+      body.printing-cert #printableCertificateArea {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 237.6mm !important;
+        height: 168mm !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 2.5rem !important;
+        box-sizing: border-box !important;
+        border: none !important;
+        border-radius: 0 !important;
+        transform: scale(1.25) !important;
+        transform-origin: top left !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid-page !important;
+      }
+
+      /* Kekalkan latar belakang templat sijil */
+      body.printing-cert #printableCertificateArea img.cert-bg-img {
+        display: block !important;
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        z-index: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      body.printing-cert #printableCertificateArea * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        visibility: visible !important;
+      }
+
+      body.printing-cert #certRecipientName {
+        color: #fde047 !important;
+        -webkit-text-fill-color: #fde047 !important;
+      }
+
+      /* 2. Mod Cetak Biasa (Bukan Sijil) */
+      body:not(.printing-cert) .no-print { display: none !important; }
+      body:not(.printing-cert) { background: white !important; color: black !important; padding: 0 !important; background-image: none !important; }
+      body:not(.printing-cert) .qr-card-print { border: 2px solid #0f172a !important; page-break-inside: avoid; background: white !important; color: black !important; }
+      body:not(.printing-cert) .print-report-container { background: white !important; color: black !important; padding: 20px !important; }
+      body:not(.printing-cert) .print-report-container * { color: black !important; border-color: #cbd5e1 !important; }
+    }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen font-sans flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
+
+  <!-- Navigasi Menu Atas Kaca -->
+  <header class="no-print glass-header sticky top-0 z-40 px-4 py-3 shadow-lg">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/26/Coat_of_arms_of_Malaysia.svg" 
+             alt="Jata Negara Malaysia" 
+             class="h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]"
+             onerror="this.onerror=null; this.src='https://www.motac.gov.my/images/jata_negara.png';">
+        <div>
+          <h1 class="text-sm md:text-base font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300">
+            Cop Digital, Cabutan Bertuah &  e-Sijil
+          </h1>
+          <p class="text-[10px] text-cyan-200/80 font-mono tracking-wider">HARI PENDIGITALAN MOTAC 2026 • Memacu Transformasi Digital MOTAC</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center bg-slate-950/80 p-1.5 rounded-2xl border border-cyan-500/30 text-xs shadow-inner">
+        <button id="navUser" onclick="switchTab('user')" class="px-3.5 py-1.5 rounded-xl font-bold bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow transition-all duration-300">
+          📱 Cop Digital Peserta
+        </button>
+        <button id="navStage" onclick="switchTab('stage')" class="px-3.5 py-1.5 rounded-xl font-bold text-slate-300 hover:text-white transition-all duration-300">
+          🖥️ Skrin Pentas (Live)
+        </button>
+        <button id="navAdmin" onclick="switchTab('admin')" class="px-3.5 py-1.5 rounded-xl font-bold text-slate-300 hover:text-white transition-all duration-300">
+          ⚙️ Panel Admin
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto w-full p-4 md:p-6 flex-1 relative z-10">
+
+    <!-- ============================================================== -->
+    <!-- 1. MODUL PESERTA (MOBILE VIEW)                                 -->
+    <!-- ============================================================== -->
+    <section id="viewUser" class="max-w-xl mx-auto">
+      
+      <!-- LOG MASUK -->
+      <div id="userLoginBox" class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl text-center anim-float">
+        <div class="flex justify-center mb-4">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/2/26/Coat_of_arms_of_Malaysia.svg" 
+               alt="Jata Negara Malaysia" 
+               class="h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]"
+               onerror="this.onerror=null; this.src='https://www.motac.gov.my/images/jata_negara.png';">
+        </div>
+        
+        <h2 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-indigo-200">
+          Cop Digital Peserta
+        </h2>
+        <p class="text-xs text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
+          Masukkan emel rasmi berdaftar anda untuk mula mengumpul cop digital daripada 11 reruai pempamer.
+        </p>
+
+        <form onsubmit="handleUserLogin(event)" class="space-y-4 mt-6 text-left">
+          <div>
+            <label class="block text-xs font-semibold text-cyan-300 mb-1.5">Alamat Emel Berdaftar</label>
+            <input type="email" id="loginEmail" required placeholder="nama@motac.gov.my"
+              class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition placeholder-slate-500 font-mono">
+          </div>
+          <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-black rounded-xl text-sm transition shadow-lg shadow-cyan-500/25 active:scale-98">
+            Buka Cop Digital Saya ➔
+          </button>
+        </form>
+      </div>
+
+      <!-- SKRIN COP DIGITAL & PROGRESS PESERTA -->
+      <div id="userPassportBox" class="hidden space-y-4">
+        
+        <!-- PROGRESS BAR INTERAKTIF 4 LANGKAH -->
+        <div class="glass-card rounded-3xl p-5 border border-cyan-500/30 shadow-2xl relative overflow-hidden">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Kemajuan Keseluruhan Misi</span>
+              <h4 id="journeyTitleText" class="text-xs sm:text-sm font-black text-cyan-300 flex items-center gap-1.5 mt-0.5">
+                <span>🚀</span> 0% Selesai
+              </h4>
+            </div>
+            <span id="journeyStepBadge" class="text-[11px] font-mono px-3 py-1 rounded-full font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+              Langkah 1 / 4
+            </span>
+          </div>
+
+          <!-- Progress Bar Garis Sambung -->
+          <div class="relative mb-6 mx-2 sm:mx-6">
+            <div class="absolute top-1/2 left-0 w-full h-1.5 bg-slate-900 -translate-y-1/2 rounded-full z-0"></div>
+            <div id="timelineProgressBar" class="absolute top-1/2 left-0 h-1.5 bg-gradient-to-r from-cyan-400 via-indigo-500 to-amber-400 -translate-y-1/2 rounded-full z-0 transition-all duration-700 shadow-[0_0_12px_rgba(34,211,238,0.7)]" style="width: 0%;"></div>
+
+            <!-- 4 Titik Langkah Visual -->
+            <div class="relative z-10 flex justify-between items-center">
+              <div class="flex flex-col items-center">
+                <div id="nodeCircle1" class="w-8 h-8 rounded-full bg-slate-900 border-2 border-cyan-400 text-cyan-300 font-black text-xs flex items-center justify-center transition-all duration-500 shadow-md">1</div>
+                <span class="text-[10px] font-bold text-slate-300 mt-1.5 text-center leading-tight">11 Cop<br><span id="nodeSub1" class="text-[9px] text-cyan-400 font-mono">0/11</span></span>
+              </div>
+              <div class="flex flex-col items-center">
+                <div id="nodeCircle2" class="w-8 h-8 rounded-full bg-slate-900 border-2 border-slate-700 text-slate-500 font-black text-xs flex items-center justify-center transition-all duration-500 shadow-md">2</div>
+                <span class="text-[10px] font-bold text-slate-400 mt-1.5 text-center leading-tight">Maklum Balas<br><span id="nodeSub2" class="text-[9px] text-slate-500 font-mono">5 Soalan</span></span>
+              </div>
+              <div class="flex flex-col items-center">
+                <div id="nodeCircle3" class="w-8 h-8 rounded-full bg-slate-900 border-2 border-slate-700 text-slate-500 font-black text-xs flex items-center justify-center transition-all duration-500 shadow-md">3</div>
+                <span class="text-[10px] font-bold text-slate-400 mt-1.5 text-center leading-tight">e-Sijil<br><span id="nodeSub3" class="text-[9px] text-slate-500 font-mono">PDF</span></span>
+              </div>
+              <div class="flex flex-col items-center">
+                <div id="nodeCircle4" class="w-8 h-8 rounded-full bg-slate-900 border-2 border-slate-700 text-slate-500 font-black text-xs flex items-center justify-center transition-all duration-500 shadow-md">4</div>
+                <span class="text-[10px] font-bold text-slate-400 mt-1.5 text-center leading-tight">Goodies Bag<br><span id="nodeSub4" class="text-[9px] text-slate-500 font-mono">Tebus</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kotak Tindakan Serta-Merta -->
+          <div id="actionBannerBox" class="p-3.5 bg-slate-950/90 rounded-2xl border border-cyan-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner">
+            <div class="flex items-center gap-3">
+              <span id="actionBannerIcon" class="text-2xl">📷</span>
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400 block">TINDAKAN ANDA SEKARANG:</span>
+                <p id="actionBannerText" class="text-xs font-bold text-white mt-0.5">Sila imbas kod QR di 11 reruai pempamer.</p>
+              </div>
+            </div>
+            <button id="actionBannerBtn" onclick="handleRoadmapActionClick()" class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 text-white font-black rounded-xl text-xs whitespace-nowrap shadow-md active:scale-95 transition">
+              Imbas QR Booth
+            </button>
+          </div>
+        </div>
+
+        <!-- KAD KHAS E-SIJIL PADA DASHBOARD PESERTA -->
+        <div id="dashboardCertCard" class="glass-card rounded-3xl p-5 border border-cyan-500/40 relative overflow-hidden shadow-xl">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center text-2xl font-black shadow-md shadow-cyan-500/20 border border-cyan-300/40">
+                🎓
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-black text-white">e-Sijil Penyertaan Rasmi MOTAC 2026</h3>
+                  <span id="certDashboardPill" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700">Terkunci 🔒</span>
+                </div>
+                <p id="certDashboardDesc" class="text-xs text-slate-300 mt-0.5">Lengkapkan 11 cop & 5 maklum balas untuk membuka e-sijil anda.</p>
+              </div>
+            </div>
+
+            <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+              <button id="btnViewCertDashboard" onclick="openCertificateModal()" disabled class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 opacity-50 cursor-not-allowed transition">
+                <span>👁️</span> Buka e-Sijil
+              </button>
+              <button id="btnDownloadCertPdf" onclick="downloadCertificateDirect()" disabled class="w-full sm:w-auto px-4 py-2.5 bg-slate-900 border border-cyan-400/40 hover:bg-slate-800 text-cyan-300 font-bold rounded-xl text-xs flex items-center justify-center gap-2 opacity-50 cursor-not-allowed transition">
+                <span>📥</span> Simpan PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- REMARK BESAR 11/11 COP -->
+        <div id="bigRemarkQualified" class="hidden golden-banner-glow rounded-3xl p-6 sm:p-7 bg-gradient-to-br from-amber-950/90 via-slate-950/95 to-emerald-950/90 border-2 border-amber-400/80 shadow-2xl relative overflow-hidden text-center">
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-black tracking-wider uppercase shadow-md mb-3">
+              <span>🏆</span> MISI 11 COP LENGKAP SEPENUHNYA
+            </div>
+            
+            <h2 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-100 to-emerald-300 tracking-tight leading-tight">
+              TAHNIAH! ANDA KINI LAYAK KE CABUTAN BERTUAH
+            </h2>
+            
+            <p id="userFeedbackRemarkText" class="text-xs sm:text-sm text-amber-100/90 mt-2 max-w-md mx-auto leading-relaxed">
+              Semua 11 reruai pempamer telah berjaya anda lawati. Rekod kehadiran anda telah disahkan ke dalam senarai cabutan pentas.
+            </p>
+
+            <div class="mt-4 p-3.5 bg-slate-950/80 border border-amber-400/30 rounded-2xl flex items-center justify-between gap-3 text-left">
+              <div>
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Status Cabutan Pentas</span>
+                <p id="userWinStatusText" class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5 mt-0.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  AKTIF DALAM SENARAI CABUTAN
+                </p>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Jumlah Cop</span>
+                <p class="text-base sm:text-lg font-black font-mono text-amber-300">11 / 11 ✅</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kad Identiti Peserta Kaca -->
+        <div class="glass-card rounded-3xl p-5 shadow-2xl relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="inline-block px-3 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 uppercase tracking-widest mb-1.5">
+                Peserta Berdaftar
+              </span>
+              <h3 id="pName" class="text-2xl font-black text-white">-</h3>
+              <p id="pEmail" class="text-xs text-slate-300 font-mono">-</p>
+              <p id="pAgency" class="text-xs text-cyan-300 mt-0.5 font-medium">-</p>
+            </div>
+            <button onclick="handleUserLogout()" class="text-xs text-rose-300 hover:text-rose-200 underline font-medium">Log Keluar</button>
+          </div>
+
+          <!-- Bar Kemajuan Cop Kecil -->
+          <div class="mt-5 pt-4 border-t border-slate-700/60">
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-xs font-semibold text-slate-200" id="pStatusLabel">Kemajuan Cop Reruai</span>
+              <span class="text-xs font-black font-mono text-cyan-300" id="pStampRatio">0 / 11</span>
+            </div>
+            <div class="w-full bg-slate-950/80 rounded-full h-3.5 p-0.5 border border-cyan-500/30">
+              <div id="pProgressBar" class="bg-gradient-to-r from-cyan-400 via-indigo-500 to-emerald-400 h-2.5 rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(34,211,238,0.6)]" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Butang Imbas Kamera -->
+        <div class="glass-card rounded-2xl p-4">
+          <button onclick="startQRScanner()" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-black rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg active:scale-98 transition">
+            <span class="text-base">📷</span> IMBAS QR DI BOOTH UNTUK DAPAT COP
+          </button>
+          <p class="text-[11px] text-slate-300 text-center mt-2">Halakan kamera telefon ke kod QR di atas meja setiap pempamer.</p>
+        </div>
+
+        <!-- Grid 11 Booth Rasmi -->
+        <div>
+          <h4 class="text-xs font-bold text-cyan-300 uppercase tracking-widest mb-2 px-1">Senarai 11 Reruai Pempamer</h4>
+          <div id="boothsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- 2. MODUL SKRIN PENTAS LIVE                                     -->
+    <!-- ============================================================== -->
+    <section id="viewStage" class="hidden space-y-6">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <span class="text-[10px] text-slate-300 uppercase font-semibold">Jumlah Berdaftar</span>
+          <p id="statTotal" class="text-2xl sm:text-3xl font-black text-white mt-1">0</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center border-slate-700 bg-slate-950/40">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold">Belum Mula (0 Cop)</span>
+          <p id="statZeroStamps" class="text-2xl sm:text-3xl font-black text-slate-400 mt-1">0</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center border-amber-500/30">
+          <span class="text-[10px] text-amber-300 uppercase font-semibold">Sedang Mengumpul (1-10)</span>
+          <p id="statActive" class="text-2xl sm:text-3xl font-black text-amber-300 mt-1">0</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center border-cyan-500/40 bg-cyan-950/30">
+          <span class="text-[10px] text-cyan-300 uppercase font-semibold">Layak 11/11 Cop</span>
+          <p id="statQualified" class="text-2xl sm:text-3xl font-black text-cyan-400 mt-1">0</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center border-emerald-500/40 bg-emerald-950/30 col-span-2 sm:col-span-1">
+          <span class="text-[10px] text-emerald-300 uppercase font-semibold">Pemenang Dicabut</span>
+          <p id="statWinnersCount" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">0</p>
+        </div>
+      </div>
+
+      <!-- Kotak Visual Cabutan Semasa -->
+      <div class="glass-card rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden shadow-2xl">
+        <h2 class="text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-100 to-indigo-300">
+          CABUTAN BERTUAH HARI PENDIGITALAN MOTAC
+        </h2>
+        <div class="bg-slate-950/90 border border-cyan-500/30 rounded-3xl p-6 sm:p-8 max-w-xl mx-auto my-6 shadow-2xl">
+          <span id="stageWinnerBadge" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Menunggu Giliran Cabutan oleh Urus Setia...</span>
+          <h3 id="stageWinnerName" class="text-3xl sm:text-5xl font-black text-amber-300 my-3">---</h3>
+          <p id="stageWinnerAgency" class="text-xs sm:text-sm text-cyan-200 font-mono">---</p>
+        </div>
+      </div>
+
+      <!-- Jadual Pemenang Sah -->
+      <div class="glass-card border-amber-500/30 rounded-2xl p-5">
+        <h3 class="font-bold text-amber-300 text-sm mb-3">🎉 Senarai Pemenang Bertuah Yang Berjaya Dicabut</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-700 text-amber-400 uppercase font-semibold">
+                <th class="py-2.5 px-3">Cabutan #</th>
+                <th class="py-2.5 px-3">Nama Pemenang</th>
+                <th class="py-2.5 px-3">Bahagian / Agensi</th>
+                <th class="py-2.5 px-3">Emel</th>
+                <th class="py-2.5 px-3 text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody id="stageWinnersTableBody" class="divide-y divide-slate-800 font-mono"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- 3. MODUL ADMIN                                                 -->
+    <!-- ============================================================== -->
+    <section id="viewAdmin" class="hidden space-y-6">
+      
+      <!-- LOG MASUK ADMIN -->
+      <div id="adminLoginBox" class="max-w-md mx-auto glass-card rounded-3xl p-6 sm:p-8 shadow-2xl text-center anim-float">
+        <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl border border-amber-500/40">
+          🔒
+        </div>
+        <h2 class="text-xl font-black text-white">Log Masuk Urus Setia (Admin)</h2>
+        <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left mt-5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Pengguna (Username)</label>
+            <input type="text" id="adminUser" required placeholder="admin"
+              class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Kata Laluan (Password)</label>
+            <input type="password" id="adminPass" required placeholder="admin1234"
+              class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white">
+          </div>
+          <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-cyan-600 text-white font-bold rounded-xl text-xs shadow-lg">
+            Log Masuk Admin
+          </button>
+        </form>
+      </div>
+
+      <!-- PANEL KAWALAN ADMIN -->
+      <div id="adminDashboardBox" class="hidden space-y-6">
+        
+        <div class="flex justify-between items-center glass-card p-4 rounded-2xl">
+          <span class="text-xs text-slate-300">Pentadbir Bertugas: <strong id="currentAdminName" class="text-amber-400 font-mono">admin</strong></span>
+          <button onclick="handleAdminLogout()" class="px-3 py-1.5 bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 rounded-lg text-xs font-bold transition">
+            Log Keluar
+          </button>
+        </div>
+
+        <!-- Sub-Navigasi Panel Admin -->
+        <div class="no-print border-b border-slate-700/80 pb-3 flex flex-wrap gap-2 text-xs">
+          <button onclick="switchAdminSub('drawControl')" id="subBtnDraw" class="px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-amber-400">
+            🎰 Kawalan Cabutan
+          </button>
+          <button onclick="switchAdminSub('participantsHub')" id="subBtnHub" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
+            👥 Pengurusan Peserta & Goodies
+          </button>
+          <button onclick="switchAdminSub('reports')" id="subBtnReports" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
+            📊 Pelaporan & Analitik
+          </button>
+          <button onclick="switchAdminSub('qr')" id="subBtnQR" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
+            🖨️ Cetakan Kad QR Reruai
+          </button>
+          <button onclick="switchAdminSub('accounts')" id="subBtnAccounts" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
+            🛡️ Urus Akaun Admin
+          </button>
+        </div>
+
+        <!-- SUB-TAB 0: KAWALAN CABUTAN BERTUAH -->
+        <div id="adminDrawSection" class="space-y-6">
+          <div class="glass-card border-amber-500/30 rounded-3xl p-6 sm:p-8 text-center shadow-2xl">
+            <div class="max-w-md mx-auto">
+              <span class="text-xs font-bold tracking-widest text-amber-400 uppercase bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30">
+                Pusat Kawalan Cabutan (Admin Trigger)
+              </span>
+              <h3 class="text-xl sm:text-2xl font-black text-white mt-3">Mula Putar Cabutan Pentas</h3>
+              <p class="text-xs text-slate-300 mt-1">Pemenang yang terpilih akan disingkirkan secara automatik daripada balang cabutan pusingan seterusnya.</p>
+              
+              <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5 my-5 shadow-inner">
+                <span id="adminWinnerBadge" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sedia Memilih</span>
+                <h4 id="adminWinnerName" class="text-2xl sm:text-3xl font-black text-amber-400 my-1">---</h4>
+                <p id="adminWinnerAgency" class="text-xs text-slate-400 font-mono">---</p>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button id="btnAdminTriggerDraw" onclick="triggerLuckyDraw()" class="flex-1 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-2xl text-base shadow-xl shadow-amber-500/20 active:scale-95 transition flex items-center justify-center gap-2">
+                  <span>🎰</span> PUTAR CABUTAN SETERUSNYA
+                </button>
+                <button onclick="resetWinnersList()" title="Set Semula Pemenang" class="px-4 py-4 bg-slate-900 border border-slate-700 hover:bg-slate-800 text-rose-300 rounded-2xl text-xs font-bold transition">
+                  🔄 Reset Pemenang
+                </button>
+              </div>
+              
+              <div class="mt-4 flex justify-between items-center text-xs text-slate-400 border-t border-slate-800 pt-3">
+                <span>Baki layak belum menang: <strong id="adminRemainingCount" class="text-emerald-400 font-mono">0</strong> orang</span>
+                <span>Telah menang: <strong id="adminWonCount" class="text-amber-400 font-mono">0</strong> orang</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5">
+            <h4 class="font-bold text-amber-300 text-sm mb-3">Rekod Pemenang Terkini (Panel Admin)</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="border-b border-slate-700 text-slate-400">
+                    <th class="py-2 px-3">Giliran</th>
+                    <th class="py-2 px-3">Nama</th>
+                    <th class="py-2 px-3">Emel</th>
+                    <th class="py-2 px-3">Bahagian</th>
+                    <th class="py-2 px-3 text-right">Tindakan</th>
+                  </tr>
+                </thead>
+                <tbody id="adminWinnersTableBody" class="divide-y divide-slate-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 1: PENGURUSAN PESERTA & GOODIES BERSEPADU -->
+        <div id="adminParticipantsHubSection" class="hidden space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div class="glass-card p-4 rounded-2xl text-center border-slate-700">
+              <span class="text-[10px] text-slate-400 uppercase font-semibold">Jumlah Pendaftar</span>
+              <p id="hubTotalCount" class="text-2xl font-black text-white mt-1">0</p>
+            </div>
+            <div class="glass-card p-4 rounded-2xl text-center border-cyan-500/40">
+              <span class="text-[10px] text-cyan-300 uppercase font-semibold">Layak 11 Cop</span>
+              <p id="hubEligibleCount" class="text-2xl font-black text-cyan-400 mt-1">0</p>
+            </div>
+            <div class="glass-card p-4 rounded-2xl text-center border-amber-500/40">
+              <span class="text-[10px] text-amber-300 uppercase font-semibold">Maklum Balas Diterima</span>
+              <p id="hubFeedbackCount" class="text-2xl font-black text-amber-400 mt-1">0</p>
+            </div>
+            <div class="glass-card p-4 rounded-2xl text-center border-emerald-500/40">
+              <span class="text-[10px] text-emerald-300 uppercase font-semibold">Goodies Ditebus</span>
+              <p id="hubClaimedCount" class="text-2xl font-black text-emerald-400 mt-1">0</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-5">
+              <h3 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                <span>✍️</span> Tambah Peserta Manual
+              </h3>
+              <form onsubmit="addParticipantManual(event)" class="space-y-3">
+                <input type="text" id="mName" required placeholder="Nama Penuh" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
+                <input type="email" id="mEmail" required placeholder="nama@motac.gov.my" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
+                <input type="text" id="mAgency" required placeholder="Bahagian / Agensi (cth: BPM)" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
+                <button type="submit" class="w-full py-2 bg-gradient-to-r from-cyan-600 to-indigo-600 text-white rounded-lg text-xs font-bold">+ Tambah Peserta</button>
+              </form>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+              <div>
+                <h3 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                  <span>📁</span> Import Fail Excel / CSV Peserta
+                </h3>
+                <div class="bg-slate-950/70 border border-dashed border-cyan-500/40 rounded-xl p-5 text-center">
+                  <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
+                  <label for="excelFileInput" class="cursor-pointer block">
+                    <span class="text-2xl block mb-1">📊</span>
+                    <span class="text-xs font-bold text-cyan-300 hover:underline">Pilih Fail Excel Peserta</span>
+                    <span class="block text-[10px] text-slate-400 mt-1">Format lajur: [Nama, Emel, Bahagian]</span>
+                  </label>
+                </div>
+                <div class="mt-3 bg-slate-950/70 border border-dashed border-amber-500/40 rounded-xl p-4 text-center">
+                  <input type="file" id="bulkUpdateFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleBulkParticipantUpdateUpload(event)">
+                  <label for="bulkUpdateFileInput" class="cursor-pointer block">
+                    <span class="text-xl block mb-1">📝</span>
+                    <span class="text-xs font-bold text-amber-300 hover:underline">Kemaskini Peserta Secara Pukal</span>
+                    <span class="block text-[10px] text-slate-400 mt-1">Jika emel wujud, maklumat akan dikemas kini. Jika tiada, peserta baru akan ditambah.</span>
+                  </label>
+                </div>
+              </div>
+              <div class="mt-3 flex justify-between items-center text-xs">
+                <span id="uploadStatusText" class="text-slate-400 text-[11px]">Sedia menerima fail.</span>
+                <button onclick="downloadSampleExcel()" class="text-xs text-cyan-300 underline">Templat Excel</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+              <div>
+                <h3 class="font-bold text-white text-base flex items-center gap-2">
+                  <span>📋</span> Pangkalan Data Peserta & Semakan Goodies
+                </h3>
+                <p class="text-xs text-slate-300">Cari peserta, semak respon maklum balas dan tandakan serahan cenderamata.</p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="exportStampMatrixExcel()" class="px-3 py-2 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg text-xs font-bold">
+                  📥 Eksport Matriks Cop (.xlsx)
+                </button>
+                <button onclick="exportFeedbackExcel()" class="px-3 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">
+                  📥 Eksport Maklum Balas (.xlsx)
+                </button>
+              </div>
+            </div>
+
+            <!-- Kotak & Penapis Carian -->
+            <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 mb-4 flex flex-col md:flex-row gap-3 items-center">
+              <div class="relative flex-1 w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400 text-xs">🔍</span>
+                <input type="text" id="hubSearchInput" onkeyup="renderIntegratedParticipantsTable()" placeholder="Cari nama peserta, alamat emel, atau bahagian/agensi..."
+                  class="w-full pl-8 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400 font-mono">
+              </div>
+
+              <div class="w-full md:w-auto flex gap-2">
+                <select id="hubFilterCategory" onchange="renderIntegratedParticipantsTable()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-400">
+                  <option value="ALL">Semua Peserta</option>
+                  <option value="QUALIFIED">Layak Goodies & Cabutan (11 Cop)</option>
+                  <option value="GOODIES_UNCLAIMED">Belum Tebus Goodies Sahaja</option>
+                  <option value="GOODIES_CLAIMED">Telah Tebus Goodies Sahaja</option>
+                  <option value="FEEDBACK_DONE">Maklum Balas Selesai</option>
+                  <option value="FEEDBACK_PENDING">Maklum Balas Belum Selesai</option>
+                </select>
+
+                <button onclick="resetHubFilters()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+                  Set Semula
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="sticky top-0 bg-slate-900 border-b border-slate-700 text-slate-300 uppercase">
+                  <tr>
+                    <th class="py-2.5 px-3">Nama Peserta</th>
+                    <th class="py-2.5 px-3">Emel & Bahagian</th>
+                    <th class="py-2.5 px-3 text-center">Bil. Cop</th>
+                    <th class="py-2.5 px-3 text-center">Maklum Balas</th>
+                    <th class="py-2.5 px-3 text-center">Beg Cenderamata (Goodies)</th>
+                    <th class="py-2.5 px-3 text-right">Tindakan</th>
+                  </tr>
+                </thead>
+                <tbody id="integratedParticipantsTableBody" class="divide-y divide-slate-800"></tbody>
+              </table>
+            </div>
+
+            <div class="mt-2.5 flex justify-between items-center text-[11px] text-slate-400">
+              <span id="hubSearchResultCount">Menunjukkan 0 peserta</span>
+              <button onclick="clearAllData()" class="text-rose-400 hover:underline">Padam Semua Data Peserta</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 2: PELAPORAN, STATISTIK & ANALITIK -->
+        <div id="adminReportsSection" class="hidden space-y-6">
+          <div class="glass-card rounded-3xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-cyan-500/40">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold mb-2">
+                <span>📈</span> Pusat Laporan Rasmi Acara
+              </div>
+              <h3 class="text-xl font-black text-white">Laporan Statistik & Data Penuh Peserta</h3>
+              <p class="text-xs text-slate-300 mt-1 max-w-xl">
+                Jana laporan komprehensif bagi Hari Pendigitalan MOTAC dalam format Microsoft Excel (.xlsx) atau cetak ke PDF.
+              </p>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+              <button onclick="exportComprehensiveReportExcel()" class="flex-1 md:flex-none px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition">
+                <span>📥</span> Muat Turun Excel (.xlsx)
+              </button>
+              <button onclick="printExecutiveReport()" class="flex-1 md:flex-none px-4 py-3 bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+                <span>🖨️</span> Cetak / Simpan PDF
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-4 border border-cyan-500/30">
+            <label for="databaseWebAppUrl" class="block text-xs font-bold text-cyan-300">Google Apps Script Database</label>
+            <p class="text-[11px] text-slate-400 mt-1">Masukkan URL Web App /exec untuk simpan dan kongsi data peserta antara peranti.</p>
+            <div class="mt-3 flex flex-col sm:flex-row gap-2">
+              <input id="databaseWebAppUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" class="min-w-0 flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+              <button onclick="connectDatabase()" class="px-4 py-2 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg text-xs font-bold">Sambung Database</button>
+              <button onclick="pushAllToDatabase()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">Hantar Semua Data ke Sheet</button>
+            </div>
+            <p id="databaseConnectionStatus" class="text-[11px] text-slate-400 mt-2" role="status">Belum disambungkan.</p>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <span class="text-[11px] text-slate-300 uppercase font-semibold">Jumlah Keseluruhan Pendaftar</span>
+              <p id="repTotalUsers" class="text-3xl font-black text-white mt-1">0</p>
+              <span class="text-[10px] text-slate-400">100% Pangkalan Data</span>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center border-cyan-500/40 bg-cyan-950/20">
+              <span class="text-[11px] text-cyan-300 uppercase font-semibold">Layak Cabutan (11/11)</span>
+              <p id="repQualifiedUsers" class="text-3xl font-black text-cyan-300 mt-1">0</p>
+              <span id="repQualifiedPct" class="text-[10px] text-cyan-400 font-mono">0% kadar layak</span>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center border-amber-500/30">
+              <span class="text-[11px] text-amber-300 uppercase font-semibold">Sedang Mengumpul (1-10 Cop)</span>
+              <p id="repActiveUsers" class="text-3xl font-black text-amber-300 mt-1">0</p>
+              <span id="repActivePct" class="text-[10px] text-amber-400 font-mono">0% kadar aktif</span>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center border-slate-700">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Belum Mula (0 Cop)</span>
+              <p id="repZeroUsers" class="text-3xl font-black text-slate-400 mt-1">0</p>
+              <span id="repZeroPct" class="text-[10px] text-slate-400 font-mono">0% belum melawat</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-5">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                  <span>🏢</span> Prestasi Lawatan Mengikut Reruai Pempamer
+                </h4>
+                <span class="text-[11px] text-cyan-300 font-mono">11 Lot Rasmi</span>
+              </div>
+              <div class="overflow-x-auto max-h-72 overflow-y-auto">
+                <table class="w-full text-left text-xs">
+                  <thead class="sticky top-0 bg-slate-900 border-b border-slate-700 text-slate-400 uppercase">
+                    <tr>
+                      <th class="py-2 px-3">Lot & Pempamer</th>
+                      <th class="py-2 px-3 text-center">Jumlah Pelawat</th>
+                      <th class="py-2 px-3 text-right">Peratusan (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="boothPerformanceTableBody" class="divide-y divide-slate-800"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                  <span>🏛️</span> Taburan Peserta Mengikut Bahagian / Agensi
+                </h4>
+                <span class="text-[11px] text-cyan-300 font-mono">Status Agensi</span>
+              </div>
+              <div class="overflow-x-auto max-h-72 overflow-y-auto">
+                <table class="w-full text-left text-xs">
+                  <thead class="sticky top-0 bg-slate-900 border-b border-slate-700 text-slate-400 uppercase">
+                    <tr>
+                      <th class="py-2 px-3">Bahagian / Agensi</th>
+                      <th class="py-2 px-3 text-center">Pendaftar</th>
+                      <th class="py-2 px-3 text-right">Lengkap 11 Cop</th>
+                    </tr>
+                  </thead>
+                  <tbody id="agencyDistributionTableBody" class="divide-y divide-slate-800"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 3: CETAKAN KAD QR -->
+        <div id="adminQRSection" class="hidden space-y-6">
+          <div class="no-print glass-card rounded-2xl p-5 flex justify-between items-center">
+            <div>
+              <h3 class="font-bold text-white text-base">Cetakan Kad QR 11 Reruai Pempamer</h3>
+              <p class="text-xs text-slate-300">Format paparan meja bagi Lot 01 hingga Lot 11.</p>
+            </div>
+            <button onclick="window.print()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 text-white font-bold rounded-xl text-xs">
+              🖨️ Cetak Semua Kad (A5 / A4)
+            </button>
+          </div>
+          <div id="printableQRCards" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </div>
+
+        <!-- SUB-TAB 4: URUS AKAUN ADMIN -->
+        <div id="adminAccountsSection" class="hidden space-y-6">
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="text-sm font-bold text-white mb-2">Akaun Urus Setia Berdaftar</h3>
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/80 border-b border-slate-800 text-slate-300 uppercase">
+                <tr>
+                  <th class="py-2.5 px-3">Nama Urus Setia</th>
+                  <th class="py-2.5 px-3">Username</th>
+                  <th class="py-2.5 px-3 text-right">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody id="adminAccountsTable" class="divide-y divide-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL: PRATONTON JAWAPAN MAKLUM BALAS PESERTA -->
+  <div id="adminFeedbackPreviewModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl max-w-lg w-full p-6 text-left relative shadow-2xl border border-cyan-400/50">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+        <div>
+          <h4 class="text-sm font-bold text-cyan-300 flex items-center gap-1.5">
+            <span>📝</span> Respon Maklum Balas Peserta
+          </h4>
+          <p id="previewParticipantName" class="text-xs text-white font-semibold mt-0.5">-</p>
+        </div>
+        <button onclick="closeAdminFeedbackPreview()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+          <span class="text-slate-400 block font-semibold mb-0.5">1. Tahap Kepuasan Acara (1-5):</span>
+          <span id="prevQ1" class="text-amber-400 font-bold">-</span>
+        </div>
+        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+          <span class="text-slate-400 block font-semibold mb-0.5">2. Reruai Paling Menarik:</span>
+          <span id="prevQ2" class="text-cyan-300 font-bold">-</span>
+        </div>
+        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+          <span class="text-slate-400 block font-semibold mb-0.5">3. Penilaian Kelancaran Web Cop Digital (1-5):</span>
+          <span id="prevQ3" class="text-amber-400 font-bold">-</span>
+        </div>
+        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+          <span class="text-slate-400 block font-semibold mb-0.5">4. Wajar Diteruskan Sebagai Acara Tahunan:</span>
+          <span id="prevQ4" class="text-emerald-400 font-bold">-</span>
+        </div>
+        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+          <span class="text-slate-400 block font-semibold mb-0.5">5. Cadangan / Penambahbaikan:</span>
+          <p id="prevQ5" class="text-slate-200 mt-1 leading-relaxed">-</p>
+        </div>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-slate-800 text-right">
+        <button onclick="closeAdminFeedbackPreview()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KEMASKINI MAKLUMAT PESERTA -->
+  <div id="proxyModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl max-w-md w-full p-6 text-left relative shadow-2xl border border-amber-500/40">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+        <div>
+          <h4 class="text-sm font-bold text-amber-300">✏️ Kemaskini Maklumat Peserta</h4>
+        </div>
+        <button onclick="closeProxyModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveProxy(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="proxyOriginalEmail">
+        <div>
+          <label class="block text-slate-400 mb-1">Peserta Semasa:</label>
+          <input type="text" id="proxyOriginalNameDisplay" disabled class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-400 cursor-not-allowed">
+        </div>
+        <div>
+          <label class="block text-amber-300 font-semibold mb-1">Nama Baharu Peserta:</label>
+          <input type="text" id="proxyNewName" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+        </div>
+        <div>
+          <label class="block text-amber-300 font-semibold mb-1">Emel Baharu:</label>
+          <input type="email" id="proxyNewEmail" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Bahagian / Agensi:</label>
+          <input type="text" id="proxyAgencyDisplay" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex gap-2">
+          <button type="submit" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs">Simpan Perubahan</button>
+          <button type="button" onclick="closeProxyModal()" class="px-4 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs">Batal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: BORANG 5 SOALAN MAKLUM BALAS -->
+  <div id="feedbackModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-3xl max-w-lg w-full p-6 text-left relative shadow-2xl border border-cyan-400/50 my-8">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+        <div>
+          <h4 class="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-indigo-200">
+            📝 Borang Maklum Balas Hari Pendigitalan MOTAC
+          </h4>
+          <p class="text-[11px] text-slate-400">Lengkapkan maklum balas di bawah untuk membuka e-Sijil.</p>
+        </div>
+        <button onclick="closeFeedbackModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+
+      <form id="feedbackForm" onsubmit="handleSurveySubmit(event)" class="space-y-4 text-xs">
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block font-semibold text-slate-200">1. Tahap kepuasan keseluruhan program:</label>
+            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          </div>
+          <div class="grid grid-cols-5 gap-2 text-center">
+            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="1" required class="block mx-auto mb-1"> 1</label>
+            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="2" class="block mx-auto mb-1"> 2</label>
+            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="3" class="block mx-auto mb-1"> 3</label>
+            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="4" class="block mx-auto mb-1"> 4</label>
+            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="5" class="block mx-auto mb-1"> 5</label>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block font-semibold text-slate-200">2. Reruai paling bermanfaat & menarik minat anda:</label>
+            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          </div>
+          <select id="surveyQ2" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
+            <option value="">-- Sila Pilih Reruai --</option>
+            <option value="LOT 01 - Ace Team">LOT 01 - Ace Team</option>
+            <option value="LOT 02 - Oreng">LOT 02 - Oreng</option>
+            <option value="LOT 03 - XOF">LOT 03 - XOF</option>
+            <option value="LOT 04 - Canon">LOT 04 - Canon</option>
+            <option value="LOT 05 - Amazon">LOT 05 - Amazon</option>
+            <option value="LOT 06 - Hewlett–Packard (HP)">LOT 06 - Hewlett–Packard (HP)</option>
+            <option value="LOT 07 - BPM">LOT 07 - BPM</option>
+            <option value="LOT 08 - NGO (Robotik)">LOT 08 - NGO (Robotik)</option>
+            <option value="LOT 09 - IGS Protech">LOT 09 - IGS Protech</option>
+            <option value="LOT 10 - Microsoft">LOT 10 - Microsoft</option>
+            <option value="LOT 11 - MyDigitalID">LOT 11 - MyDigitalID</option>
+          </select>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block font-semibold text-slate-200">3. Penilaian kelancaran web Cop Digital (1-5):</label>
+            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          </div>
+          <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-700">
+            <span class="text-[11px] text-slate-400">Sukar</span>
+            <div class="flex gap-4">
+              <label><input type="radio" name="q3" value="1" required> 1</label>
+              <label><input type="radio" name="q3" value="2"> 2</label>
+              <label><input type="radio" name="q3" value="3"> 3</label>
+              <label><input type="radio" name="q3" value="4"> 4</label>
+              <label><input type="radio" name="q3" value="5"> 5</label>
+            </div>
+            <span class="text-[11px] text-emerald-400">Sangat Mudah</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block font-semibold text-slate-200">4. Wajar dijadikan acara tahunan MOTAC?</label>
+            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          </div>
+          <div class="flex gap-6 mt-1">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q4" value="Ya" required> Ya, Sangat Setuju</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q4" value="Tidak"> Tidak Pasti / Tidak</label>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block font-semibold text-slate-200">5. Cadangan penambahbaikan:</label>
+            <span class="text-[10px] text-slate-400 font-normal">(Pilihan / Opsional)</span>
+          </div>
+          <textarea id="surveyQ5" rows="3" placeholder="Kongsi cadangan anda (jika ada)..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex gap-2">
+          <button type="submit" class="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-black rounded-xl text-xs transition shadow-lg">
+            Hantar Maklum Balas & Buka e-Sijil ➔
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: E-SIJIL PENYERTAAN RASMI (A4 LANDSCAPE)                 -->
+  <!-- ============================================================== -->
+  <div id="certificateModal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    
+    <!-- Bar Navigasi Atas Modal e-Sijil -->
+    <div class="max-w-4xl w-full flex justify-between items-center mb-3 no-print">
+      <span class="text-xs text-cyan-300 font-bold flex items-center gap-1.5">
+        <span>🎓</span> Pratonton e-Sijil Penyertaan Rasmi MOTAC 2026
+      </span>
+      <div class="flex gap-2">
+        <button onclick="printCertificate()" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-cyan-500/25 transition">
+          🖨️ Cetak / Simpan Format PDF
+        </button>
+        <button onclick="closeCertificateModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+          Tutup
+        </button>
+      </div>
+    </div>
+
+    <!-- Kawasan Sijil Landscape (Nisbah A4: 1.414 / 1) -->
+    <div id="printableCertificateArea" class="cert-backdrop-container w-full max-w-4xl aspect-[1.414/1] rounded-3xl p-6 sm:p-10 shadow-[0_0_50px_rgba(14,165,233,0.35)] border-2 border-cyan-400/40 relative flex flex-col justify-center overflow-hidden text-center text-white">
+      
+      <!-- Gambar Latar Belakang Templat Sijil -->
+      <img src="Landscape Sijil Penghargaan (1).png" alt="Latar Belakang Sijil" class="cert-bg-img absolute inset-0 h-full w-full object-cover pointer-events-none" onerror="this.style.display='none'">
+      
+      <!-- Hiasan Garis Bingkai Cahaya Cyber -->
+      <div class="absolute inset-3 sm:inset-4 rounded-2xl border border-cyan-400/30 pointer-events-none z-10"></div>
+      <div class="absolute inset-4 sm:inset-5 rounded-2xl border border-indigo-500/20 pointer-events-none z-10"></div>
+
+      <!-- Bahagian Atas: Jata Negara & Tajuk SIJIL PENYERTAAN -->
+      <div class="relative z-20 pt-2 sm:pt-4">
+        <p class="relative -translate-y-6 sm:-translate-y-10 text-[9px] sm:text-[11px] font-sans font-bold tracking-[0.25em] text-cyan-200 uppercase">
+          KEMENTERIAN PELANCONGAN, SENI DAN BUDAYA
+        </p>
+
+        <!-- Tajuk SIJIL PENYERTAAN -->
+        <h1 class="relative -translate-y-1 sm:-translate-y-2 text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-100 to-indigo-200 tracking-wider font-sans mt-2 drop-shadow-[0_0_20px_rgba(56,189,248,0.5)]">
+          SIJIL PENYERTAAN
+        </h1>
+      </div>
+
+      <!-- Bahagian Tengah: Maklumat Pengakuan & Nama Peserta -->
+      <div class="relative z-20 px-6 sm:px-10 max-w-2xl mx-auto w-full">
+        <p class="text-[11px] sm:text-xs font-sans text-slate-300 uppercase tracking-widest font-semibold">
+          DENGAN INI DIPERAKUI BAHAWA
+        </p>
+
+        <!-- Nama Penuh Peserta (HURUF BESAR) Sahaja -->
+        <div class="my-2 sm:my-3 border-b-2 border-cyan-400/60 inline-block min-w-[75%] pb-1">
+          <h2 id="certRecipientName" class="text-xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-100 to-amber-200 uppercase font-sans tracking-wider">
+            NAMA PESERTA
+          </h2>
+        </div>
+
+        <!-- Teks Kandungan Sijil yang Ditetapkan -->
+        <div class="text-sm sm:text-base font-sans text-slate-200 max-w-xl mx-auto mt-2 leading-relaxed space-y-1">
+          <p class="text-slate-300">telah menyertai</p>
+          <p class="text-base sm:text-xl font-black text-white tracking-wide">Hari Pendigitalan MOTAC 2026</p>
+          <p class="text-cyan-200 italic font-medium">"Memacu Transformasi Digital MOTAC"</p>
+          <p class="text-slate-300 pt-1">pada <span class="text-white font-bold">28 Oktober 2026</span></p>
+          <p class="text-slate-300">Bertempat di <span class="text-white font-bold">Dewan Sanggar Pujangga, MOTAC</span></p>
+        </div>
+      </div>
+
+      <!-- Bahagian Bawah: Pengesahan & No Siri Digital -->
+      <div class="absolute z-20 bottom-2 sm:bottom-3 right-4 sm:right-8 px-4 sm:px-8">
+        <div class="flex justify-between text-[8px] sm:text-[9px] font-mono text-slate-400">
+          <span></span>
+          <span>No. Siri: <strong id="certSerialNo" class="text-cyan-300 font-bold">MOTAC-DIGI-2026-0001</strong></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: NOTIS CLAIM GOODIES BAG -->
+  <div id="goodiesModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl max-w-md w-full p-6 text-center relative shadow-2xl border-2 border-amber-400/80">
+      <div class="w-16 h-16 bg-gradient-to-tr from-amber-500 to-yellow-300 rounded-full flex items-center justify-center text-3xl mx-auto shadow-lg mb-3">🎁</div>
+      <h3 class="text-xl font-black text-amber-300">Penebusan Beg Cenderamata</h3>
+      <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+        Sila hadir ke <strong>Meja Kaunter Urus Setia</strong> untuk mengambil beg cenderamata (Goodies Bag) rasmi Hari Pendigitalan MOTAC 2026.
+      </p>
+      <div class="bg-slate-950/90 border border-amber-400/40 rounded-2xl p-4 my-4 text-left font-mono">
+        <div class="flex justify-between items-center text-xs pb-2 border-b border-slate-800">
+          <span class="text-slate-400">Nama Penerima:</span>
+          <span id="goodiesModalName" class="font-bold text-white">-</span>
+        </div>
+        <div class="flex justify-between items-center text-xs pt-2">
+          <span class="text-slate-400">Status Tuntutan:</span>
+          <span id="goodiesModalClaimText" class="font-bold text-amber-400">Belum Ditebus ⏳</span>
+        </div>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button onclick="closeGoodiesModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold">Tutup Notis</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PENGIMBAS QR KAMERA -->
+  <div id="scannerModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl max-w-sm w-full p-5 text-center relative shadow-2xl">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="text-sm font-bold text-cyan-300">📷 Pengimbas Cop Digital</h4>
+        <button onclick="stopQRScanner()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+      <div id="readerBox" class="w-full h-64 bg-black rounded-2xl overflow-hidden border border-cyan-500/40"></div>
+      <p class="text-[11px] text-slate-300 mt-3">Arahkan kamera ke kad QR di atas meja pempamer.</p>
+    </div>
+  </div>
+
+  
+
+  <footer class="no-print py-4 text-center text-[11px] text-cyan-200/60 border-t border-cyan-500/10">
+    Hari Pendigitalan Kementerian Pelancongan, Seni dan Budaya (MOTAC) © 2026
+  </footer>
+
+  <script>
+    // ==============================================================
+    // 1. DATA MASTER 11 PEMPAMER (MENGIKUT GAMBAR RASMI)
+    // ==============================================================
+    const MOTAC_BOOTHS = [
+      { id: 1, lot: "LOT 01", name: "Ace Team", desc: "Integrasi sistem ICT komprehensif, penyelesaian rangkaian korporat dan infrastruktur pintar.", slot: "Slot 6 • 3.00 Petang", token: "ACE606", icon: "🌐" },
+      { id: 2, lot: "LOT 02", name: "Oreng", desc: "Aplikasi inovatif dan perisian interaktif memperkasa pengurusan pengalaman digital pengunjung pelancongan.", slot: "Slot 7 • 3.30 Petang", token: "ORG707", icon: "📱" },
+      { id: 3, lot: "LOT 03", name: "XOF", desc: "Solusi teknologi digital maju, platform automasi proses pintar serta perkhidmatan automasi moden.", slot: "Sesi Pameran Teknologi", token: "XOF303", icon: "⚙️" },
+      { id: 4, lot: "LOT 04", name: "Canon", desc: "Penyelesaian pengimejan resolusi tinggi, arkib digital warisan dan teknologi imbasan dokumen pintar.", slot: "Slot 5 • 2.30 Petang", token: "CAN505", icon: "📷" },
+      { id: 5, lot: "LOT 05", name: "Amazon", desc: "Infrastruktur pengkomputeran awan (AWS), analitik data pelancongan dan keselamatan awan sektor awam.", slot: "Slot 3 • 11.40 Pagi", token: "AWS303", icon: "☁" },
+      { id: 6, lot: "LOT 06", name: "Hewlett–Packard (HP)", desc: "Perkakasan hibrid pejabat masa depan, sekuriti peranti endpoint dan teknologi AI PC.", slot: "Slot 4 • 12.10 Tgh Hari", token: "HPM404", icon: "💻" },
+      { id: 7, lot: "LOT 07", name: "BPM", desc: "Klinik ICT BPM: Bantuan MyGovUC, DDMS 2.0, khidmat keselamatan kata laluan dan sokongan rangkaian.", slot: "Kaunter Terus BPM", token: "BPM110", icon: "🛡️" },
+      { id: 8, lot: "LOT 08", name: "NGO (Robotik)", desc: "Inovasi robotik automasi, pemerkasaan STEM dan pendedahan teknologi robotik untuk kebudayaan moden.", slot: "Slot 8 • 4.00 Petang", token: "ROB808", icon: "🤖" },
+      { id: 9, lot: "LOT 09", name: "IGS Protech", desc: "Penyelesaian perlindungan data peringkat perusahaan, pengurusan risiko siber dan keselamatan maklumat.", slot: "Sesi Pameran Teknologi", token: "IGS909", icon: "🔒" },
+      { id: 10, lot: "LOT 10", name: "Microsoft", desc: "Ekosistem AI Copilot, produktiviti pejabat pintar, automasi pentadbiran dan kolaborasi moden.", slot: "Slot 2 • 11.10 Pagi", token: "MSF202", icon: "🪟" },
+      { id: 11, lot: "LOT 11", name: "MyDigitalID", desc: "Identiti Digital Nasional sektor awam, pengesahan tanpa kata laluan dan keselamatan transaksi rakyat.", slot: "Slot 1 • 9.00 Pagi", token: "DID101", icon: "🆔" }
+    ];
+
+    const defaultParticipants = [
+      { name: "Nurfateenizati", email: "fatini@motac.gov.my", agency: "Bahagian Pengurusan Maklumat (BPM)", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
+      { name: "Ahmad Faris", email: "faris@tourism.gov.my", agency: "Tourism Malaysia", stamps: [1, 2, 3], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
+      { name: "Nurul Huda", email: "huda@heritage.gov.my", agency: "Jabatan Warisan Negara", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: true, certDownloaded: true, goodiesClaimed: true },
+      { name: "Mohd Khairul", email: "khairul@istanabudaya.gov.my", agency: "Istana Budaya", stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
+      { name: "Siti Khadijah Binti Ismail", email: "khadijah@motac.gov.my", agency: "Bahagian Dasar Pelancongan", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: true, certDownloaded: true, goodiesClaimed: false },
+      { name: "Muhammad Zharif Bin Roslan", email: "zharif@motac.gov.my", agency: "Bahagian Pengurusan Maklumat (BPM)", stamps: [1, 2, 3, 4, 5, 6, 7, 8], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
+      { name: "Ainul Mardhiah Binti Yusof", email: "ainul@tourism.gov.my", agency: "Tourism Malaysia", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
+      { name: "Mohd Danish Haikal", email: "danish@kraftangan.gov.my", agency: "Perbadanan Kemajuan Kraftangan", stamps: [1, 2, 3, 4, 5], feedbackDone: false, certDownloaded: false, goodiesClaimed: false }
+    ]; 
+
+    const defaultAdmins = [
+      { name: "Pentadbir Utama BPM", user: "admin", pass: "admin1234" }
+    ];
+
+    let participants = JSON.parse(localStorage.getItem('motac_p_v28')) || defaultParticipants;
+    let adminAccounts = JSON.parse(localStorage.getItem('motac_admins_v28')) || defaultAdmins;
+    let winnersList = JSON.parse(localStorage.getItem('motac_winners_v28')) || [];
+    let feedbackResponses = JSON.parse(localStorage.getItem('motac_feedbacks_v28')) || [];
+    let currentParticipantEmail = localStorage.getItem('motac_logged_email') || null;
+    let activeAdminUser = sessionStorage.getItem('motac_active_admin') || null;
+    let html5ScannerInstance = null;
+    let databaseWebAppUrl = localStorage.getItem('motac_apps_script_url_v3') || 'https://script.google.com/macros/s/AKfycbyqVKhfzvzcnjFM_qnaQ4ugdkvMD7acBaFrJhG0r22DLOYVi-gmYGeXpTduusOZfg/exec';
+
+    const databaseUrlInput = document.getElementById('databaseWebAppUrl');
+    if (databaseUrlInput) databaseUrlInput.value = databaseWebAppUrl;
+
+    // Cross-Tab Sync
+    const syncChannel = window.BroadcastChannel ? new BroadcastChannel('motac_sync_channel_v28') : null;
+    if (syncChannel) {
+      syncChannel.onmessage = (event) => {
+        if (event.data && event.data.type === 'STATE_UPDATED') {
+          reloadLocalState();
+          refreshViews();
+        }
+      };
+    }
+
+    function reloadLocalState() {
+      participants = JSON.parse(localStorage.getItem('motac_p_v28')) || defaultParticipants;
+      adminAccounts = JSON.parse(localStorage.getItem('motac_admins_v28')) || defaultAdmins;
+      winnersList = JSON.parse(localStorage.getItem('motac_winners_v28')) || [];
+      feedbackResponses = JSON.parse(localStorage.getItem('motac_feedbacks_v28')) || [];
+    }
+
+    function refreshViews() {
+      renderUserView();
+      renderStageView();
+      if (activeAdminUser) renderAdminView();
+    }
+
+    function saveState() {
+      localStorage.setItem('motac_p_v28', JSON.stringify(participants));
+      localStorage.setItem('motac_admins_v28', JSON.stringify(adminAccounts));
+      localStorage.setItem('motac_winners_v28', JSON.stringify(winnersList));
+      localStorage.setItem('motac_feedbacks_v28', JSON.stringify(feedbackResponses));
+      if (currentParticipantEmail) {
+        localStorage.setItem('motac_logged_email', currentParticipantEmail);
+      } else {
+        localStorage.removeItem('motac_logged_email');
+      }
+      if (syncChannel) syncChannel.postMessage({ type: 'STATE_UPDATED' });
+    }
+
+    function readDatabaseState() {
+      return new Promise((resolve, reject) => {
+        const callbackName = `motacDatabaseCallback${Date.now()}${Math.floor(Math.random() * 1000)}`;
+        const script = document.createElement('script');
+        const timeoutId = setTimeout(() => finish(new Error('Sambungan database tamat masa.')), 15000);
+        const finish = (error, result) => {
+          clearTimeout(timeoutId);
+          delete window[callbackName];
+          script.remove();
+          if (error) reject(error);
+          else resolve(result);
+        };
+        window[callbackName] = result => finish(null, result);
+        script.onerror = () => finish(new Error('Tidak dapat membuka Web App. Semak URL dan akses deployment.'));
+        script.src = `${databaseWebAppUrl}?action=GET_STATE&callback=${callbackName}&t=${Date.now()}`;
+        document.head.appendChild(script);
+      });
+    }
+
+    // ---------- Penghantaran ke Google Sheet (dengan baris gilir & cuba semula) ----------
+    const OUTBOX_KEY = 'motac_db_outbox_v1';
+    let dbChain = Promise.resolve();
+
+    function updateDatabaseStatus(message) {
+      const status = document.getElementById('databaseConnectionStatus');
+      if (status) status.innerText = message;
+    }
+
+    function getOutbox() {
+      try { return JSON.parse(localStorage.getItem(OUTBOX_KEY)) || []; } catch (e) { return []; }
+    }
+
+    function setOutbox(list) {
+      try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(list)); } catch (e) { console.error('[MOTAC Outbox]', e); }
+    }
+
+    function queueOutbox(payload) {
+      // Jangan simpan PDF besar dalam localStorage
+      if (payload.action === 'SEND_CERTIFICATE') return;
+      const list = getOutbox();
+      list.push(payload);
+      setOutbox(list);
+    }
+
+    async function sendToDatabase(payload) {
+      const body = JSON.stringify(payload);
+      let response;
+      try {
+        // text/plain = "simple request" (tiada preflight CORS), respons boleh dibaca
+        response = await fetch(databaseWebAppUrl, { method: 'POST', body, redirect: 'follow' });
+      } catch (readError) {
+        // Pelayar tidak dapat baca respons; hantar secara "buta" sebagai pilihan terakhir.
+        // Jika peranti offline, panggilan ini juga akan gagal dan ralat akan dilontar.
+        await fetch(databaseWebAppUrl, { method: 'POST', mode: 'no-cors', body });
+        return { ok: true, blind: true };
+      }
+      const text = await response.text();
+      let result;
+      try {
+        result = JSON.parse(text);
+      } catch (parseError) {
+        const err = new Error('Web App tidak memulangkan JSON. Semak Deploy: Execute as "Me" dan Who has access "Anyone".');
+        err.permanent = true;
+        throw err;
+      }
+      if (!result.ok) {
+        const err = new Error(result.error || 'Pelayan menolak permintaan.');
+        err.permanent = true;
+        throw err;
+      }
+      return result;
+    }
+
+    async function flushOutboxNow() {
+      const list = getOutbox();
+      while (list.length) {
+        try {
+          await sendToDatabase(list[0]);
+          list.shift();
+        } catch (error) {
+          if (error.permanent) {
+            console.error('[MOTAC Outbox] Dibuang (ditolak pelayan):', list[0].action, error.message);
+            list.shift();
+          } else {
+            setOutbox(list);
+            return false;
+          }
+        }
+        setOutbox(list);
+      }
+      return true;
+    }
+
+    function flushOutbox() {
+      if (!databaseWebAppUrl) return Promise.resolve(true);
+      const task = dbChain.then(flushOutboxNow);
+      dbChain = task.catch(() => {});
+      return task;
+    }
+
+    function postDatabase(action, data = {}, throwOnError = false) {
+      if (!databaseWebAppUrl) return Promise.resolve();
+      const payload = { action, ...data };
+      const task = dbChain.then(async () => {
+        if (getOutbox().length) await flushOutboxNow(); // kekalkan susunan
+        return sendToDatabase(payload);
+      });
+      dbChain = task.catch(() => {});
+      if (throwOnError) return task;
+      return task.catch(error => {
+        console.error('[MOTAC Database]', action, error);
+        queueOutbox(payload);
+        updateDatabaseStatus(`Gagal hantar ke Google Sheet (${error.message}). ${getOutbox().length} perubahan akan dicuba semula secara automatik.`);
+      });
+    }
+
+    window.addEventListener('online', () => flushOutbox());
+    setInterval(() => { if (getOutbox().length) flushOutbox(); }, 30000);
+
+    function readDatabaseState() {
+      return new Promise((resolve, reject) => {
+        const callbackName = `motacDatabaseCallback${Date.now()}${Math.floor(Math.random() * 1000)}`;
+        const script = document.createElement('script');
+        let settled = false;
+        const timeoutId = setTimeout(() => finish(new Error('Sambungan database tamat masa.')), 20000);
+        const finish = (error, result) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeoutId);
+          delete window[callbackName];
+          script.remove();
+          if (error) reject(error);
+          else resolve(result);
+        };
+        window[callbackName] = result => finish(null, result);
+        script.onerror = () => finish(new Error('Tidak dapat membuka Web App. Semak URL dan akses deployment (Anyone).'));
+        script.onload = () => setTimeout(() => finish(new Error('Web App tidak memulangkan data. Pastikan kod Apps Script terkini telah di-Deploy sebagai versi baharu.')), 300);
+        script.src = `${databaseWebAppUrl}${databaseWebAppUrl.includes('?') ? '&' : '?'}action=GET_STATE&callback=${callbackName}&t=${Date.now()}`;
+        document.head.appendChild(script);
+      });
+    }
+
+    async function connectDatabase() {
+      const url = document.getElementById('databaseWebAppUrl').value.trim();
+      if (!url.startsWith('https://script.google.com/macros/s/') || !url.endsWith('/exec')) {
+        alert('Sila masukkan URL Web App Apps Script yang berakhir dengan /exec.');
+        return;
+      }
+      databaseWebAppUrl = url;
+      localStorage.setItem('motac_apps_script_url_v3', url);
+      await initializeDatabase(true);
+    }
+
+    function normalizeBool(v) { return v === true || String(v).toLowerCase() === 'true'; }
+
+    function normalizeStamps(v) {
+      if (Array.isArray(v)) return v.map(Number).filter(Boolean);
+      if (typeof v === 'number') return [v];
+      if (typeof v === 'string' && v.trim()) {
+        try {
+          const parsed = JSON.parse(v);
+          if (Array.isArray(parsed)) return parsed.map(Number).filter(Boolean);
+        } catch (e) { /* bukan JSON */ }
+        return v.split(/[,;\s]+/).map(Number).filter(Boolean);
+      }
+      return [];
+    }
+
+    async function initializeDatabase(seedWhenEmpty) {
+      if (!databaseWebAppUrl) return;
+      updateDatabaseStatus('Menyambung ke database...');
+      try {
+        // Hantar dahulu perubahan tertunggak supaya tidak ditimpa oleh data Sheet
+        await flushOutbox();
+        const result = await readDatabaseState();
+        if (!result || !result.ok || !result.state) throw new Error(result?.error || 'Respons database tidak sah.');
+        const state = result.state;
+        if (state.participants && state.participants.length) {
+          participants = state.participants.map(person => ({
+            ...person,
+            email: String(person.email || '').trim().toLowerCase(),
+            stamps: normalizeStamps(person.stamps),
+            feedbackDone: normalizeBool(person.feedbackDone),
+            certDownloaded: normalizeBool(person.certDownloaded),
+            goodiesClaimed: normalizeBool(person.goodiesClaimed)
+          }));
+          feedbackResponses = state.feedbackResponses || [];
+          winnersList = state.winnersList || [];
+          saveState();
+          refreshViews();
+        } else if (seedWhenEmpty) {
+          await pushAllToDatabase(true);
+        }
+        const pending = getOutbox().length;
+        updateDatabaseStatus(`Database disambungkan. ${participants.length} peserta dimuatkan.${pending ? ` ${pending} perubahan menunggu dihantar.` : ''}`);
+      } catch (error) {
+        console.error('[MOTAC Database]', error);
+        updateDatabaseStatus(`Gagal sambung: ${error.message}`);
+      }
+    }
+
+    // Hantar SEMUA data tempatan (peserta, maklum balas, pemenang) ke Google Sheet
+    async function pushAllToDatabase(silent) {
+      if (!databaseWebAppUrl) { alert('Sila sambung database dahulu.'); return; }
+      updateDatabaseStatus('Menghantar semua data ke Google Sheet...');
+      try {
+        for (let i = 0; i < participants.length; i += 100) {
+          await postDatabase('UPSERT_PARTICIPANTS', { participants: participants.slice(i, i + 100) }, true);
+        }
+        for (const feedback of feedbackResponses) await postDatabase('UPSERT_FEEDBACK', { feedback }, true);
+        for (const winner of winnersList) await postDatabase('ADD_WINNER', { winner }, true);
+        updateDatabaseStatus(`Selesai: ${participants.length} peserta, ${feedbackResponses.length} maklum balas, ${winnersList.length} pemenang dihantar ke Google Sheet.`);
+        if (!silent) alert('Semua data tempatan berjaya dihantar ke Google Sheet. Semak tab Peserta dalam Sheet anda.');
+      } catch (error) {
+        console.error('[MOTAC Database]', error);
+        updateDatabaseStatus(`Gagal hantar: ${error.message}`);
+        if (!silent) alert(`Gagal hantar data ke Google Sheet: ${error.message}`);
+      }
+    }
+
+    // ==============================================================
+    // 2. LOGIK KEMAJUAN TINDAKAN PESERTA
+    // ==============================================================
+    function handleUserLogin(e) {
+      e.preventDefault();
+      const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const user = participants.find(p => p.email.toLowerCase() === emailInput);
+      if (!user) {
+        alert("Emel ini tidak dijumpai dalam senarai pendaftaran MOTAC. Sila hubungi meja urus setia.");
+        return;
+      }
+      currentParticipantEmail = user.email;
+      saveState();
+      renderUserView();
+    }
+
+    function handleUserLogout() {
+      currentParticipantEmail = null;
+      saveState();
+      renderUserView();
+    }
+
+    function updateParticipantActionRoadmap(user) {
+      const count = user.stamps.length;
+      const isStampsDone = count === 11;
+      const isFeedbackDone = !!user.feedbackDone;
+      const isCertDone = !!user.certDownloaded;
+      const isGoodiesDone = !!user.goodiesClaimed;
+
+      const titleText = document.getElementById('journeyTitleText');
+      const stepBadge = document.getElementById('journeyStepBadge');
+      const progressBar = document.getElementById('timelineProgressBar');
+
+      const node1 = document.getElementById('nodeCircle1');
+      const sub1 = document.getElementById('nodeSub1');
+      const node2 = document.getElementById('nodeCircle2');
+      const sub2 = document.getElementById('nodeSub2');
+      const node3 = document.getElementById('nodeCircle3');
+      const sub3 = document.getElementById('nodeSub3');
+      const node4 = document.getElementById('nodeCircle4');
+      const sub4 = document.getElementById('nodeSub4');
+
+      const alertBox = document.getElementById('actionBannerBox');
+      const alertIcon = document.getElementById('actionBannerIcon');
+      const alertText = document.getElementById('actionBannerText');
+      const alertBtn = document.getElementById('actionBannerBtn');
+
+      const certPill = document.getElementById('certDashboardPill');
+      const certDesc = document.getElementById('certDashboardDesc');
+      const btnViewCert = document.getElementById('btnViewCertDashboard');
+      const btnDownCert = document.getElementById('btnDownloadCertPdf');
+
+      const defaultNode = "w-8 h-8 rounded-full bg-slate-900 border-2 border-slate-700 text-slate-500 font-black text-xs flex items-center justify-center transition-all duration-500 shadow-md";
+      const completedNode = "w-8 h-8 rounded-full bg-emerald-500 border-2 border-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center transition-all duration-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]";
+      const activeNode = "w-8 h-8 rounded-full bg-cyan-500 border-2 border-cyan-300 text-slate-950 font-black text-xs flex items-center justify-center transition-all duration-500 animate-pulse shadow-[0_0_15px_rgba(34,211,238,0.7)]";
+      const activeAmberNode = "w-8 h-8 rounded-full bg-amber-400 border-2 border-yellow-200 text-slate-950 font-black text-xs flex items-center justify-center transition-all duration-500 animate-bounce shadow-[0_0_15px_rgba(251,191,36,0.7)]";
+
+      node1.className = defaultNode;
+      node2.className = defaultNode;
+      node3.className = defaultNode;
+      node4.className = defaultNode;
+
+      sub1.innerText = `${count}/11`;
+      sub2.innerText = isFeedbackDone ? "Selesai ✓" : "5 Soalan";
+      sub3.innerText = isFeedbackDone ? "Sedia ✓" : "Muat Turun";
+      sub4.innerText = isGoodiesDone ? "Ditebus ✓" : "Urus Setia";
+
+      let progressPct = 0;
+
+      if (isStampsDone) { node1.className = completedNode; node1.innerText = "✓"; }
+      else { node1.className = activeNode; node1.innerText = "1"; }
+
+      if (isFeedbackDone) { node2.className = completedNode; node2.innerText = "✓"; }
+      else if (isStampsDone) { node2.className = activeAmberNode; node2.innerText = "2"; }
+      else { node2.innerText = "2"; }
+
+      if (isFeedbackDone) { node3.className = completedNode; node3.innerText = "✓"; }
+      else if (isStampsDone && !isFeedbackDone) { node3.innerText = "3"; }
+      else { node3.innerText = "3"; }
+
+      if (isGoodiesDone) { node4.className = completedNode; node4.innerText = "✓"; }
+      else if (isStampsDone && isFeedbackDone && isCertDone) { node4.className = activeAmberNode; node4.innerText = "4"; }
+      else { node4.innerText = "4"; }
+
+      // Kawalan Kad e-Sijil pada Dashboard
+      if (isFeedbackDone) {
+        if (certPill) {
+          certPill.classList.add('hidden');
+        }
+        certDesc.innerText = "Tahniah! e-Sijil rasmi anda telah sedia. Anda boleh melihat atau memuat turun PDF.";
+        
+        btnViewCert.disabled = false;
+        btnViewCert.className = "w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 text-white font-black rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-95 transition cursor-pointer";
+
+        btnDownCert.disabled = false;
+        btnDownCert.className = "w-full sm:w-auto px-4 py-2.5 bg-slate-900 border border-cyan-400/50 hover:bg-slate-800 text-cyan-300 font-bold rounded-xl text-xs flex items-center justify-center gap-2 active:scale-95 transition cursor-pointer";
+      } else {
+        if (certPill) {
+          certPill.classList.remove('hidden');
+          certPill.innerText = "Terkunci 🔒";
+          certPill.className = "text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700";
+        }
+        certDesc.innerText = "Sila lengkapkan 11 cop reruai & hantar 5 maklum balas ringkas untuk membuka e-sijil anda.";
+
+        btnViewCert.disabled = true;
+        btnViewCert.className = "w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black rounded-xl text-xs flex items-center justify-center gap-2 opacity-40 cursor-not-allowed";
+
+        btnDownCert.disabled = true;
+        btnDownCert.className = "w-full sm:w-auto px-4 py-2.5 bg-slate-900 border border-cyan-400/40 text-cyan-300 font-bold rounded-xl text-xs flex items-center justify-center gap-2 opacity-40 cursor-not-allowed";
+      }
+
+      // Kawalan Kotak Tindakan
+      if (!isStampsDone) {
+        progressPct = Math.round((count / 11) * 25);
+        progressBar.style.width = `${progressPct}%`;
+        titleText.innerHTML = `<span>🚀</span> Kumpul Cop: ${progressPct}% Selesai`;
+        stepBadge.innerText = `Langkah 1: Kumpul 11 Cop (${count}/11)`;
+        stepBadge.className = "text-[11px] font-mono px-3 py-1 rounded-full font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30";
+
+        alertBox.className = "p-3.5 bg-slate-950/90 rounded-2xl border border-cyan-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner";
+        alertIcon.innerText = "📷";
+        alertText.innerText = `Sila lengkapkan baki ${11 - count} cop lagi di meja reruai pempamer.`;
+        alertBtn.innerText = "Imbas Kod QR Booth";
+        window.currentRoadmapTarget = "SCAN";
+
+      } else if (!isFeedbackDone) {
+        progressBar.style.width = "45%";
+        titleText.innerHTML = `<span>📝</span> Maklum Balas: Sedia Dijawab`;
+        stepBadge.innerText = `Langkah 2: Isi 5 Maklum Balas`;
+        stepBadge.className = "text-[11px] font-mono px-3 py-1 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 animate-pulse";
+
+        alertBox.className = "p-3.5 bg-gradient-to-r from-amber-950/80 via-slate-950 to-slate-950 rounded-2xl border border-amber-400/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner";
+        alertIcon.innerText = "📝";
+        alertText.innerText = "11 Cop Lengkap! Sila jawab maklum balas ringkas untuk membuka e-Sijil.";
+        alertBtn.innerText = "Jawab Maklum Balas Sekarang";
+        window.currentRoadmapTarget = "SURVEY";
+
+      } else if (!isGoodiesDone) {
+        progressBar.style.width = "85%";
+        titleText.innerHTML = `<span>🎁</span> Goodies Bag: Sedia Ditebus di Meja Urus Setia`;
+        stepBadge.innerText = `Langkah 4 (Akhir): Tebus Beg Cenderamata`;
+        stepBadge.className = "text-[11px] font-mono px-3 py-1 rounded-full font-bold bg-amber-500/30 text-amber-300 border border-amber-400/50 animate-pulse";
+
+        alertBox.className = "p-3.5 bg-gradient-to-r from-amber-950/70 via-slate-950 to-slate-950 rounded-2xl border border-amber-400/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner";
+        alertIcon.innerText = "🎁";
+        alertText.innerText = "e-Sijil sedia! Sila ke Kaunter Urus Setia untuk langkah terakhir mengambil Beg Cenderamata anda.";
+        alertBtn.innerText = "Papar Skrin Penebusan Hadiah";
+        window.currentRoadmapTarget = "GOODIES";
+
+      } else {
+        progressBar.style.width = "100%";
+        titleText.innerHTML = `<span>🎉</span> Tahniah! Misi Selesai 100%`;
+        stepBadge.innerText = `Semua Langkah Lengkap!`;
+        stepBadge.className = "text-[11px] font-mono px-3 py-1 rounded-full font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40";
+
+        alertBox.className = "p-3.5 bg-slate-950/90 rounded-2xl border border-emerald-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner";
+        alertIcon.innerText = "🏆";
+        alertText.innerText = "Semua langkah telah selesai. Beg cenderamata ditebus & e-sijil anda boleh dimuat turun bila-bila masa!";
+        alertBtn.innerText = "Buka & Simpan e-Sijil";
+        window.currentRoadmapTarget = "CERT";
+      }
+    }
+
+    function handleRoadmapActionClick() {
+      if (window.currentRoadmapTarget === "SCAN") startQRScanner();
+      else if (window.currentRoadmapTarget === "SURVEY") openFeedbackModal();
+      else if (window.currentRoadmapTarget === "CERT") openCertificateModal();
+      else if (window.currentRoadmapTarget === "GOODIES") showGoodiesModal();
+    }
+
+    function downloadCertificateDirect() {
+      const user = participants.find(p => p.email.toLowerCase() === currentParticipantEmail?.toLowerCase());
+      if (!user || !user.feedbackDone) {
+        alert("Sila lengkapkan 11 cop dan maklum balas terlebih dahulu.");
+        return;
+      }
+      openCertificateModal();
+      setTimeout(() => {
+        printCertificate();
+      }, 300);
+    }
+
+    function renderUserView() {
+      const loginBox = document.getElementById('userLoginBox');
+      const passportBox = document.getElementById('userPassportBox');
+
+      if (!currentParticipantEmail) {
+        loginBox.classList.remove('hidden');
+        passportBox.classList.add('hidden');
+        return;
+      }
+
+      const user = participants.find(p => p.email.toLowerCase() === currentParticipantEmail.toLowerCase());
+      if (!user) { handleUserLogout(); return; }
+
+      loginBox.classList.add('hidden');
+      passportBox.classList.remove('hidden');
+
+      document.getElementById('pName').innerText = user.name;
+      document.getElementById('pEmail').innerText = user.email;
+      document.getElementById('pAgency').innerText = user.agency;
+
+      const count = user.stamps.length;
+      document.getElementById('pStampRatio').innerText = `${count} / 11`;
+      document.getElementById('pProgressBar').style.width = `${(count / 11) * 100}%`;
+
+      updateParticipantActionRoadmap(user);
+
+      const bigRemark = document.getElementById('bigRemarkQualified');
+      const winStatusText = document.getElementById('userWinStatusText');
+      const isAlreadyWinner = winnersList.some(w => w.email.toLowerCase() === user.email.toLowerCase());
+
+      if (count === 11) {
+        bigRemark.classList.remove('hidden');
+        if (isAlreadyWinner) {
+          winStatusText.innerHTML = `🏆 <span class="text-amber-400 font-black">TAHNIAH! ANDA TELAH MEMENANGI CABUTAN BERTUAH</span>`;
+        } else {
+          winStatusText.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span> AKTIF DALAM SENARAI CABUTAN`;
+        }
+      } else {
+        bigRemark.classList.add('hidden');
+      }
+
+      const container = document.getElementById('boothsContainer');
+      container.innerHTML = '';
+
+      MOTAC_BOOTHS.forEach(b => {
+        const hasStamp = user.stamps.includes(b.id);
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
+          hasStamp ? 'bg-emerald-950/50 border-emerald-400/60 text-emerald-200' : 'bg-slate-900/60 border-slate-700/60 text-slate-300'
+        }`;
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded font-black ${hasStamp ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-amber-400'}">${b.lot}</span>
+              <span class="text-sm">${hasStamp ? '✅' : '⚪'}</span>
+            </div>
+            <p class="text-xs font-bold text-white leading-tight mt-1">${b.name}</p>
+            <p class="text-[10px] text-slate-300 mt-1 line-clamp-2">${b.desc}</p>
+          </div>
+          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] font-bold ${hasStamp ? 'text-emerald-400' : 'text-slate-400'}">
+            ${hasStamp ? 'Cop Diperoleh' : 'Belum Dicop'}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // ==============================================================
+    // 3. IMBAS QR & PENERIMAAN COP
+    // ==============================================================
+    function startQRScanner() {
+      document.getElementById('scannerModal').classList.remove('hidden');
+      if (html5ScannerInstance) { try { html5ScannerInstance.clear(); } catch(e) {} }
+      html5ScannerInstance = new Html5Qrcode("readerBox");
+      html5ScannerInstance.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        (decodedText) => verifyScannedPayload(decodedText),
+        () => {}
+      ).catch(() => alert("Sila benarkan akses kamera."));
+    }
+
+    function stopQRScanner() {
+      const modal = document.getElementById('scannerModal');
+      if (html5ScannerInstance) {
+        html5ScannerInstance.stop().then(() => {
+          html5ScannerInstance.clear();
+          modal.classList.add('hidden');
+        }).catch(() => modal.classList.add('hidden'));
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function verifyScannedPayload(payload) {
+      const parts = payload.split(':');
+      let boothId = null, token = null;
+      if (parts.length === 3 && parts[0] === 'MOTAC_STAMP') {
+        boothId = parseInt(parts[1]);
+        token = parts[2];
+      }
+      if (!boothId || !token) { alert("Kod QR tidak sah."); return; }
+
+      const targetBooth = MOTAC_BOOTHS.find(b => b.id === boothId && b.token === token);
+      if (!targetBooth) { alert("Token reruai tidak sah."); return; }
+
+      const user = participants.find(p => p.email.toLowerCase() === currentParticipantEmail.toLowerCase());
+      if (!user) return;
+
+      if (user.stamps.includes(boothId)) {
+        alert("Anda telah pun menerima cop ini!");
+        stopQRScanner();
+        return;
+      }
+
+      user.stamps.push(boothId);
+      saveState();
+      postDatabase('ADD_STAMP', { email: user.email, boothId });
+      stopQRScanner();
+      renderUserView();
+      renderStageView();
+
+      if (user.stamps.length === 11) {
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+        alert("🎉 TAHNIAH! Anda lengkap 11 cop reruai. Sila jawab 5 maklum balas ringkas untuk membuka e-Sijil.");
+        openFeedbackModal();
+      } else {
+        alert(`Berjaya! Anda telah menerima cop bagi ${targetBooth.lot}`);
+      }
+    }
+
+    // ==============================================================
+    // 4. MAKLUM BALAS, E-SIJIL & GOODIES
+    // ==============================================================
+    function openFeedbackModal() {
+      const form = document.getElementById('feedbackForm');
+      if (form) form.reset();
+      document.getElementById('feedbackModal').classList.remove('hidden');
+    }
+
+    function closeFeedbackModal() {
+      document.getElementById('feedbackModal').classList.add('hidden');
+    }
+
+    // Helper: Convert image URL to base64 data URI to avoid CORS tainted canvas
+    function imageToBase64(imgElement) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          canvas.getContext('2d').drawImage(img, 0, 0);
+          try {
+            resolve(canvas.toDataURL('image/png'));
+          } catch (e) {
+            // If CORS still blocks, read via fetch as blob
+            fetch(imgElement.src)
+              .then(r => r.blob())
+              .then(blob => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+              })
+              .catch(() => resolve(''));
+          }
+        };
+        img.onerror = () => {
+          // Fallback: try fetch as blob
+          fetch(imgElement.src)
+            .then(r => r.blob())
+            .then(blob => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            })
+            .catch(() => resolve(''));
+        };
+        img.src = imgElement.src;
+      });
+    }
+
+    async function createCertificatePdfBase64(user) {
+      if (!window.html2pdf) throw new Error('Modul jana PDF belum dimuatkan.');
+      const certificate = document.getElementById('printableCertificateArea').cloneNode(true);
+      const serial = `MOTAC-DIGI-2026-${String(participants.findIndex(p => p.email.toLowerCase() === user.email.toLowerCase()) + 1).padStart(4, '0')}`;
+      certificate.querySelector('#certRecipientName').innerText = (user.name || '').toUpperCase();
+      certificate.querySelector('#certSerialNo').innerText = serial;
+      certificate.dataset.pdfCaptureRoot = 'true';
+
+      // Convert all images inside certificate to base64 to prevent CORS tainted canvas
+      const originalBgImg = document.getElementById('printableCertificateArea').querySelector('.cert-bg-img');
+      const clonedBgImg = certificate.querySelector('.cert-bg-img');
+      if (clonedBgImg && originalBgImg && originalBgImg.src) {
+        try {
+          const base64Src = await imageToBase64(originalBgImg);
+          if (base64Src) clonedBgImg.src = base64Src;
+        } catch (e) { /* keep original src as fallback */ }
+      }
+
+      Object.assign(certificate.style, {
+        width: '1122px',
+        height: '794px',
+        maxWidth: 'none',
+        aspectRatio: 'auto',
+        borderRadius: '0',
+        transform: 'none'
+      });
+
+      const container = document.createElement('div');
+      Object.assign(container.style, {
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        width: '1122px',
+        height: '794px',
+        overflow: 'hidden',
+        zIndex: '2147483647',
+        opacity: '0',
+        pointerEvents: 'none'
+      });
+      container.appendChild(certificate);
+      document.body.appendChild(container);
+
+      const renderPdf = () => window.html2pdf().set({
+        margin: 0,
+        image: { type: 'jpeg', quality: 0.96 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: '#030a21',
+          onclone: clonedDocument => {
+            const clonedCertificate = clonedDocument.querySelector('[data-pdf-capture-root="true"]');
+            if (!clonedCertificate) return;
+            Object.assign(clonedCertificate.style, {
+              position: 'relative',
+              left: '0',
+              top: '0',
+              width: '1122px',
+              height: '794px',
+              opacity: '1',
+              visibility: 'visible',
+              transform: 'none',
+              backgroundColor: '#030a21'
+            });
+            const title = clonedCertificate.querySelector('h1');
+            const recipientName = clonedCertificate.querySelector('#certRecipientName');
+            [title, recipientName].forEach((element, index) => {
+              if (!element) return;
+              element.classList.remove('text-transparent', 'bg-clip-text', 'bg-gradient-to-r');
+              Object.assign(element.style, {
+                background: 'none',
+                backgroundImage: 'none',
+                backgroundClip: 'border-box',
+                color: index === 0 ? '#67e8f9' : '#fde047',
+                webkitTextFillColor: index === 0 ? '#67e8f9' : '#fde047',
+                webkitBackgroundClip: 'border-box'
+              });
+            });
+          }
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      }).from(certificate).outputPdf('datauristring');
+
+      try {
+        const dataUri = await renderPdf();
+        return dataUri.split(',')[1];
+      } finally {
+        container.remove();
+      }
+    }
+
+    async function handleSurveySubmit(e) {
+      e.preventDefault();
+      const user = participants.find(p => p.email.toLowerCase() === currentParticipantEmail.toLowerCase());
+      if (!user) return;
+
+      const q1El = document.querySelector('input[name="q1"]:checked');
+      const q2 = document.getElementById('surveyQ2').value;
+      const q3El = document.querySelector('input[name="q3"]:checked');
+      const q4El = document.querySelector('input[name="q4"]:checked');
+      const q5 = document.getElementById('surveyQ5').value.trim();
+
+      if (!q1El || !q2 || !q3El || !q4El) {
+        alert("Sila pastikan Soalan 1 hingga 4 telah dijawab.");
+        return;
+      }
+
+      const payload = {
+        timestamp: new Date().toLocaleString('ms-MY'),
+        name: user.name,
+        email: user.email,
+        agency: user.agency,
+        q1_satisfaction: parseInt(q1El.value),
+        q2_favorite_booth: q2,
+        q3_app_ease: parseInt(q3El.value),
+        q4_continue_yearly: q4El.value,
+        q5_suggestions: q5 || "-"
+      };
+
+      try {
+        await postDatabase('SAVE_PROGRESS', { email: user.email, feedbackDone: true, feedback: payload }, true);
+      } catch (error) {
+        console.error('[MOTAC Feedback Save]', error);
+        alert(`Maklum balas belum dapat dihantar ke Google Sheet. Sila cuba semula. (${error.message})`);
+        return;
+      }
+
+      const fbIdx = feedbackResponses.findIndex(f => f.email.toLowerCase() === user.email.toLowerCase());
+      if (fbIdx !== -1) feedbackResponses[fbIdx] = payload;
+      else feedbackResponses.push(payload);
+
+      user.feedbackDone = true;
+      saveState();
+      closeFeedbackModal();
+      renderUserView();
+      if (activeAdminUser) renderAdminView();
+
+      try {
+        const pdfBase64 = await createCertificatePdfBase64(user);
+        await postDatabase('SEND_CERTIFICATE', { feedback: payload, pdfBase64 }, true);
+        alert(`Maklum balas diterima dan permintaan penghantaran e-Sijil PDF telah dihantar ke ${user.email}. Sila semak Inbox atau Spam.`);
+      } catch (error) {
+        console.error('[MOTAC Certificate Email]', error);
+        alert(`Jawapan maklum balas sudah disimpan dalam Google Sheet. PDF e-sijil tidak dapat dihantar secara automatik, tetapi boleh dimuat turun dari dashboard. (${error.message})`);
+      }
+      openCertificateModal();
+    }
+
+    function openCertificateModal() {
+      const user = participants.find(p => p.email.toLowerCase() === currentParticipantEmail?.toLowerCase());
+      if (!user) return;
+
+      // Nama Penuh Peserta dalam HURUF BESAR sepenuhnya
+      document.getElementById('certRecipientName').innerText = (user.name || '').toUpperCase();
+      
+      const idx = participants.findIndex(p => p.email.toLowerCase() === user.email.toLowerCase()) + 1;
+      document.getElementById('certSerialNo').innerText = `MOTAC-DIGI-2026-${String(idx).padStart(4, '0')}`;
+
+      document.getElementById('certificateModal').classList.remove('hidden');
+    }
+
+    function closeCertificateModal() {
+      document.getElementById('certificateModal').classList.add('hidden');
+    }
+
+    function printCertificate() {
+      const user = participants.find(p => p.email.toLowerCase() === currentParticipantEmail?.toLowerCase());
+      if (user) {
+        user.certDownloaded = true;
+        saveState();
+        postDatabase('SAVE_PROGRESS', { email: user.email, certDownloaded: true });
+        renderUserView();
+      }
+
+      document.body.classList.add('printing-cert');
+
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          window.print();
+          setTimeout(() => {
+            document.body.classList.remove('printing-cert');
+            if (user && !user.goodiesClaimed) {
+              showGoodiesModal();
+            }
+          }, 180);
+        }, 30);
+      });
+    }
+
+    function showGoodiesModal() {
+      const user = participants.find(p => p.email.toLowerCase() === currentParticipantEmail?.toLowerCase());
+      if (!user) return;
+
+      document.getElementById('goodiesModalName').innerText = user.name;
+      document.getElementById('goodiesModalClaimText').innerText = user.goodiesClaimed ? "Telah Ditebus ✅" : "Belum Ditebus ⏳";
+      document.getElementById('goodiesModalClaimText').className = user.goodiesClaimed ? "font-bold text-emerald-400" : "font-bold text-amber-400";
+
+      document.getElementById('goodiesModal').classList.remove('hidden');
+    }
+
+    function closeGoodiesModal() {
+      document.getElementById('goodiesModal').classList.add('hidden');
+    }
+
+    // ==============================================================
+    // 5. PUSAT PENGURUSAN BERSEPADU PESERTA (ADMIN HUB)
+    // ==============================================================
+    function toggleClaimGoodies(email) {
+      const user = participants.find(p => p.email.toLowerCase() === email.toLowerCase());
+      if (!user) return;
+      user.goodiesClaimed = !user.goodiesClaimed;
+      saveState();
+      postDatabase('SAVE_PROGRESS', { email: user.email, goodiesClaimed: user.goodiesClaimed });
+      renderIntegratedParticipantsTable();
+      renderUserView();
+
+    }
+
+    function resetHubFilters() {
+      document.getElementById('hubSearchInput').value = "";
+      document.getElementById('hubFilterCategory').value = "ALL";
+      renderIntegratedParticipantsTable();
+    }
+
+    function openAdminFeedbackPreview(email) {
+      const user = participants.find(p => p.email.toLowerCase() === email.toLowerCase());
+      const fb = feedbackResponses.find(f => f.email.toLowerCase() === email.toLowerCase());
+      if (!user) return;
+
+      document.getElementById('previewParticipantName').innerText = `${user.name} (${user.email} - ${user.agency})`;
+      if (fb) {
+        document.getElementById('prevQ1').innerText = `${fb.q1_satisfaction} / 5 Bintang`;
+        document.getElementById('prevQ2').innerText = fb.q2_favorite_booth;
+        document.getElementById('prevQ3').innerText = `${fb.q3_app_ease} / 5`;
+        document.getElementById('prevQ4').innerText = fb.q4_continue_yearly;
+        document.getElementById('prevQ5').innerText = fb.q5_suggestions || "-";
+      } else {
+        document.getElementById('prevQ1').innerText = "-";
+        document.getElementById('prevQ2').innerText = "-";
+        document.getElementById('prevQ3').innerText = "-";
+        document.getElementById('prevQ4').innerText = "-";
+        document.getElementById('prevQ5').innerText = "Peserta belum menghantar borang maklum balas.";
+      }
+
+      document.getElementById('adminFeedbackPreviewModal').classList.remove('hidden');
+    }
+
+    function openAdminCertificatePreview(email) {
+      const user = participants.find(p => p.email.toLowerCase() === email.toLowerCase());
+      if (!user) return;
+
+      currentParticipantEmail = user.email;
+      document.getElementById('certRecipientName').innerText = (user.name || '').toUpperCase();
+      const idx = participants.findIndex(p => p.email.toLowerCase() === user.email.toLowerCase()) + 1;
+      document.getElementById('certSerialNo').innerText = `MOTAC-DIGI-2026-${String(idx).padStart(4, '0')}`;
+      document.getElementById('certificateModal').classList.remove('hidden');
+    }
+
+    function closeAdminFeedbackPreview() {
+      document.getElementById('adminFeedbackPreviewModal').classList.add('hidden');
+    }
+
+    function renderIntegratedParticipantsTable() {
+      const tbody = document.getElementById('integratedParticipantsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const searchVal = document.getElementById('hubSearchInput')?.value.trim().toLowerCase() || "";
+      const filterCat = document.getElementById('hubFilterCategory')?.value || "ALL";
+
+      const total = participants.length;
+      const eligible = participants.filter(p => p.stamps.length === 11).length;
+      const fbCount = participants.filter(p => p.feedbackDone).length;
+      const claimed = participants.filter(p => p.goodiesClaimed).length;
+
+      document.getElementById('hubTotalCount').innerText = total;
+      document.getElementById('hubEligibleCount').innerText = eligible;
+      document.getElementById('hubFeedbackCount').innerText = fbCount;
+      document.getElementById('hubClaimedCount').innerText = claimed;
+
+      let list = participants;
+
+      if (filterCat === "QUALIFIED") list = list.filter(p => p.stamps.length === 11);
+      else if (filterCat === "GOODIES_UNCLAIMED") list = list.filter(p => p.stamps.length === 11 && !p.goodiesClaimed);
+      else if (filterCat === "GOODIES_CLAIMED") list = list.filter(p => p.goodiesClaimed);
+      else if (filterCat === "FEEDBACK_DONE") list = list.filter(p => p.feedbackDone);
+      else if (filterCat === "FEEDBACK_PENDING") list = list.filter(p => !p.feedbackDone);
+
+      if (searchVal) {
+        list = list.filter(p => 
+          p.name.toLowerCase().includes(searchVal) ||
+          p.email.toLowerCase().includes(searchVal) ||
+          p.agency.toLowerCase().includes(searchVal)
+        );
+      }
+
+      document.getElementById('hubSearchResultCount').innerText = `Menunjukkan ${list.length} daripada ${participants.length} peserta berdaftar`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-amber-400">Tiada rekod peserta yang sepadan dengan kriteria carian.</td></tr>`;
+        return;
+      }
+
+      list.forEach(p => {
+        const count = p.stamps.length;
+        const isEligible = count === 11;
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40 transition";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-semibold text-white">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span>${p.name}</span>
+              ${p.goodiesClaimed ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-bold border border-emerald-500/30">DITEBUS</span>' : ''}
+            </div>
+          </td>
+          <td class="py-2.5 px-3">
+            <p class="text-cyan-300 font-mono text-[11px]">${p.email}</p>
+            <p class="text-slate-400 text-[10px]">${p.agency}</p>
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${isEligible ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' : 'bg-slate-900 text-amber-400 border border-slate-700'}">
+              ${count}/11 ${isEligible ? '✅' : ''}
+            </span>
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            ${p.feedbackDone 
+              ? `<button onclick="openAdminFeedbackPreview('${p.email}')" class="px-2 py-0.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-400/40 rounded text-[10px] font-bold">👁️ Respon Selesai</button>` 
+              : `<span class="text-[10px] text-slate-500">Belum Jawab ⏳</span>`
+            }
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            ${isEligible 
+              ? `<label class="inline-flex items-center gap-1.5 cursor-pointer bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-xl hover:border-cyan-400">
+                  <input type="checkbox" ${p.goodiesClaimed ? 'checked' : ''} onchange="toggleClaimGoodies('${p.email}')" class="rounded text-cyan-500 focus:ring-0">
+                  <span class="text-[10px] font-bold ${p.goodiesClaimed ? 'text-emerald-400' : 'text-amber-400'}">
+                    ${p.goodiesClaimed ? 'Telah Serah ✅' : 'Tandakan Serah 🎁'}
+                  </span>
+                </label>` 
+              : `<span class="text-[10px] text-slate-500 italic">Belum Layak</span>`
+            }
+          </td>
+          <td class="py-2.5 px-3 text-right">
+            <div class="flex justify-end items-center gap-2 flex-wrap">
+              <button onclick="openAdminCertificatePreview('${p.email}')" class="px-2 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 rounded text-[10px] font-bold">
+                👁️ Sijil
+              </button>
+              <button onclick="openProxyModal('${p.email}')" class="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded text-[10px] font-bold">
+                ✏️ Edit
+              </button>
+              <button onclick="deleteParticipant('${p.email}')" class="text-rose-400 hover:text-rose-300 text-[10px]">Padam</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ==============================================================
+    // 6. KAWALAN CABUTAN PENTAS & STATISTIK ANALITIK
+    // ==============================================================
+    function triggerLuckyDraw() {
+      if (!activeAdminUser) {
+        alert("Akses dinafikan. Hanya admin urus setia yang sah boleh memulakan cabutan bertuah!");
+        return;
+      }
+
+      const allQualified = participants.filter(p => p.stamps.length === 11);
+      const remainingPool = allQualified.filter(p => !winnersList.some(w => w.email.toLowerCase() === p.email.toLowerCase()));
+
+      const btn = document.getElementById('btnAdminTriggerDraw');
+      const adminName = document.getElementById('adminWinnerName');
+      const adminAgency = document.getElementById('adminWinnerAgency');
+      const adminBadge = document.getElementById('adminWinnerBadge');
+
+      const stageName = document.getElementById('stageWinnerName');
+      const stageAgency = document.getElementById('stageWinnerAgency');
+      const stageBadge = document.getElementById('stageWinnerBadge');
+
+      if (remainingPool.length === 0) {
+        alert("Tiada lagi baki peserta layak di dalam balang. Semua peserta lengkap 11 cop telah pun memenangi cabutan bertuah!");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+      const msgRunning = `SEDANG MENCABUT PEMENANG #${winnersList.length + 1}...`;
+      adminBadge.innerText = msgRunning;
+      stageBadge.innerText = msgRunning;
+      stageBadge.className = "text-xs font-bold text-amber-400 uppercase tracking-widest animate-pulse";
+
+      let rollCount = 0;
+      const interval = setInterval(() => {
+        const randomItem = remainingPool[Math.floor(Math.random() * remainingPool.length)];
+        
+        adminName.innerText = randomItem.name;
+        adminAgency.innerText = `${randomItem.agency} (${randomItem.email})`;
+
+        stageName.innerText = randomItem.name;
+        stageAgency.innerText = `${randomItem.agency} • ${randomItem.email}`;
+
+        rollCount++;
+
+        if (rollCount > 25) {
+          clearInterval(interval);
+          
+          const finalWinner = remainingPool[Math.floor(Math.random() * remainingPool.length)];
+          
+          winnersList.push({
+            name: finalWinner.name,
+            email: finalWinner.email,
+            agency: finalWinner.agency,
+            wonAt: new Date().toLocaleTimeString('ms-MY')
+          });
+          saveState();
+          postDatabase('ADD_WINNER', { winner: winnersList[winnersList.length - 1] });
+
+          const winTitle = `🎉 TAHNIAH PEMENANG CABUTAN #${winnersList.length} 🎉`;
+          
+          adminBadge.innerText = winTitle;
+          adminName.innerText = finalWinner.name;
+          adminAgency.innerText = `${finalWinner.agency} • ${finalWinner.email}`;
+
+          stageBadge.innerText = winTitle;
+          stageBadge.className = "text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest animate-bounce";
+          stageName.innerText = finalWinner.name;
+          stageName.className = "text-3xl sm:text-5xl font-black text-amber-300 my-3 drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]";
+          stageAgency.innerText = `${finalWinner.agency} • ${finalWinner.email}`;
+
+          confetti({ particleCount: 170, spread: 90, origin: { y: 0.6 } });
+
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+          renderStageView();
+        }
+      }, 90);
+    }
+
+    function removeWinner(email) {
+      if (!confirm(`Batalkan kemenangan untuk ${email} dan kembalikan peserta ke dalam balang cabutan?`)) return;
+      winnersList = winnersList.filter(w => w.email.toLowerCase() !== email.toLowerCase());
+      saveState();
+      postDatabase('REMOVE_WINNER', { email });
+      renderStageView();
+    }
+
+    function resetWinnersList() {
+      if (winnersList.length === 0) {
+        alert("Senarai pemenang masih kosong.");
+        return;
+      }
+      if (!confirm("AMARAN: Anda pasti mahu mengosongkan semula semua rekod pemenang dan memasukkan semua peserta layak ke dalam balang semula?")) return;
+      winnersList = [];
+      saveState();
+      postDatabase('RESET_WINNERS');
+      renderStageView();
+      alert("Senarai pemenang telah diset semula!");
+    }
+
+    function renderAdminWinnersTable() {
+      const tbody = document.getElementById('adminWinnersTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (winnersList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-slate-500">Tiada rekod pemenang lagi.</td></tr>`;
+        return;
+      }
+
+      winnersList.forEach((w, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40";
+        tr.innerHTML = `
+          <td class="py-2 px-3 font-bold text-amber-400">Cabutan #${idx + 1}</td>
+          <td class="py-2 px-3 font-semibold text-white">${w.name}</td>
+          <td class="py-2 px-3 text-slate-400">${w.email}</td>
+          <td class="py-2 px-3 text-slate-300">${w.agency}</td>
+          <td class="py-2 px-3 text-right">
+            <button onclick="removeWinner('${w.email}')" class="text-rose-400 hover:text-rose-300 text-[11px] underline">Batal Kemenangan</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAdminReportsView() {
+      const total = participants.length;
+      const zeroCount = participants.filter(p => p.stamps.length === 0).length;
+      const activeCount = participants.filter(p => p.stamps.length >= 1 && p.stamps.length < 11).length;
+      const qualCount = participants.filter(p => p.stamps.length === 11).length;
+
+      const qPct = total > 0 ? ((qualCount / total) * 100).toFixed(1) : 0;
+      const aPct = total > 0 ? ((activeCount / total) * 100).toFixed(1) : 0;
+      const zPct = total > 0 ? ((zeroCount / total) * 100).toFixed(1) : 0;
+
+      const elTotal = document.getElementById('repTotalUsers');
+      if (elTotal) {
+        elTotal.innerText = total;
+        document.getElementById('repQualifiedUsers').innerText = qualCount;
+        document.getElementById('repQualifiedPct').innerText = `${qPct}% kadar layak`;
+        document.getElementById('repActiveUsers').innerText = activeCount;
+        document.getElementById('repActivePct').innerText = `${aPct}% kadar aktif`;
+        document.getElementById('repZeroUsers').innerText = zeroCount;
+        document.getElementById('repZeroPct').innerText = `${zPct}% belum melawat`;
+      }
+
+      const boothTbody = document.getElementById('boothPerformanceTableBody');
+      if (boothTbody) {
+        boothTbody.innerHTML = '';
+        MOTAC_BOOTHS.forEach(b => {
+          const visitedCount = participants.filter(p => p.stamps.includes(b.id)).length;
+          const pct = total > 0 ? ((visitedCount / total) * 100).toFixed(1) : 0;
+
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-800/40";
+          tr.innerHTML = `
+            <td class="py-2.5 px-3">
+              <span class="font-bold text-white">${b.lot} — ${b.name}</span>
+              <p class="text-[10px] text-slate-400">${b.slot}</p>
+            </td>
+            <td class="py-2.5 px-3 text-center font-mono font-bold text-cyan-300">${visitedCount}</td>
+            <td class="py-2.5 px-3 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <div class="w-16 bg-slate-900 rounded-full h-1.5 border border-slate-700 hidden sm:block">
+                  <div class="bg-cyan-400 h-1.5 rounded-full" style="width: ${pct}%"></div>
+                </div>
+                <span class="font-mono text-emerald-400 font-bold">${pct}%</span>
+              </div>
+            </td>
+          `;
+          boothTbody.appendChild(tr);
+        });
+      }
+
+      const agencyTbody = document.getElementById('agencyDistributionTableBody');
+      if (agencyTbody) {
+        agencyTbody.innerHTML = '';
+        const agencyMap = {};
+        participants.forEach(p => {
+          const ag = p.agency || "Lain-lain Bahagian";
+          if (!agencyMap[ag]) {
+            agencyMap[ag] = { total: 0, qualified: 0 };
+          }
+          agencyMap[ag].total++;
+          if (p.stamps.length === 11) agencyMap[ag].qualified++;
+        });
+
+        Object.keys(agencyMap).forEach(agName => {
+          const data = agencyMap[agName];
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-800/40";
+          tr.innerHTML = `
+            <td class="py-2.5 px-3 font-semibold text-white">${agName}</td>
+            <td class="py-2.5 px-3 text-center font-mono text-slate-300">${data.total}</td>
+            <td class="py-2.5 px-3 text-right font-mono text-emerald-400 font-bold">${data.qualified}</td>
+          `;
+          agencyTbody.appendChild(tr);
+        });
+      }
+    }
+
+    function renderStageView() {
+      const total = participants.length;
+      const zero = participants.filter(p => p.stamps.length === 0).length;
+      const active = participants.filter(p => p.stamps.length >= 1 && p.stamps.length < 11).length;
+      const qualified = participants.filter(p => p.stamps.length === 11);
+      const remainingPool = qualified.filter(p => !winnersList.some(w => w.email.toLowerCase() === p.email.toLowerCase()));
+
+      document.getElementById('statTotal').innerText = total;
+      document.getElementById('statZeroStamps').innerText = zero;
+      document.getElementById('statActive').innerText = active;
+      document.getElementById('statQualified').innerText = qualified.length;
+      document.getElementById('statWinnersCount').innerText = winnersList.length;
+
+      const adminRemainingEl = document.getElementById('adminRemainingCount');
+      if (adminRemainingEl) adminRemainingEl.innerText = remainingPool.length;
+
+      const adminWonEl = document.getElementById('adminWonCount');
+      if (adminWonEl) adminWonEl.innerText = winnersList.length;
+
+      const tbody = document.getElementById('stageWinnersTableBody');
+      tbody.innerHTML = '';
+      winnersList.forEach((w, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40 text-amber-200";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-bold text-amber-400">#${idx + 1}</td>
+          <td class="py-2.5 px-3 font-semibold text-white">${w.name}</td>
+          <td class="py-2.5 px-3 text-slate-300">${w.agency}</td>
+          <td class="py-2.5 px-3 text-cyan-300 font-mono">${w.email}</td>
+          <td class="py-2.5 px-3 text-right"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">PEMENANG SAH</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      renderAdminWinnersTable();
+      renderAdminReportsView();
+    }
+
+    // ==============================================================
+    // 7. EKSPORT & PENGURUSAN DATA
+    // ==============================================================
+    function exportComprehensiveReportExcel() {
+      if (participants.length === 0) {
+        alert("Tiada rekod data peserta untuk dieksport.");
+        return;
+      }
+
+      const wb = XLSX.utils.book_new();
+      const total = participants.length;
+      const zeroCount = participants.filter(p => p.stamps.length === 0).length;
+      const activeCount = participants.filter(p => p.stamps.length >= 1 && p.stamps.length < 11).length;
+      const qualCount = participants.filter(p => p.stamps.length === 11).length;
+
+      const summaryData = [
+        ["LAPORAN STATISTIK HARI PENDIGITALAN MOTAC TAHUN 2026"],
+        ["Tarikh & Masa Jana", new Date().toLocaleString('ms-MY')],
+        [],
+        ["METRIK UTAMA", "BILANGAN PESERTA", "PERATUSAN (%)"],
+        ["Jumlah Pendaftar", total, "100.0%"],
+        ["Layak Cabutan Bertuah (11/11 Cop)", qualCount, `${total > 0 ? ((qualCount/total)*100).toFixed(1) : 0}%`],
+        ["Sedang Mengumpul Cop (1-10 Cop)", activeCount, `${total > 0 ? ((activeCount/total)*100).toFixed(1) : 0}%`],
+        ["Belum Mula Melawat (0 Cop)", zeroCount, `${total > 0 ? ((zeroCount/total)*100).toFixed(1) : 0}%`],
+        ["Jumlah Pemenang Dicabut", winnersList.length, "-"],
+        [],
+        ["PRESTASI KUNJUNGAN MENGIKUT RERUAI PEMPAMER (11 LOT)", "PELAWAT HADIR", "PERATUSAN SAMBUTAN (%)"]
+      ];
+
+      MOTAC_BOOTHS.forEach(b => {
+        const vCount = participants.filter(p => p.stamps.includes(b.id)).length;
+        const vPct = total > 0 ? ((vCount/total)*100).toFixed(1) : 0;
+        summaryData.push([`${b.lot} - ${b.name} (${b.slot})`, vCount, `${vPct}%`]);
+      });
+
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan_Statistik");
+
+      const participantsData = [
+        ["Bil", "Nama Peserta / Wakil", "Alamat Emel", "Bahagian / Agensi", "Bilangan Cop", "Status Kelayakan", "Status Goodies", "Senarai Lot Booth Dilawati"]
+      ];
+
+      participants.forEach((p, idx) => {
+        let status = "Belum Mula";
+        if (p.stamps.length === 11) status = "Layak Cabutan Bertuah (11/11)";
+        else if (p.stamps.length > 0) status = `Sedang Mengumpul (${p.stamps.length}/11)`;
+
+        const visitedBooths = p.stamps.map(id => {
+          const b = MOTAC_BOOTHS.find(item => item.id === id);
+          return b ? b.lot : `#${id}`;
+        }).join(", ");
+
+        participantsData.push([
+          idx + 1,
+          p.name,
+          p.email,
+          p.agency,
+          p.stamps.length,
+          status,
+          p.goodiesClaimed ? "Telah Ditebus" : "Belum Ditebus",
+          visitedBooths || "Tiada"
+        ]);
+      });
+
+      const wsParticipants = XLSX.utils.aoa_to_sheet(participantsData);
+      XLSX.utils.book_append_sheet(wb, wsParticipants, "Senarai_Peserta_Penuh");
+
+      const winnersData = [
+        ["Giliran Cabutan", "Nama Pemenang", "Alamat Emel", "Bahagian / Agensi", "Masa Dicabut"]
+      ];
+
+      winnersList.forEach((w, idx) => {
+        winnersData.push([
+          `Cabutan #${idx + 1}`,
+          w.name,
+          w.email,
+          w.agency,
+          w.wonAt || "Selesai"
+        ]);
+      });
+
+      const wsWinners = XLSX.utils.aoa_to_sheet(winnersData);
+      XLSX.utils.book_append_sheet(wb, wsWinners, "Senarai_Pemenang_Cabutan");
+
+      const dateStr = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(wb, `Laporan_Statistik_MOTAC_${dateStr}.xlsx`);
+    }
+
+    function printExecutiveReport() {
+      window.print();
+    }
+
+    function exportStampMatrixExcel() {
+      if (participants.length === 0) { alert("Tiada data peserta."); return; }
+      const headers = ["Bil", "Nama Peserta", "Emel", "Bahagian", "Lot 1", "Lot 2", "Lot 3", "Lot 4", "Lot 5", "Lot 6", "Lot 7", "Lot 8", "Lot 9", "Lot 10", "Lot 11", "Jumlah Cop", "Maklum Balas", "Status Goodies"];
+      const rows = [headers];
+      participants.forEach((p, idx) => {
+        const checks = [1,2,3,4,5,6,7,8,9,10,11].map(id => p.stamps.includes(id) ? "✓" : "-");
+        rows.push([idx + 1, p.name, p.email, p.agency, ...checks, p.stamps.length, p.feedbackDone ? "Selesai" : "Belum", p.goodiesClaimed ? "Telah Ditebus" : "Belum"]);
+      });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Matriks_Cop");
+      XLSX.writeFile(wb, `Matriks_Cop_MOTAC_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function exportFeedbackExcel() {
+      if (feedbackResponses.length === 0) { alert("Tiada data maklum balas."); return; }
+      const data = [["Tarikh/Masa", "Nama", "Emel", "Bahagian", "S1: Kepuasan", "S2: Reruai Pilihan", "S3: Kelancaran", "S4: Setuju Tahunan", "S5: Cadangan"]];
+      feedbackResponses.forEach(r => {
+        data.push([r.timestamp, r.name, r.email, r.agency, r.q1_satisfaction, r.q2_favorite_booth, r.q3_app_ease, r.q4_continue_yearly, r.q5_suggestions]);
+      });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Maklum_Balas");
+      XLSX.writeFile(wb, `Maklum_Balas_MOTAC_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function addParticipantManual(e) {
+      e.preventDefault();
+      const name = document.getElementById('mName').value.trim();
+      const email = document.getElementById('mEmail').value.trim().toLowerCase();
+      const agency = document.getElementById('mAgency').value.trim();
+
+      if (participants.some(p => p.email.toLowerCase() === email)) {
+        alert("Emel ini telah berdaftar.");
+        return;
+      }
+
+      const newUser = { name, email, agency, stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false };
+      participants.push(newUser);
+      saveState();
+      postDatabase('UPSERT_PARTICIPANTS', { participants: [newUser] });
+      renderIntegratedParticipantsTable();
+      renderStageView();
+
+      document.getElementById('mName').value = '';
+      document.getElementById('mEmail').value = '';
+      document.getElementById('mAgency').value = '';
+      alert(`Peserta ${name} berjaya didaftarkan!`);
+    }
+
+    function handleExcelUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
+          let count = 0;
+          const importedParticipants = [];
+          for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length < 2) continue;
+            const name = String(r[0] || '').trim();
+            const email = String(r[1] || '').trim().toLowerCase();
+            const agency = String(r[2] || 'MOTAC').trim();
+            if (email && !participants.some(p => p.email.toLowerCase() === email)) {
+              const newUser = { name: name || 'Peserta', email, agency, stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false };
+              participants.push(newUser);
+              importedParticipants.push(newUser);
+              count++;
+            }
+          }
+          saveState();
+          postDatabase('UPSERT_PARTICIPANTS', { participants: importedParticipants });
+          renderIntegratedParticipantsTable();
+          renderStageView();
+          alert(`Berjaya memuat naik ${count} peserta baharu!`);
+        } catch(err) {
+          alert("Format fail Excel tidak sah.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function handleBulkParticipantUpdateUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
+          let updated = 0;
+          let added = 0;
+          const changedParticipants = [];
+          for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length < 3) continue;
+
+            const name = String(r[0] || '').trim();
+            const email = String(r[1] || '').trim().toLowerCase();
+            const agency = String(r[2] || '').trim();
+
+            if (!email) continue;
+
+            const existing = participants.find(p => p.email.toLowerCase() === email);
+            if (existing) {
+              existing.name = name || existing.name;
+              existing.agency = agency || existing.agency;
+              changedParticipants.push(existing);
+              updated++;
+            } else {
+              const newUser = {
+                name: name || 'Peserta',
+                email,
+                agency: agency || 'MOTAC',
+                stamps: [],
+                feedbackDone: false,
+                certDownloaded: false,
+                goodiesClaimed: false
+              };
+              participants.push(newUser);
+              changedParticipants.push(newUser);
+              added++;
+            }
+          }
+
+          saveState();
+          postDatabase('UPSERT_PARTICIPANTS', { participants: changedParticipants });
+          renderIntegratedParticipantsTable();
+          renderStageView();
+          renderUserView();
+          if (activeAdminUser) renderAdminView();
+
+          alert(`Kemas kini pukal selesai: ${updated} rekod dikemaskini, ${added} peserta baru ditambah.`);
+        } catch(err) {
+          alert("Format fail Excel tidak sah untuk kemaskini pukal.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function downloadSampleExcel() {
+      const sample = [["Nama", "Emel", "Bahagian"], ["Ali bin Ahmad", "ali@motac.gov.my", "BPM"]];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sample), "Templat");
+      XLSX.writeFile(wb, "Templat_Pendaftaran_MOTAC.xlsx");
+    }
+
+    function deleteParticipant(email) {
+      if (!confirm(`Padam rekod ${email}?`)) return;
+      participants = participants.filter(p => p.email.toLowerCase() !== email.toLowerCase());
+      winnersList = winnersList.filter(w => w.email.toLowerCase() !== email.toLowerCase());
+      feedbackResponses = feedbackResponses.filter(f => f.email.toLowerCase() !== email.toLowerCase());
+      if (currentParticipantEmail === email) handleUserLogout();
+      saveState();
+      postDatabase('DELETE_PARTICIPANT', { email });
+      renderIntegratedParticipantsTable();
+      renderStageView();
+    }
+
+    function clearAllData() {
+      if (!confirm("AMARAN: Anda pasti mahu memadam SEMUA rekod peserta?")) return;
+      participants = [];
+      winnersList = [];
+      feedbackResponses = [];
+      handleUserLogout();
+      saveState();
+      postDatabase('CLEAR_DATA');
+      renderIntegratedParticipantsTable();
+      renderStageView();
+    }
+
+    function openProxyModal(email) {
+      const user = participants.find(p => p.email.toLowerCase() === email.toLowerCase());
+      if (!user) return;
+      document.getElementById('proxyOriginalEmail').value = user.email;
+      document.getElementById('proxyOriginalNameDisplay').value = user.name;
+      document.getElementById('proxyNewName').value = user.name;
+      document.getElementById('proxyNewEmail').value = user.email;
+      document.getElementById('proxyAgencyDisplay').value = user.agency;
+      document.getElementById('proxyModal').classList.remove('hidden');
+    }
+
+    function closeProxyModal() {
+      document.getElementById('proxyModal').classList.add('hidden');
+    }
+
+    function handleSaveProxy(e) {
+      e.preventDefault();
+      const orig = document.getElementById('proxyOriginalEmail').value;
+      const nName = document.getElementById('proxyNewName').value.trim();
+      const nEmail = document.getElementById('proxyNewEmail').value.trim().toLowerCase();
+      const nAgency = document.getElementById('proxyAgencyDisplay').value.trim();
+
+      const user = participants.find(p => p.email.toLowerCase() === orig.toLowerCase());
+      if (!user) return;
+
+      const oldEmail = user.email;
+      user.name = nName;
+      user.email = nEmail;
+      user.agency = nAgency;
+      if (currentParticipantEmail && currentParticipantEmail.toLowerCase() === orig.toLowerCase()) currentParticipantEmail = nEmail;
+
+      saveState();
+      postDatabase('UPDATE_PARTICIPANT', {
+        originalEmail: oldEmail,
+        participant: { name: user.name, email: user.email, agency: user.agency }
+      });
+      closeProxyModal();
+      renderIntegratedParticipantsTable();
+      renderUserView();
+      alert("Maklumat wakil berjaya dikemas kini!");
+    }
+
+    function renderAdminQRCards() {
+      const container = document.getElementById('printableQRCards');
+      container.innerHTML = '';
+      MOTAC_BOOTHS.forEach(b => {
+        const card = document.createElement('div');
+        card.className = "qr-card-print bg-white text-slate-900 border-2 border-slate-900 rounded-3xl p-6 text-center flex flex-col items-center justify-between shadow-md";
+        card.innerHTML = `
+          <div class="w-full border-b-2 border-slate-900 pb-2 mb-3">
+            <span class="text-xs font-mono font-black bg-slate-900 text-white px-2 py-0.5 rounded">${b.lot}</span>
+            <h3 class="text-xl font-black text-slate-900 mt-1">${b.name}</h3>
+            <p class="text-[10px] text-slate-600">${b.slot}</p>
+          </div>
+          <div id="admin-qr-${b.id}" class="my-2 p-2 bg-white border border-slate-300 rounded-xl"></div>
+          <p class="text-[10px] font-mono text-slate-500">Kod Keselamatan: <strong>${b.token}</strong></p>
+        `;
+        container.appendChild(card);
+        new QRCode(document.getElementById(`admin-qr-${b.id}`), {
+          text: `MOTAC_STAMP:${b.id}:${b.token}`,
+          width: 140,
+          height: 140,
+          colorDark: "#0f172a",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      });
+    }
+
+    function renderBoothAnalytics() {
+      const tbody = document.getElementById('boothPerformanceTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      const total = participants.length;
+      MOTAC_BOOTHS.forEach(b => {
+        const visited = participants.filter(p => p.stamps.includes(b.id)).length;
+        const pct = total > 0 ? ((visited / total) * 100).toFixed(1) : 0;
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-bold text-white">${b.lot} — ${b.name}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-cyan-300 font-bold">${visited}</td>
+          <td class="py-2.5 px-3 text-right font-mono text-emerald-400 font-bold">${pct}%</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('adminUser').value.trim();
+      const p = document.getElementById('adminPass').value.trim();
+      const match = adminAccounts.find(a => a.user === u && a.pass === p);
+      if (!match) { alert("Nama pengguna atau kata laluan salah!"); return; }
+      activeAdminUser = match.user;
+      sessionStorage.setItem('motac_active_admin', activeAdminUser);
+      renderAdminView();
+    }
+
+    function handleAdminLogout() {
+      activeAdminUser = null;
+      sessionStorage.removeItem('motac_active_admin');
+      renderAdminView();
+    }
+
+    function renderAdminView() {
+      const loginBox = document.getElementById('adminLoginBox');
+      const dashBox = document.getElementById('adminDashboardBox');
+      if (!activeAdminUser) {
+        loginBox.classList.remove('hidden');
+        dashBox.classList.add('hidden');
+        return;
+      }
+      loginBox.classList.add('hidden');
+      dashBox.classList.remove('hidden');
+      document.getElementById('currentAdminName').innerText = activeAdminUser;
+
+      renderIntegratedParticipantsTable();
+      renderBoothAnalytics();
+      renderAdminQRCards();
+      renderAdminAccounts();
+      renderStageView();
+    }
+
+    function renderAdminAccounts() {
+      const tbody = document.getElementById('adminAccountsTable');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      adminAccounts.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-semibold text-white">${a.name}</td>
+          <td class="py-2.5 px-3 font-mono text-cyan-300">${a.user}</td>
+          <td class="py-2.5 px-3 text-right"><span class="text-xs text-slate-400 font-mono">Aktif</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Switch Tab Navigasi
+    function switchTab(tab) {
+      ['viewUser', 'viewStage', 'viewAdmin'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      ['navUser', 'navStage', 'navAdmin'].forEach(id => document.getElementById(id).className = "px-3.5 py-1.5 rounded-xl font-bold text-slate-300 hover:text-white transition-all");
+
+      if (tab === 'user') {
+        document.getElementById('viewUser').classList.remove('hidden');
+        document.getElementById('navUser').className = "px-3.5 py-1.5 rounded-xl font-bold bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow";
+        renderUserView();
+      } else if (tab === 'stage') {
+        document.getElementById('viewStage').classList.remove('hidden');
+        document.getElementById('navStage').className = "px-3.5 py-1.5 rounded-xl font-bold bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow";
+        renderStageView();
+      } else if (tab === 'admin') {
+        document.getElementById('viewAdmin').classList.remove('hidden');
+        document.getElementById('navAdmin').className = "px-3.5 py-1.5 rounded-xl font-bold bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow";
+        renderAdminView();
+      }
+    }
+
+    function switchAdminSub(sub) {
+      ['adminDrawSection', 'adminParticipantsHubSection', 'adminReportsSection', 'adminQRSection', 'adminAccountsSection'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+      ['subBtnDraw', 'subBtnHub', 'subBtnReports', 'subBtnQR', 'subBtnAccounts'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.className = "px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white";
+      });
+
+      if (sub === 'drawControl') {
+        document.getElementById('adminDrawSection').classList.remove('hidden');
+        document.getElementById('subBtnDraw').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-amber-400";
+      } else if (sub === 'participantsHub') {
+        document.getElementById('adminParticipantsHubSection').classList.remove('hidden');
+        document.getElementById('subBtnHub').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-cyan-300";
+        renderIntegratedParticipantsTable();
+      } else if (sub === 'reports') {
+        document.getElementById('adminReportsSection').classList.remove('hidden');
+        document.getElementById('subBtnReports').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-cyan-300";
+        renderBoothAnalytics();
+      } else if (sub === 'qr') {
+        document.getElementById('adminQRSection').classList.remove('hidden');
+        document.getElementById('subBtnQR').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-cyan-300";
+        renderAdminQRCards();
+      } else if (sub === 'accounts') {
+        document.getElementById('adminAccountsSection').classList.remove('hidden');
+        document.getElementById('subBtnAccounts').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-cyan-300";
+        renderAdminAccounts();
+      }
+    }
+
+    window.onload = function() {
+      renderUserView();
+      renderStageView();
+      if (activeAdminUser) renderAdminView();
+      initializeDatabase(true);
+    };
+  </script>
+</body>
+</html>
