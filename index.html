@@ -1771,8 +1771,39 @@
       document.getElementById('feedbackModal').classList.add('hidden');
     }
 
+    // Cache for pre-converted base64 images (converted at page load)
+    let certBgBase64Cache = '';
+
+    // Pre-convert certificate background image to base64 at page load
+    function preConvertCertImages() {
+      const bgImg = document.querySelector('#printableCertificateArea .cert-bg-img');
+      if (!bgImg) return;
+
+      function doConvert() {
+        if (!bgImg.naturalWidth || !bgImg.naturalHeight) return;
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = bgImg.naturalWidth;
+          canvas.height = bgImg.naturalHeight;
+          canvas.getContext('2d').drawImage(bgImg, 0, 0);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+          if (dataUrl && dataUrl !== 'data:,') {
+            certBgBase64Cache = dataUrl;
+            bgImg.src = dataUrl; // Replace src so it's already base64 in DOM
+          }
+        } catch (e) {
+          console.warn('[MOTAC] Cannot pre-convert cert bg image:', e.message);
+        }
+      }
+
+      if (bgImg.complete && bgImg.naturalWidth) {
+        doConvert();
+      } else {
+        bgImg.addEventListener('load', doConvert);
+      }
+    }
+
     // Helper: Convert image to base64 data URI to avoid CORS tainted canvas.
-    // Works on file:// protocol by drawing the already-loaded DOM image directly.
     function imageToBase64(imgElement) {
       return new Promise((resolve) => {
         // If already a data URI, return as-is
@@ -1781,20 +1812,26 @@
           return;
         }
 
-        // Draw the already-loaded DOM image onto a canvas (no crossOrigin needed)
+        // Check if we have cached base64 for this image
+        if (imgElement.classList.contains('cert-bg-img') && certBgBase64Cache) {
+          resolve(certBgBase64Cache);
+          return;
+        }
+
+        // Draw the already-loaded DOM image onto a canvas
         try {
           if (imgElement.naturalWidth && imgElement.naturalHeight) {
             const canvas = document.createElement('canvas');
             canvas.width = imgElement.naturalWidth;
             canvas.height = imgElement.naturalHeight;
             canvas.getContext('2d').drawImage(imgElement, 0, 0);
-            const dataUrl = canvas.toDataURL('image/png');
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
             if (dataUrl && dataUrl !== 'data:,') {
               resolve(dataUrl);
               return;
             }
           }
-        } catch (e) { /* canvas tainted, try fetch fallback */ }
+        } catch (e) { /* canvas tainted */ }
 
         // Fallback: fetch as blob
         fetch(imgElement.src)
@@ -1826,11 +1863,11 @@
             if (base64Src) {
               clonedImages[i].src = base64Src;
             } else {
-              // Remove image that can't be converted to prevent tainted canvas
-              clonedImages[i].remove();
+              // Hide image that can't be converted to prevent tainted canvas
+              clonedImages[i].style.display = 'none';
             }
           } catch (e) {
-            clonedImages[i].remove();
+            clonedImages[i].style.display = 'none';
           }
         }
       }
@@ -2878,6 +2915,7 @@
     }
 
     window.onload = function() {
+      preConvertCertImages();
       renderUserView();
       renderStageView();
       if (activeAdminUser) renderAdminView();
