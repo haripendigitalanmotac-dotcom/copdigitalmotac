@@ -1778,29 +1778,31 @@
     function preConvertCertImages() {
       const bgImg = document.querySelector('#printableCertificateArea .cert-bg-img');
       if (!bgImg) return;
+      const originalSrc = bgImg.getAttribute('src');
+      if (!originalSrc || originalSrc.startsWith('data:')) return;
 
-      function doConvert() {
-        if (!bgImg.naturalWidth || !bgImg.naturalHeight) return;
+      // Load image independently via new Image() to avoid display:none blocking
+      const tempImg = new Image();
+      tempImg.onload = function() {
         try {
           const canvas = document.createElement('canvas');
-          canvas.width = bgImg.naturalWidth;
-          canvas.height = bgImg.naturalHeight;
-          canvas.getContext('2d').drawImage(bgImg, 0, 0);
+          canvas.width = tempImg.naturalWidth;
+          canvas.height = tempImg.naturalHeight;
+          canvas.getContext('2d').drawImage(tempImg, 0, 0);
           const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
           if (dataUrl && dataUrl !== 'data:,') {
             certBgBase64Cache = dataUrl;
-            bgImg.src = dataUrl; // Replace src so it's already base64 in DOM
+            bgImg.src = dataUrl;
+            console.log('[MOTAC] Cert background pre-converted to base64 OK');
           }
         } catch (e) {
           console.warn('[MOTAC] Cannot pre-convert cert bg image:', e.message);
         }
-      }
-
-      if (bgImg.complete && bgImg.naturalWidth) {
-        doConvert();
-      } else {
-        bgImg.addEventListener('load', doConvert);
-      }
+      };
+      tempImg.onerror = function() {
+        console.warn('[MOTAC] Cannot load cert bg image for pre-conversion');
+      };
+      tempImg.src = originalSrc;
     }
 
     // Helper: Convert image to base64 data URI to avoid CORS tainted canvas.
