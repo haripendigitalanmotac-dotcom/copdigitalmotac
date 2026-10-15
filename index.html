@@ -479,12 +479,12 @@
         <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left mt-5">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Pengguna (Username)</label>
-            <input type="text" id="adminUser" required placeholder="admin"
+            <input type="text" id="adminUser" required
               class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Kata Laluan (Password)</label>
-            <input type="password" id="adminPass" required placeholder="admin1234"
+            <input type="password" id="adminPass" required
               class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white">
           </div>
           <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-cyan-600 text-white font-bold rounded-xl text-xs shadow-lg">
@@ -871,8 +871,12 @@
           <span id="prevQ4" class="text-emerald-400 font-bold">-</span>
         </div>
         <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
-          <span class="text-slate-400 block font-semibold mb-0.5">5. Cadangan / Penambahbaikan:</span>
+          <span class="text-slate-400 block font-semibold mb-0.5">5. Proses Kerja Manual Wajar Didigitalkan:</span>
           <p id="prevQ5" class="text-slate-200 mt-1 leading-relaxed">-</p>
+        </div>
+        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+          <span class="text-slate-400 block font-semibold mb-0.5">6. Cadangan / Penambahbaikan:</span>
+          <p id="prevQ6" class="text-slate-200 mt-1 leading-relaxed">-</p>
         </div>
       </div>
 
@@ -998,10 +1002,18 @@
 
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="block font-semibold text-slate-200">5. Cadangan penambahbaikan:</label>
+            <label class="block font-semibold text-slate-200">5. Apakah proses kerja anda yang masih dijalankan secara manual dan wajar didigitalkan?</label>
+            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          </div>
+          <textarea id="surveyQ5" rows="3" required placeholder="Nyatakan proses kerja manual yang wajar didigitalkan..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white"></textarea>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block font-semibold text-slate-200">6. Cadangan penambahbaikan:</label>
             <span class="text-[10px] text-slate-400 font-normal">(Pilihan / Opsional)</span>
           </div>
-          <textarea id="surveyQ5" rows="3" placeholder="Kongsi cadangan anda (jika ada)..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white"></textarea>
+          <textarea id="surveyQ6" rows="3" placeholder="Kongsi cadangan anda (jika ada)..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white"></textarea>
         </div>
 
         <div class="pt-3 border-t border-slate-800 flex gap-2">
@@ -1762,39 +1774,38 @@
     // Helper: Convert image URL to base64 data URI to avoid CORS tainted canvas
     function imageToBase64(imgElement) {
       return new Promise((resolve) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.naturalWidth;
-          canvas.height = img.naturalHeight;
-          canvas.getContext('2d').drawImage(img, 0, 0);
-          try {
-            resolve(canvas.toDataURL('image/png'));
-          } catch (e) {
-            // If CORS still blocks, read via fetch as blob
-            fetch(imgElement.src)
-              .then(r => r.blob())
-              .then(blob => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(blob);
-              })
-              .catch(() => resolve(''));
-          }
-        };
-        img.onerror = () => {
-          // Fallback: try fetch as blob
-          fetch(imgElement.src)
-            .then(r => r.blob())
-            .then(blob => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result);
-              reader.readAsDataURL(blob);
-            })
-            .catch(() => resolve(''));
-        };
-        img.src = imgElement.src;
+        // If already a data URI, return as-is
+        if (imgElement.src && imgElement.src.startsWith('data:')) {
+          resolve(imgElement.src);
+          return;
+        }
+
+        // Try fetch-as-blob first (works reliably for local and same-origin files)
+        fetch(imgElement.src)
+          .then(r => r.blob())
+          .then(blob => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          })
+          .catch(() => {
+            // Fallback: try canvas with crossOrigin
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.naturalWidth;
+              canvas.height = img.naturalHeight;
+              canvas.getContext('2d').drawImage(img, 0, 0);
+              try {
+                resolve(canvas.toDataURL('image/png'));
+              } catch (e) {
+                resolve('');
+              }
+            };
+            img.onerror = () => resolve('');
+            img.src = imgElement.src;
+          });
       });
     }
 
@@ -1807,13 +1818,15 @@
       certificate.dataset.pdfCaptureRoot = 'true';
 
       // Convert all images inside certificate to base64 to prevent CORS tainted canvas
-      const originalBgImg = document.getElementById('printableCertificateArea').querySelector('.cert-bg-img');
-      const clonedBgImg = certificate.querySelector('.cert-bg-img');
-      if (clonedBgImg && originalBgImg && originalBgImg.src) {
-        try {
-          const base64Src = await imageToBase64(originalBgImg);
-          if (base64Src) clonedBgImg.src = base64Src;
-        } catch (e) { /* keep original src as fallback */ }
+      const originalImages = document.getElementById('printableCertificateArea').querySelectorAll('img');
+      const clonedImages = certificate.querySelectorAll('img');
+      for (let i = 0; i < originalImages.length; i++) {
+        if (originalImages[i].src && clonedImages[i]) {
+          try {
+            const base64Src = await imageToBase64(originalImages[i]);
+            if (base64Src) clonedImages[i].src = base64Src;
+          } catch (e) { /* keep original src as fallback */ }
+        }
       }
 
       Object.assign(certificate.style, {
@@ -1846,7 +1859,7 @@
         html2canvas: {
           scale: 2,
           useCORS: true,
-          allowTaint: false,
+          allowTaint: true,
           backgroundColor: '#030a21',
           onclone: clonedDocument => {
             const clonedCertificate = clonedDocument.querySelector('[data-pdf-capture-root="true"]');
@@ -1899,9 +1912,10 @@
       const q3El = document.querySelector('input[name="q3"]:checked');
       const q4El = document.querySelector('input[name="q4"]:checked');
       const q5 = document.getElementById('surveyQ5').value.trim();
+      const q6 = document.getElementById('surveyQ6').value.trim();
 
-      if (!q1El || !q2 || !q3El || !q4El) {
-        alert("Sila pastikan Soalan 1 hingga 4 telah dijawab.");
+      if (!q1El || !q2 || !q3El || !q4El || !q5) {
+        alert("Sila pastikan Soalan 1 hingga 5 telah dijawab.");
         return;
       }
 
@@ -1914,7 +1928,8 @@
         q2_favorite_booth: q2,
         q3_app_ease: parseInt(q3El.value),
         q4_continue_yearly: q4El.value,
-        q5_suggestions: q5 || "-"
+        q5_manual_process: q5,
+        q6_suggestions: q6 || "-"
       };
 
       try {
@@ -2033,13 +2048,15 @@
         document.getElementById('prevQ2').innerText = fb.q2_favorite_booth;
         document.getElementById('prevQ3').innerText = `${fb.q3_app_ease} / 5`;
         document.getElementById('prevQ4').innerText = fb.q4_continue_yearly;
-        document.getElementById('prevQ5').innerText = fb.q5_suggestions || "-";
+        document.getElementById('prevQ5').innerText = fb.q5_manual_process || "-";
+        document.getElementById('prevQ6').innerText = fb.q6_suggestions || "-";
       } else {
         document.getElementById('prevQ1').innerText = "-";
         document.getElementById('prevQ2').innerText = "-";
         document.getElementById('prevQ3').innerText = "-";
         document.getElementById('prevQ4').innerText = "-";
-        document.getElementById('prevQ5').innerText = "Peserta belum menghantar borang maklum balas.";
+        document.getElementById('prevQ5').innerText = "-";
+        document.getElementById('prevQ6').innerText = "Peserta belum menghantar borang maklum balas.";
       }
 
       document.getElementById('adminFeedbackPreviewModal').classList.remove('hidden');
@@ -2505,9 +2522,9 @@
 
     function exportFeedbackExcel() {
       if (feedbackResponses.length === 0) { alert("Tiada data maklum balas."); return; }
-      const data = [["Tarikh/Masa", "Nama", "Emel", "Bahagian", "S1: Kepuasan", "S2: Reruai Pilihan", "S3: Kelancaran", "S4: Setuju Tahunan", "S5: Cadangan"]];
+      const data = [["Tarikh/Masa", "Nama", "Emel", "Bahagian", "S1: Kepuasan", "S2: Reruai Pilihan", "S3: Kelancaran", "S4: Setuju Tahunan", "S5: Proses Manual Wajar Digital", "S6: Cadangan"]];
       feedbackResponses.forEach(r => {
-        data.push([r.timestamp, r.name, r.email, r.agency, r.q1_satisfaction, r.q2_favorite_booth, r.q3_app_ease, r.q4_continue_yearly, r.q5_suggestions]);
+        data.push([r.timestamp, r.name, r.email, r.agency, r.q1_satisfaction, r.q2_favorite_booth, r.q3_app_ease, r.q4_continue_yearly, r.q5_manual_process, r.q6_suggestions]);
       });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Maklum_Balas");
