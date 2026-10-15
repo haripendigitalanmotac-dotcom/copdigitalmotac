@@ -1771,7 +1771,8 @@
       document.getElementById('feedbackModal').classList.add('hidden');
     }
 
-    // Helper: Convert image URL to base64 data URI to avoid CORS tainted canvas
+    // Helper: Convert image to base64 data URI to avoid CORS tainted canvas.
+    // Works on file:// protocol by drawing the already-loaded DOM image directly.
     function imageToBase64(imgElement) {
       return new Promise((resolve) => {
         // If already a data URI, return as-is
@@ -1780,7 +1781,22 @@
           return;
         }
 
-        // Try fetch-as-blob first (works reliably for local and same-origin files)
+        // Draw the already-loaded DOM image onto a canvas (no crossOrigin needed)
+        try {
+          if (imgElement.naturalWidth && imgElement.naturalHeight) {
+            const canvas = document.createElement('canvas');
+            canvas.width = imgElement.naturalWidth;
+            canvas.height = imgElement.naturalHeight;
+            canvas.getContext('2d').drawImage(imgElement, 0, 0);
+            const dataUrl = canvas.toDataURL('image/png');
+            if (dataUrl && dataUrl !== 'data:,') {
+              resolve(dataUrl);
+              return;
+            }
+          }
+        } catch (e) { /* canvas tainted, try fetch fallback */ }
+
+        // Fallback: fetch as blob
         fetch(imgElement.src)
           .then(r => r.blob())
           .then(blob => {
@@ -1788,24 +1804,7 @@
             reader.onloadend = () => resolve(reader.result);
             reader.readAsDataURL(blob);
           })
-          .catch(() => {
-            // Fallback: try canvas with crossOrigin
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              canvas.width = img.naturalWidth;
-              canvas.height = img.naturalHeight;
-              canvas.getContext('2d').drawImage(img, 0, 0);
-              try {
-                resolve(canvas.toDataURL('image/png'));
-              } catch (e) {
-                resolve('');
-              }
-            };
-            img.onerror = () => resolve('');
-            img.src = imgElement.src;
-          });
+          .catch(() => resolve(''));
       });
     }
 
@@ -1824,8 +1823,15 @@
         if (originalImages[i].src && clonedImages[i]) {
           try {
             const base64Src = await imageToBase64(originalImages[i]);
-            if (base64Src) clonedImages[i].src = base64Src;
-          } catch (e) { /* keep original src as fallback */ }
+            if (base64Src) {
+              clonedImages[i].src = base64Src;
+            } else {
+              // Remove image that can't be converted to prevent tainted canvas
+              clonedImages[i].remove();
+            }
+          } catch (e) {
+            clonedImages[i].remove();
+          }
         }
       }
 
@@ -1859,7 +1865,7 @@
         html2canvas: {
           scale: 2,
           useCORS: true,
-          allowTaint: true,
+          allowTaint: false,
           backgroundColor: '#030a21',
           onclone: clonedDocument => {
             const clonedCertificate = clonedDocument.querySelector('[data-pdf-capture-root="true"]');
