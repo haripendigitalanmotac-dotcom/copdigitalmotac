@@ -1856,21 +1856,41 @@
       certificate.dataset.pdfCaptureRoot = 'true';
 
       // Convert all images inside certificate to base64 to prevent CORS tainted canvas
-      const originalImages = document.getElementById('printableCertificateArea').querySelectorAll('img');
       const clonedImages = certificate.querySelectorAll('img');
-      for (let i = 0; i < originalImages.length; i++) {
-        if (originalImages[i].src && clonedImages[i]) {
-          try {
-            const base64Src = await imageToBase64(originalImages[i]);
-            if (base64Src) {
-              clonedImages[i].src = base64Src;
-            } else {
-              // Hide image that can't be converted to prevent tainted canvas
-              clonedImages[i].style.display = 'none';
-            }
-          } catch (e) {
-            clonedImages[i].style.display = 'none';
+      for (let i = 0; i < clonedImages.length; i++) {
+        const img = clonedImages[i];
+        const src = img.getAttribute('src') || '';
+        // Already base64 — skip
+        if (src.startsWith('data:')) continue;
+        // Try to convert using cached base64 or by loading fresh
+        if (img.classList.contains('cert-bg-img') && certBgBase64Cache) {
+          img.src = certBgBase64Cache;
+          continue;
+        }
+        // Load fresh and convert
+        try {
+          const base64 = await new Promise((resolve, reject) => {
+            const tempImg = new Image();
+            tempImg.onload = () => {
+              try {
+                const c = document.createElement('canvas');
+                c.width = tempImg.naturalWidth;
+                c.height = tempImg.naturalHeight;
+                c.getContext('2d').drawImage(tempImg, 0, 0);
+                const d = c.toDataURL('image/jpeg', 0.92);
+                resolve(d && d !== 'data:,' ? d : '');
+              } catch (e) { resolve(''); }
+            };
+            tempImg.onerror = () => resolve('');
+            tempImg.src = src;
+          });
+          if (base64) {
+            img.src = base64;
+          } else {
+            img.style.display = 'none';
           }
+        } catch (e) {
+          img.style.display = 'none';
         }
       }
 
@@ -1998,10 +2018,10 @@
       try {
         const pdfBase64 = await createCertificatePdfBase64(user);
         await postDatabase('SEND_CERTIFICATE', { feedback: payload, pdfBase64 }, true);
-        alert(`Maklum balas diterima dan permintaan penghantaran e-Sijil PDF telah dihantar ke ${user.email}. Sila semak Inbox atau Spam.`);
+        alert(`Maklum balas diterima dan e-Sijil PDF telah dihantar ke ${user.email}. Sila semak Inbox atau Spam.`);
       } catch (error) {
         console.error('[MOTAC Certificate Email]', error);
-        alert(`Jawapan maklum balas sudah disimpan dalam Google Sheet. PDF e-sijil tidak dapat dihantar secara automatik, tetapi boleh dimuat turun dari dashboard. (${error.message})`);
+        alert(`✅ Maklum balas sudah berjaya disimpan!\n\nℹ️ e-Sijil tidak dapat dihantar melalui emel secara automatik. Sila gunakan butang "Cetak / Simpan Format PDF" untuk muat turun sijil anda.`);
       }
       openCertificateModal();
     }
