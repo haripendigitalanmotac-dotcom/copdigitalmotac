@@ -1850,7 +1850,7 @@
     async function createCertificatePdfBase64(user) {
       if (!window.html2pdf) throw new Error('Modul jana PDF belum dimuatkan.');
       const certificate = document.getElementById('printableCertificateArea').cloneNode(true);
-      const serial = `MOTAC-DIGI-2026-${String(participants.findIndex(p => p.email.toLowerCase() === user.email.toLowerCase()) + 1).padStart(4, '0')}`;
+      const serial = `MOTAC-ICT-${String(participants.findIndex(p => p.email.toLowerCase() === user.email.toLowerCase()) + 1).padStart(4, '0')}`;
       certificate.querySelector('#certRecipientName').innerText = (user.name || '').toUpperCase();
       certificate.querySelector('#certSerialNo').innerText = serial;
       certificate.dataset.pdfCaptureRoot = 'true';
@@ -2056,7 +2056,7 @@
       document.getElementById('certRecipientName').innerText = (user.name || '').toUpperCase();
       
       const idx = participants.findIndex(p => p.email.toLowerCase() === user.email.toLowerCase()) + 1;
-      document.getElementById('certSerialNo').innerText = `MOTAC-DIGI-2026-${String(idx).padStart(4, '0')}`;
+      document.getElementById('certSerialNo').innerText = `MOTAC-ICT-${String(idx).padStart(4, '0')}`;
 
       document.getElementById('certificateModal').classList.remove('hidden');
     }
@@ -2156,7 +2156,7 @@
       currentParticipantEmail = user.email;
       document.getElementById('certRecipientName').innerText = (user.name || '').toUpperCase();
       const idx = participants.findIndex(p => p.email.toLowerCase() === user.email.toLowerCase()) + 1;
-      document.getElementById('certSerialNo').innerText = `MOTAC-DIGI-2026-${String(idx).padStart(4, '0')}`;
+      document.getElementById('certSerialNo').innerText = `MOTAC-ICT-${String(idx).padStart(4, '0')}`;
       document.getElementById('certificateModal').classList.remove('hidden');
     }
 
