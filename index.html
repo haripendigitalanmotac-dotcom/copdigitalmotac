@@ -74,6 +74,57 @@
       animation: floatSoft 4s ease-in-out infinite;
     }
 
+    /* Skrin Pentas: nama baharu layak cabutan muncul dengan kesan "pop" */
+    @keyframes chipPop {
+      0% { transform: scale(0.4); opacity: 0; }
+      70% { transform: scale(1.12); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .chip-new {
+      animation: chipPop 0.6s ease-out, goldenPulse 2s ease-in-out 0.6s infinite;
+    }
+    .wall-fade {
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+    }
+    /* Popup: jika kandungan lebih tinggi daripada skrin (telefon kecil), mula dari atas dan
+       boleh diskrol. Kandungan pendek tetap di tengah melalui margin auto. */
+    #feedbackModal, #goodiesModal, #proxyModal, #walkinEditModal, #adminFeedbackPreviewModal {
+      align-items: flex-start; overflow-y: auto; overscroll-behavior: contain;
+    }
+    #feedbackModal > *, #goodiesModal > *, #proxyModal > *, #walkinEditModal > *, #adminFeedbackPreviewModal > * {
+      margin-top: auto !important; margin-bottom: auto !important;
+    }
+    #certificateModal { justify-content: flex-start; overscroll-behavior: contain; }
+    #certificateModal > :first-child { margin-top: auto; }
+    #certificateModal > :last-child { margin-bottom: auto; }
+    /* Menu sub Panel Admin: satu baris boleh dileret di telefon */
+    .admin-subnav > button { white-space: nowrap; flex-shrink: 0; }
+    /* Borang Maklum Balas tema cerah: pilihan besar & jelas, pilihan yang dipilih diserlahkan */
+    .fb-light .fb-req { flex-shrink: 0; font-size: 12px; font-weight: 700; color: #e11d48; }
+    .fb-light .fb-opt {
+      display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px;
+      border: 2px solid #cbd5e1; border-radius: 12px; background: #f8fafc; color: #0f172a;
+      font-weight: 700; cursor: pointer; transition: all .15s;
+    }
+    .fb-light .fb-opt:hover { border-color: #22d3ee; }
+    .fb-light .fb-opt:has(input:checked) { border-color: #0891b2; background: #cffafe; color: #164e63; }
+    .fb-light .fb-opt input { width: 18px; height: 18px; accent-color: #0891b2; margin: 0; }
+    .fb-light .fb-input {
+      width: 100%; padding: 10px 12px; border: 2px solid #cbd5e1; border-radius: 12px;
+      background: #fff; color: #0f172a; font-size: 14px;
+    }
+    .fb-light .fb-input::placeholder { color: #94a3b8; }
+    .fb-light .fb-input:focus { outline: none; border-color: #0891b2; box-shadow: 0 0 0 3px rgba(8,145,178,.2); }
+    .no-scrollbar { scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+
+    @keyframes toastIn {
+      0% { transform: translate(-50%, -120%); opacity: 0; }
+      100% { transform: translate(-50%, 0); opacity: 1; }
+    }
+    .toast-in { animation: toastIn 0.5s cubic-bezier(.2,1.4,.4,1); }
+
     /* Gaya Bekas e-Sijil */
     .cert-backdrop-container {
       background-color: #030a21;
@@ -88,6 +139,46 @@
       size: A4 landscape;
       margin: 0;
     }
+
+    /* Kad QR pempamer: satu helaian A4 (210 x 297 mm) = 2 kad sama bersaiz A5 landskap
+       (210 x 148.5 mm), digunting di garisan tengah */
+    @page qrA4 {
+      size: A4 portrait;
+      margin: 0;
+    }
+    .qr-sheet {
+      width: 210mm; height: 297mm; background: #fff; color: #0f172a;
+      display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .qr-half {
+      height: 148.5mm; box-sizing: border-box; padding: 7mm 10mm;
+      display: flex; flex-direction: column; font-family: inherit;
+    }
+    .qr-half + .qr-half { border-top: 0.5mm dashed #94a3b8; } /* garisan gunting */
+    .qr-head {
+      display: flex; align-items: center; gap: 4mm; flex-shrink: 0;
+      padding-bottom: 2.5mm; border-bottom: 0.8mm solid #0f172a;
+    }
+    .qr-head img { height: 17mm; width: auto; }
+    .qr-event { font-size: 6.9mm; font-weight: 900; letter-spacing: 0.1mm; line-height: 1.05; white-space: nowrap; }
+    .qr-ministry { font-size: 3.4mm; color: #475569; margin-top: 0.8mm; }
+    /* Badan kad mengisi baki ketinggian: QR sebesar ruang yang ada, teks diagih atas-bawah */
+    .qr-body { flex: 1; display: flex; align-items: stretch; gap: 6mm; padding-top: 4mm; min-height: 0; }
+    .qr-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 1mm 0; }
+    .qr-lot {
+      align-self: flex-start; background: #0f172a; color: #fff; font-weight: 900;
+      font-size: 6mm; padding: 1.5mm 4mm; border-radius: 2mm; font-family: monospace;
+    }
+    .qr-name { font-size: 11mm; font-weight: 900; line-height: 1.05; margin-top: 2.5mm; }
+    .qr-slot { font-size: 4.4mm; color: #475569; margin-top: 1.5mm; }
+    .qr-instr { font-size: 4.6mm; font-weight: 700; color: #0e7490; line-height: 1.3; }
+    .qr-token { font-size: 3.4mm; color: #475569; word-break: break-all; padding-top: 2mm; border-top: 0.3mm solid #e2e8f0; }
+    .qr-token strong { display: block; font-family: monospace; font-size: 7mm; letter-spacing: 1mm; color: #0f172a; margin-top: 0.5mm; word-break: normal; }
+    .qr-code { width: 100mm; height: 100mm; align-self: center; padding: 2.5mm; border: 0.5mm solid #cbd5e1; border-radius: 3.5mm; flex-shrink: 0; box-sizing: border-box; }
+    .qr-code img, .qr-code canvas { width: 100% !important; height: 100% !important; }
+    .qr-sheet.walkin .qr-lot { background: #6d28d9; }
+    .qr-sheet.walkin .qr-head { border-color: #6d28d9; }
 
     @media print {
       /* 1. Mod Cetak e-Sijil Rasmi A4 Landscape */
@@ -170,6 +261,17 @@
         -webkit-text-fill-color: #fde047 !important;
       }
 
+      /* 1b. Mod Cetak Kad QR: kertas A4, satu pempamer satu helaian (2 kad A5 yang sama) */
+      body.printing-qr > :not(#printableQRCards) { display: none !important; }
+      body.printing-qr { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+      body.printing-qr #printableQRCards { display: block !important; margin: 0 !important; padding: 0 !important; }
+      body.printing-qr .qr-sheet {
+        page: qrA4; box-shadow: none !important; margin: 0 !important;
+        break-after: page; page-break-after: always;
+        -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+      }
+      body.printing-qr .qr-sheet:last-child { break-after: auto; page-break-after: auto; }
+
       /* 2. Mod Cetak Biasa (Bukan Sijil) */
       body:not(.printing-cert) .no-print { display: none !important; }
       body:not(.printing-cert) { background: white !important; color: black !important; padding: 0 !important; background-image: none !important; }
@@ -201,7 +303,8 @@
         <button id="navUser" onclick="switchTab('user')" class="px-3.5 py-1.5 rounded-xl font-bold bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow transition-all duration-300">
           📱 Cop Digital Peserta
         </button>
-        <button id="navStage" onclick="switchTab('stage')" class="px-3.5 py-1.5 rounded-xl font-bold text-slate-300 hover:text-white transition-all duration-300">
+        <!-- Skrin Pentas hanya untuk admin: butang disembunyikan sehingga admin log masuk (updateAdminNav) -->
+        <button id="navStage" onclick="switchTab('stage')" class="hidden px-3.5 py-1.5 rounded-xl font-bold text-slate-300 hover:text-white transition-all duration-300">
           🖥️ Skrin Pentas (Live)
         </button>
         <button id="navAdmin" onclick="switchTab('admin')" class="px-3.5 py-1.5 rounded-xl font-bold text-slate-300 hover:text-white transition-all duration-300">
@@ -212,6 +315,65 @@
   </header>
 
   <main class="max-w-6xl mx-auto w-full p-4 md:p-6 flex-1 relative z-10">
+
+    <!-- ============================================================== -->
+    <!-- 0. PENDAFTARAN PENGUNJUNG WALK-IN (dibuka melalui QR: ?daftar=walkin) -->
+    <!--    Untuk jumlah kehadiran program sahaja: tidak kumpul cop & tiada cabutan -->
+    <!-- ============================================================== -->
+    <section id="viewWalkin" class="hidden max-w-xl mx-auto">
+      <div id="walkinFormBox" class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <h2 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-indigo-200 text-center">
+          Pendaftaran Pengunjung Walk-in
+        </h2>
+        <p class="text-xs text-slate-300 mt-1 text-center leading-relaxed">
+          Hari Pendigitalan MOTAC 2026. Sila isi maklumat di bawah untuk merekodkan kehadiran anda.
+        </p>
+        <form onsubmit="handleWalkinSubmit(event)" class="space-y-3.5 mt-6">
+          <div>
+            <label class="block text-xs font-semibold text-cyan-300 mb-1.5">Gelaran</label>
+            <select id="walkinTitle" required class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-cyan-300 mb-1.5">Nama Penuh</label>
+            <input id="walkinName" type="text" required autocomplete="name" placeholder="Seperti dalam kad pengenalan"
+              class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-cyan-300 mb-1.5">Alamat Emel</label>
+            <input id="walkinEmail" type="email" required autocomplete="email" placeholder="nama@motac.gov.my"
+              class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-cyan-300 mb-1.5">No. Telefon</label>
+            <input id="walkinPhone" type="tel" required inputmode="numeric" maxlength="11" pattern="0[0-9]{8,10}"
+              oninput="this.value = this.value.replace(/\D/g, '')" placeholder="Cth: 0123456789"
+              title="Nombor sahaja, bermula dengan 0 (9-11 digit)"
+              class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-cyan-300 mb-1.5">Bahagian / Agensi</label>
+            <select id="walkinAgency" required onchange="toggleAgencyOther('walkin')"
+              class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"></select>
+            <input id="walkinAgencyOther" type="text" placeholder="Nyatakan bahagian / agensi / organisasi anda"
+              class="hidden mt-2 w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+          </div>
+          <button id="walkinSubmitBtn" type="submit" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 text-white font-black rounded-xl text-sm shadow-lg shadow-cyan-500/25 active:scale-95 transition disabled:opacity-60 disabled:cursor-wait">
+            Rekod Kehadiran Saya ➔
+          </button>
+        </form>
+      </div>
+
+      <div id="walkinDoneBox" class="hidden glass-card rounded-3xl p-8 shadow-2xl text-center border border-emerald-500/40">
+        <div class="text-5xl mb-3">✅</div>
+        <h2 class="text-2xl font-black text-emerald-300">Terima Kasih!</h2>
+        <p id="walkinDoneText" class="text-sm text-slate-200 mt-2 leading-relaxed"></p>
+        <!-- Mod kiosk (tablet di kaunter): kosongkan borang untuk pengunjung seterusnya -->
+        <button onclick="resetWalkinForm()" class="mt-6 w-full py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 text-white font-black rounded-xl text-sm active:scale-95 transition">
+          ➕ Daftar Pengunjung Seterusnya
+        </button>
+        <p class="text-[11px] text-slate-400 mt-3">Jika guna telefon sendiri, anda boleh tutup halaman ini.</p>
+      </div>
+    </section>
 
     <!-- ============================================================== -->
     <!-- 1. MODUL PESERTA (MOBILE VIEW)                                 -->
@@ -251,14 +413,14 @@
         
         <!-- PROGRESS BAR INTERAKTIF 4 LANGKAH -->
         <div class="glass-card rounded-3xl p-5 border border-cyan-500/30 shadow-2xl relative overflow-hidden">
-          <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-slate-800">
             <div>
               <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Kemajuan Keseluruhan Misi</span>
               <h4 id="journeyTitleText" class="text-xs sm:text-sm font-black text-cyan-300 flex items-center gap-1.5 mt-0.5">
                 <span>🚀</span> 0% Selesai
               </h4>
             </div>
-            <span id="journeyStepBadge" class="text-[11px] font-mono px-3 py-1 rounded-full font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+            <span id="journeyStepBadge" class="self-start sm:self-auto text-[11px] font-mono px-3 py-1 rounded-full font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
               Langkah 1 / 4
             </span>
           </div>
@@ -312,7 +474,7 @@
                 🎓
               </div>
               <div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <h3 class="text-sm font-black text-white">e-Sijil Penyertaan Rasmi MOTAC 2026</h3>
                   <span id="certDashboardPill" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700">Terkunci 🔒</span>
                 </div>
@@ -390,16 +552,16 @@
 
         <!-- Butang Imbas Kamera -->
         <div class="glass-card rounded-2xl p-4">
-          <button onclick="startQRScanner()" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-black rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg active:scale-98 transition">
+          <button id="btnScanQR" onclick="startQRScanner()" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-black rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg active:scale-98 transition">
             <span class="text-base">📷</span> IMBAS QR DI BOOTH UNTUK DAPAT COP
           </button>
-          <p class="text-[11px] text-slate-300 text-center mt-2">Halakan kamera telefon ke kod QR di atas meja setiap pempamer.</p>
+          <p id="scanHintText" class="text-[11px] text-slate-300 text-center mt-2">Halakan kamera telefon ke kod QR di atas meja setiap pempamer.</p>
         </div>
 
         <!-- Grid 11 Booth Rasmi -->
         <div>
           <h4 class="text-xs font-bold text-cyan-300 uppercase tracking-widest mb-2 px-1">Senarai 11 Reruai Pempamer</h4>
-          <div id="boothsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          <div id="boothsContainer" class="grid grid-cols-2 gap-2.5 sm:gap-3"></div>
         </div>
 
       </div>
@@ -433,6 +595,24 @@
         </div>
       </div>
 
+      <!-- PERLUMBAAN COP: senarai nama layak cabutan (dikemas kini sendiri setiap 15 saat) -->
+      <div>
+        <div class="glass-card rounded-2xl p-5 border border-emerald-500/40">
+          <div class="flex items-end justify-between gap-3 mb-3">
+            <div>
+              <h3 class="font-black text-emerald-300 text-base sm:text-lg">🏆 Senarai Layak Cabutan Bertuah</h3>
+              <p class="text-[11px] text-slate-400">Peserta yang telah lengkap 11 cop reruai</p>
+            </div>
+            <div class="text-right">
+              <p id="stageWallCount" class="text-3xl sm:text-4xl font-black text-emerald-400 leading-none">0</p>
+              <p class="text-[10px] text-slate-400 uppercase font-semibold">orang layak</p>
+            </div>
+          </div>
+          <!-- Senarai bergerak ke atas tanpa henti; kandungan digandakan supaya pusingan bersambung -->
+          <div id="stageQualifiedWall" class="wall-fade no-scrollbar max-h-[420px] overflow-hidden"></div>
+        </div>
+      </div>
+
       <!-- Kotak Visual Cabutan Semasa -->
       <div class="glass-card rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden shadow-2xl">
         <h2 class="text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-100 to-indigo-300">
@@ -443,7 +623,22 @@
           <h3 id="stageWinnerName" class="text-3xl sm:text-5xl font-black text-amber-300 my-3">---</h3>
           <p id="stageWinnerAgency" class="text-xs sm:text-sm text-cyan-200 font-mono">---</p>
         </div>
+
+        <!-- Kawalan cabutan live (skrin pentas hanya boleh dibuka oleh admin) -->
+        <div class="max-w-xl mx-auto flex flex-col items-center gap-3">
+          <button id="btnStageTriggerDraw" onclick="triggerLuckyDraw()" class="admin-draw-only w-full py-5 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black rounded-2xl text-xl sm:text-2xl tracking-wide shadow-2xl shadow-amber-500/30 active:scale-95 transition flex items-center justify-center gap-3">
+            <span class="text-2xl sm:text-3xl">🎰</span> PUTAR CABUTAN
+          </button>
+          <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-300">
+            <span>Baki dalam balang: <strong id="stageRemainingCount" class="text-emerald-400 font-mono">0</strong> orang</span>
+            <span class="admin-draw-only hidden sm:inline text-slate-500">Tekan <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-600 font-mono text-[10px]">Space</kbd> untuk putar</span>
+            <button onclick="toggleStageFullscreen()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold">⛶ Skrin Penuh</button>
+          </div>
+        </div>
       </div>
+
+      <!-- Pengumuman pop-up bila peserta baharu layak cabutan -->
+      <div id="stageQualifyToast" class="hidden fixed top-6 left-1/2 z-50 max-w-[90vw] px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 shadow-2xl shadow-emerald-500/40 border-2 border-white/60 text-center"></div>
 
       <!-- Jadual Pemenang Sah -->
       <div class="glass-card border-amber-500/30 rounded-2xl p-5">
@@ -455,7 +650,6 @@
                 <th class="py-2.5 px-3">Cabutan #</th>
                 <th class="py-2.5 px-3">Nama Pemenang</th>
                 <th class="py-2.5 px-3">Bahagian / Agensi</th>
-                <th class="py-2.5 px-3">Emel</th>
                 <th class="py-2.5 px-3 text-right">Status</th>
               </tr>
             </thead>
@@ -504,7 +698,7 @@
         </div>
 
         <!-- Sub-Navigasi Panel Admin -->
-        <div class="no-print border-b border-slate-700/80 pb-3 flex flex-wrap gap-2 text-xs">
+        <div class="admin-subnav no-print border-b border-slate-700/80 pb-3 flex flex-nowrap sm:flex-wrap gap-2 text-xs overflow-x-auto no-scrollbar">
           <button onclick="switchAdminSub('drawControl')" id="subBtnDraw" class="px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-amber-400">
             🎰 Kawalan Cabutan
           </button>
@@ -575,10 +769,74 @@
 
         <!-- SUB-TAB 1: PENGURUSAN PESERTA & GOODIES BERSEPADU -->
         <div id="adminParticipantsHubSection" class="hidden space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <!-- KAUNTER KEHADIRAN: cari nama/emel, tekan Sahkan Hadir (Enter jika tinggal seorang) -->
+          <div class="glass-card rounded-2xl p-5 border border-emerald-500/40">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>✅</span> Kaunter Pengesahan Kehadiran
+              </h3>
+              <span class="text-xs text-slate-300">Hadir: <strong id="attendCounterRatio" class="text-emerald-400 font-mono">0 / 0</strong></span>
+            </div>
+            <input type="text" id="attendSearchInput" autocomplete="off"
+              oninput="renderAttendanceCounter()" onkeydown="handleAttendSearchKey(event)"
+              placeholder="Taip nama atau emel peserta... (Enter = sahkan jika tinggal seorang)"
+              class="w-full bg-slate-950/80 border border-emerald-500/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono">
+            <div id="attendSearchResults" class="mt-3 space-y-2"></div>
+          </div>
+
+          <!-- PENGUNJUNG WALK-IN: jumlah kehadiran program sahaja; boleh dijadikan peserta jika ada kekosongan -->
+          <div class="glass-card rounded-2xl p-5 border border-violet-500/40">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+              <div>
+                <h3 class="text-sm font-bold text-white flex items-center gap-2"><span>🚶</span> Pengunjung Walk-in</h3>
+                <p class="text-[11px] text-slate-400">Tidak kumpul cop &amp; tidak layak cabutan. Tekan "Jadikan Peserta" jika ada peserta tidak hadir.</p>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-1.5">
+                  <p id="walkinActiveCount" class="text-lg font-black text-violet-300">0</p>
+                  <p class="text-[9px] text-slate-400 uppercase">Walk-in</p>
+                </div>
+                <div class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-1.5">
+                  <p id="walkinVacancyCount" class="text-lg font-black text-rose-300">0</p>
+                  <p class="text-[9px] text-slate-400 uppercase">Peserta Tak Hadir</p>
+                </div>
+                <div class="bg-slate-950/70 border border-emerald-500/40 rounded-xl px-3 py-1.5">
+                  <p id="programAttendanceTotal" class="text-lg font-black text-emerald-300">0</p>
+                  <p class="text-[9px] text-slate-400 uppercase">Jumlah Kehadiran</p>
+                </div>
+              </div>
+            </div>
+            <!-- Sandaran jika pengunjung tidak dapat imbas QR: admin daftarkan terus di kaunter -->
+            <details id="adminWalkinBox" class="mb-3 bg-slate-950/60 border border-violet-500/30 rounded-xl">
+              <summary class="cursor-pointer select-none px-4 py-2.5 text-xs font-bold text-violet-300">➕ Daftar Walk-in di Kaunter (jika pengunjung tidak dapat imbas QR)</summary>
+              <form onsubmit="handleAdminWalkinSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-2 px-4 pb-4 pt-1">
+                <select id="awTitle" required class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white"></select>
+                <input id="awName" type="text" required placeholder="Nama penuh" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                <input id="awEmail" type="email" required placeholder="Emel" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono">
+                <input id="awPhone" type="tel" required inputmode="numeric" maxlength="11" pattern="0[0-9]{8,10}"
+                  oninput="this.value = this.value.replace(/\D/g, '')" placeholder="No telefon (cth 0123456789)"
+                  class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono">
+                <select id="awAgency" required onchange="toggleAgencyOther('aw')" class="sm:col-span-2 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white"></select>
+                <input id="awAgencyOther" type="text" placeholder="Nyatakan bahagian / agensi / organisasi" class="hidden sm:col-span-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                <button id="awSubmitBtn" type="submit" class="sm:col-span-2 py-2.5 bg-violet-500 hover:bg-violet-400 text-white font-black rounded-lg text-xs disabled:opacity-60 disabled:cursor-wait">
+                  Simpan Pengunjung Walk-in
+                </button>
+              </form>
+            </details>
+            <input type="text" id="walkinSearchInput" oninput="renderWalkinPanel()" autocomplete="off"
+              placeholder="Cari nama, emel atau bahagian pengunjung walk-in..."
+              class="w-full bg-slate-950/80 border border-violet-500/40 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-violet-400 font-mono">
+            <div id="walkinList" class="mt-3 space-y-2 max-h-[320px] overflow-y-auto"></div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
             <div class="glass-card p-4 rounded-2xl text-center border-slate-700">
               <span class="text-[10px] text-slate-400 uppercase font-semibold">Jumlah Pendaftar</span>
               <p id="hubTotalCount" class="text-2xl font-black text-white mt-1">0</p>
+            </div>
+            <div class="glass-card p-4 rounded-2xl text-center border-emerald-500/40">
+              <span class="text-[10px] text-emerald-300 uppercase font-semibold">Hadir Disahkan</span>
+              <p id="hubAttendedCount" class="text-2xl font-black text-emerald-400 mt-1">0</p>
             </div>
             <div class="glass-card p-4 rounded-2xl text-center border-cyan-500/40">
               <span class="text-[10px] text-cyan-300 uppercase font-semibold">Layak 11 Cop</span>
@@ -594,18 +852,8 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="glass-card rounded-2xl p-5">
-              <h3 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                <span>✍️</span> Tambah Peserta Manual
-              </h3>
-              <form onsubmit="addParticipantManual(event)" class="space-y-3">
-                <input type="text" id="mName" required placeholder="Nama Penuh" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
-                <input type="email" id="mEmail" required placeholder="nama@motac.gov.my" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
-                <input type="text" id="mAgency" required placeholder="Bahagian / Agensi (cth: BPM)" class="w-full bg-slate-950/80 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
-                <button type="submit" class="w-full py-2 bg-gradient-to-r from-cyan-600 to-indigo-600 text-white rounded-lg text-xs font-bold">+ Tambah Peserta</button>
-              </form>
-            </div>
+          <!-- Peserta pra-daftar diimport dari Excel; pendaftar pada hari acara masuk sebagai walk-in -->
+          <div>
 
             <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
               <div>
@@ -665,6 +913,8 @@
               <div class="w-full md:w-auto flex gap-2">
                 <select id="hubFilterCategory" onchange="renderIntegratedParticipantsTable()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-400">
                   <option value="ALL">Semua Peserta</option>
+                  <option value="ATTENDED">Hadir Disahkan</option>
+                  <option value="NOT_ATTENDED">Belum Hadir</option>
                   <option value="QUALIFIED">Layak Goodies & Cabutan (11 Cop)</option>
                   <option value="GOODIES_UNCLAIMED">Belum Tebus Goodies Sahaja</option>
                   <option value="GOODIES_CLAIMED">Telah Tebus Goodies Sahaja</option>
@@ -684,6 +934,7 @@
                   <tr>
                     <th class="py-2.5 px-3">Nama Peserta</th>
                     <th class="py-2.5 px-3">Emel & Bahagian</th>
+                    <th class="py-2.5 px-3 text-center">Kehadiran</th>
                     <th class="py-2.5 px-3 text-center">Bil. Cop</th>
                     <th class="py-2.5 px-3 text-center">Maklum Balas</th>
                     <th class="py-2.5 px-3 text-center">Beg Cenderamata (Goodies)</th>
@@ -808,13 +1059,15 @@
           <div class="no-print glass-card rounded-2xl p-5 flex justify-between items-center">
             <div>
               <h3 class="font-bold text-white text-base">Cetakan Kad QR 11 Reruai Pempamer</h3>
-              <p class="text-xs text-slate-300">Format paparan meja bagi Lot 01 hingga Lot 11.</p>
+              <p class="text-xs text-slate-300">Kertas A4: setiap helaian ada 2 kad A5 yang sama bagi satu pempamer. Gunting di garisan putus-putus.</p>
             </div>
-            <button onclick="window.print()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 text-white font-bold rounded-xl text-xs">
-              🖨️ Cetak Semua Kad (A5 / A4)
+            <button onclick="printQRCards()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 text-white font-bold rounded-xl text-xs">
+              🖨️ Cetak Semua Kad (A4, 2 x A5)
             </button>
           </div>
-          <div id="printableQRCards" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+          <div class="overflow-x-auto pb-4">
+            <div id="printableQRCards" class="flex flex-wrap gap-6 justify-center"></div>
+          </div>
         </div>
 
         <!-- SUB-TAB 4: URUS AKAUN ADMIN -->
@@ -886,6 +1139,47 @@
     </div>
   </div>
 
+  <!-- MODAL: KEMASKINI PENGUNJUNG WALK-IN -->
+  <div id="walkinEditModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl max-w-md w-full p-6 text-left relative shadow-2xl border border-violet-500/40">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+        <h4 class="text-sm font-bold text-violet-300">✏️ Kemaskini Pengunjung Walk-in</h4>
+        <button onclick="closeWalkinEdit()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+      <form onsubmit="handleWalkinEditSubmit(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="ewOriginalEmail">
+        <div>
+          <label class="block text-violet-300 font-semibold mb-1">Gelaran</label>
+          <select id="ewTitle" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white"></select>
+        </div>
+        <div>
+          <label class="block text-violet-300 font-semibold mb-1">Nama Penuh</label>
+          <input type="text" id="ewName" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+        </div>
+        <div>
+          <label class="block text-violet-300 font-semibold mb-1">Emel</label>
+          <input type="email" id="ewEmail" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white font-mono">
+        </div>
+        <div>
+          <label class="block text-violet-300 font-semibold mb-1">No. Telefon Baharu <span class="text-slate-500 font-normal">(kosongkan untuk kekalkan no sedia ada)</span></label>
+          <input type="tel" id="ewPhone" inputmode="numeric" maxlength="11" pattern="0[0-9]{8,10}"
+            oninput="this.value = this.value.replace(/\D/g, '')" placeholder="Cth: 0123456789"
+            class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white font-mono">
+        </div>
+        <div>
+          <label class="block text-violet-300 font-semibold mb-1">Bahagian / Agensi</label>
+          <select id="ewAgency" required onchange="toggleAgencyOther('ew')" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white"></select>
+          <input type="text" id="ewAgencyOther" placeholder="Nyatakan bahagian / agensi / organisasi" class="hidden mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+        </div>
+        <p id="ewConvertedNote" class="hidden text-[11px] text-emerald-300">Pengunjung ini sudah dijadikan peserta. Maklumat peserta turut dikemas kini.</p>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex gap-2">
+          <button id="ewSubmitBtn" type="submit" class="flex-1 py-2.5 bg-violet-500 hover:bg-violet-400 text-white font-black rounded-xl text-xs disabled:opacity-60 disabled:cursor-wait">Simpan Perubahan</button>
+          <button type="button" onclick="closeWalkinEdit()" class="px-4 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs">Batal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: KEMASKINI MAKLUMAT PESERTA -->
   <div id="proxyModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="glass-card rounded-3xl max-w-md w-full p-6 text-left relative shadow-2xl border border-amber-500/40">
@@ -924,38 +1218,38 @@
 
   <!-- MODAL: BORANG 5 SOALAN MAKLUM BALAS -->
   <div id="feedbackModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
-    <div class="glass-card rounded-3xl max-w-lg w-full p-6 text-left relative shadow-2xl border border-cyan-400/50 my-8">
-      <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+    <!-- Tema cerah supaya mudah dibaca di telefon & di bawah cahaya terang -->
+    <div class="fb-light bg-white text-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-6 text-left relative shadow-2xl border-t-8 border-cyan-500 my-8">
+      <div class="flex justify-between items-start gap-3 mb-4 pb-3 border-b border-slate-200">
         <div>
-          <h4 class="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-indigo-200">
-            📝 Borang Maklum Balas Hari Pendigitalan MOTAC
-          </h4>
-          <p class="text-[11px] text-slate-400">Lengkapkan maklum balas di bawah untuk membuka e-Sijil.</p>
+          <h4 class="text-lg font-black text-slate-900 leading-snug">📝 Borang Maklum Balas Hari Pendigitalan MOTAC</h4>
+          <p class="text-sm text-slate-600 mt-1">Lengkapkan maklum balas di bawah untuk membuka e-Sijil.</p>
         </div>
-        <button onclick="closeFeedbackModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+        <button onclick="closeFeedbackModal()" class="shrink-0 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold">✕</button>
       </div>
 
-      <form id="feedbackForm" onsubmit="handleSurveySubmit(event)" class="space-y-4 text-xs">
+      <form id="feedbackForm" onsubmit="handleSurveySubmit(event)" class="space-y-5 text-sm">
         <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block font-semibold text-slate-200">1. Tahap kepuasan keseluruhan program:</label>
-            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          <div class="flex justify-between items-start gap-2 mb-2">
+            <label class="block font-bold text-slate-900">1. Tahap kepuasan keseluruhan program:</label>
+            <span class="fb-req">*Wajib</span>
           </div>
           <div class="grid grid-cols-5 gap-2 text-center">
-            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="1" required class="block mx-auto mb-1"> 1</label>
-            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="2" class="block mx-auto mb-1"> 2</label>
-            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="3" class="block mx-auto mb-1"> 3</label>
-            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="4" class="block mx-auto mb-1"> 4</label>
-            <label class="p-2 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer"><input type="radio" name="q1" value="5" class="block mx-auto mb-1"> 5</label>
+            <label class="fb-opt flex-col"><input type="radio" name="q1" value="1" required> 1</label>
+            <label class="fb-opt flex-col"><input type="radio" name="q1" value="2"> 2</label>
+            <label class="fb-opt flex-col"><input type="radio" name="q1" value="3"> 3</label>
+            <label class="fb-opt flex-col"><input type="radio" name="q1" value="4"> 4</label>
+            <label class="fb-opt flex-col"><input type="radio" name="q1" value="5"> 5</label>
           </div>
+          <div class="flex justify-between text-xs text-slate-500 mt-1 px-1"><span>Tidak Puas</span><span>Sangat Puas</span></div>
         </div>
 
         <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block font-semibold text-slate-200">2. Reruai paling bermanfaat & menarik minat anda:</label>
-            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          <div class="flex justify-between items-start gap-2 mb-2">
+            <label class="block font-bold text-slate-900">2. Reruai paling bermanfaat & menarik minat anda:</label>
+            <span class="fb-req">*Wajib</span>
           </div>
-          <select id="surveyQ2" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
+          <select id="surveyQ2" required class="fb-input">
             <option value="">-- Sila Pilih Reruai --</option>
             <option value="LOT 01 - Ace Team">LOT 01 - Ace Team</option>
             <option value="LOT 02 - Oreng">LOT 02 - Oreng</option>
@@ -972,52 +1266,49 @@
         </div>
 
         <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block font-semibold text-slate-200">3. Penilaian kelancaran web Cop Digital (1-5):</label>
-            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          <div class="flex justify-between items-start gap-2 mb-2">
+            <label class="block font-bold text-slate-900">3. Penilaian kelancaran web Cop Digital (1-5):</label>
+            <span class="fb-req">*Wajib</span>
           </div>
-          <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-700">
-            <span class="text-[11px] text-slate-400">Sukar</span>
-            <div class="flex gap-4">
-              <label><input type="radio" name="q3" value="1" required> 1</label>
-              <label><input type="radio" name="q3" value="2"> 2</label>
-              <label><input type="radio" name="q3" value="3"> 3</label>
-              <label><input type="radio" name="q3" value="4"> 4</label>
-              <label><input type="radio" name="q3" value="5"> 5</label>
-            </div>
-            <span class="text-[11px] text-emerald-400">Sangat Mudah</span>
+          <div class="grid grid-cols-5 gap-2 text-center">
+            <label class="fb-opt flex-col"><input type="radio" name="q3" value="1" required> 1</label>
+            <label class="fb-opt flex-col"><input type="radio" name="q3" value="2"> 2</label>
+            <label class="fb-opt flex-col"><input type="radio" name="q3" value="3"> 3</label>
+            <label class="fb-opt flex-col"><input type="radio" name="q3" value="4"> 4</label>
+            <label class="fb-opt flex-col"><input type="radio" name="q3" value="5"> 5</label>
+          </div>
+          <div class="flex justify-between text-xs text-slate-500 mt-1 px-1"><span>Sukar</span><span>Sangat Mudah</span></div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-start gap-2 mb-2">
+            <label class="block font-bold text-slate-900">4. Wajar dijadikan acara tahunan MOTAC?</label>
+            <span class="fb-req">*Wajib</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="fb-opt justify-start"><input type="radio" name="q4" value="Ya" required> Ya, Sangat Setuju</label>
+            <label class="fb-opt justify-start"><input type="radio" name="q4" value="Tidak"> Tidak Pasti / Tidak</label>
           </div>
         </div>
 
         <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block font-semibold text-slate-200">4. Wajar dijadikan acara tahunan MOTAC?</label>
-            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          <div class="flex justify-between items-start gap-2 mb-2">
+            <label class="block font-bold text-slate-900">5. Apakah proses kerja anda yang masih dijalankan secara manual dan wajar didigitalkan?</label>
+            <span class="fb-req">*Wajib</span>
           </div>
-          <div class="flex gap-6 mt-1">
-            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q4" value="Ya" required> Ya, Sangat Setuju</label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="q4" value="Tidak"> Tidak Pasti / Tidak</label>
-          </div>
+          <textarea id="surveyQ5" rows="3" required placeholder="Nyatakan proses kerja manual yang wajar didigitalkan..." class="fb-input"></textarea>
         </div>
 
         <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block font-semibold text-slate-200">5. Apakah proses kerja anda yang masih dijalankan secara manual dan wajar didigitalkan?</label>
-            <span class="text-[10px] text-rose-400 font-bold">*Wajib</span>
+          <div class="flex justify-between items-start gap-2 mb-2">
+            <label class="block font-bold text-slate-900">6. Cadangan penambahbaikan:</label>
+            <span class="shrink-0 text-xs text-slate-500">(Pilihan)</span>
           </div>
-          <textarea id="surveyQ5" rows="3" required placeholder="Nyatakan proses kerja manual yang wajar didigitalkan..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white"></textarea>
+          <textarea id="surveyQ6" rows="3" placeholder="Kongsi cadangan anda (jika ada)..." class="fb-input"></textarea>
         </div>
 
-        <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block font-semibold text-slate-200">6. Cadangan penambahbaikan:</label>
-            <span class="text-[10px] text-slate-400 font-normal">(Pilihan / Opsional)</span>
-          </div>
-          <textarea id="surveyQ6" rows="3" placeholder="Kongsi cadangan anda (jika ada)..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white"></textarea>
-        </div>
-
-        <div class="pt-3 border-t border-slate-800 flex gap-2">
-          <button type="submit" class="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-black rounded-xl text-xs transition shadow-lg">
+        <div class="pt-4 border-t border-slate-200">
+          <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-white font-black rounded-xl text-sm transition shadow-lg">
             Hantar Maklum Balas & Buka e-Sijil ➔
           </button>
         </div>
@@ -1057,7 +1348,7 @@
 
       <!-- Bahagian Atas: Jata Negara & Tajuk SIJIL PENYERTAAN -->
       <div class="relative z-20 pt-2 sm:pt-4">
-        <p class="relative -translate-y-6 sm:-translate-y-10 text-[9px] sm:text-[11px] font-sans font-bold tracking-[0.25em] text-cyan-200 uppercase">
+        <p class="relative -translate-y-1 sm:-translate-y-4 text-[9px] sm:text-[11px] font-sans font-bold tracking-[0.25em] text-cyan-200 uppercase">
           KEMENTERIAN PELANCONGAN, SENI DAN BUDAYA
         </p>
 
@@ -1075,7 +1366,7 @@
 
         <!-- Nama Penuh Peserta (HURUF BESAR) Sahaja -->
         <div class="my-2 sm:my-3 border-b-2 border-cyan-400/60 inline-block min-w-[75%] pb-1">
-          <h2 id="certRecipientName" class="text-xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-100 to-amber-200 uppercase font-sans tracking-wider">
+          <h2 id="certRecipientName" class="text-lg sm:text-2xl whitespace-nowrap font-black text-amber-300 uppercase font-sans tracking-wider">
             NAMA PESERTA
           </h2>
         </div>
@@ -1084,7 +1375,7 @@
         <div class="text-sm sm:text-base font-sans text-slate-200 max-w-xl mx-auto mt-2 leading-relaxed space-y-1">
           <p class="text-slate-300">telah menyertai</p>
           <p class="text-base sm:text-l font-black text-white tracking-wide">Hari Pendigitalan Kementerian Pelancongan, Seni dan Budaya (MOTAC) Tahun 2026</p>
-          <p class="text-cyan-200 italic font-medium">"Memacu Transformasi Digital MOTAC"</p>
+          <p class="text-cyan-200 font-medium">"Memacu Transformasi Digital MOTAC"</p>
           <p class="text-slate-300 pt-1">pada <span class="text-white font-bold">28 Oktober 2026</span></p>
           <p class="text-slate-300">Bertempat di <span class="text-white font-bold">Dewan Sanggar Pujangga, MOTAC</span></p>
         </div>
@@ -1126,14 +1417,30 @@
   </div>
 
   <!-- MODAL PENGIMBAS QR KAMERA -->
-  <div id="scannerModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-card rounded-3xl max-w-sm w-full p-5 text-center relative shadow-2xl">
-      <div class="flex justify-between items-center mb-3">
-        <h4 class="text-sm font-bold text-cyan-300">📷 Pengimbas Cop Digital</h4>
-        <button onclick="stopQRScanner()" class="text-slate-400 hover:text-white font-bold">✕</button>
+  <!-- Pengimbas QR reruai: hampir skrin penuh di telefon supaya ruang kamera besar -->
+  <div id="scannerModal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center p-2 sm:p-4">
+    <div class="w-full max-w-lg text-center relative">
+      <div class="flex justify-between items-center mb-3 px-2">
+        <h4 class="text-base font-bold text-cyan-300">📷 Imbas QR Reruai</h4>
+        <button onclick="stopQRScanner()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm">✕ Tutup</button>
       </div>
-      <div id="readerBox" class="w-full h-64 bg-black rounded-2xl overflow-hidden border border-cyan-500/40"></div>
-      <p class="text-[11px] text-slate-300 mt-3">Arahkan kamera ke kad QR di atas meja pempamer.</p>
+      <div id="readerBox" class="w-full aspect-square max-h-[75vh] mx-auto bg-black rounded-2xl overflow-hidden border-2 border-cyan-500/60"></div>
+      <p class="text-sm text-slate-200 mt-3">Halakan kamera ke kod QR di meja pempamer.<br>
+        <span class="text-xs text-slate-400">Jarak kira-kira 15–30 cm. Pastikan QR berada dalam kotak.</span></p>
+      <!-- Sandaran: dipaparkan HANYA bila kamera gagal dibuka / gagal mengesan QR (showScannerCodeBox) -->
+      <div id="scannerCodeBox" class="hidden mt-4 max-w-sm mx-auto p-3 rounded-xl bg-amber-950/60 border border-amber-500/50">
+        <p id="scannerCodeMsg" class="text-xs font-bold text-amber-300 mb-2"></p>
+        <button id="scannerRetryBtn" type="button" onclick="startQRScanner()" class="hidden w-full mb-2 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black rounded-lg text-xs">
+          📷 Benarkan Kamera &amp; Cuba Lagi
+        </button>
+        <p class="text-[11px] text-slate-300 mb-2">Atau minta <b>kod reruai</b> daripada pempamer dan masukkan di bawah:</p>
+        <form onsubmit="submitManualBoothCode(event, 'scannerCodeInput')" class="flex gap-2">
+          <input id="scannerCodeInput" type="text" required autocomplete="off" autocapitalize="characters" maxlength="12"
+            placeholder="Kod reruai (cth ACE606)"
+            class="flex-1 min-w-0 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white uppercase font-mono tracking-widest placeholder:normal-case placeholder:tracking-normal">
+          <button type="submit" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs">Sahkan</button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -1165,7 +1472,7 @@
       { name: "Nurfateenizati", email: "fatini@motac.gov.my", agency: "Bahagian Pengurusan Maklumat (BPM)", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
       { name: "Ahmad Faris", email: "faris@tourism.gov.my", agency: "Tourism Malaysia", stamps: [1, 2, 3], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
       { name: "Nurul Huda", email: "huda@heritage.gov.my", agency: "Jabatan Warisan Negara", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: true, certDownloaded: true, goodiesClaimed: true },
-      { name: "Mohd Khairul", email: "khairul@istanabudaya.gov.my", agency: "Istana Budaya", stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
+      { name: "Mohd Khairul", email: "khairul@istanabudaya.gov.my", agency: "Istana Budaya", stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false, attended: false, attendedAt: "" },
       { name: "Siti Khadijah Binti Ismail", email: "khadijah@motac.gov.my", agency: "Bahagian Dasar Pelancongan", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: true, certDownloaded: true, goodiesClaimed: false },
       { name: "Muhammad Zharif Bin Roslan", email: "zharif@motac.gov.my", agency: "Bahagian Pengurusan Maklumat (BPM)", stamps: [1, 2, 3, 4, 5, 6, 7, 8], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
       { name: "Ainul Mardhiah Binti Yusof", email: "ainul@tourism.gov.my", agency: "Tourism Malaysia", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
@@ -1173,17 +1480,20 @@
     ]; 
 
     const defaultAdmins = [
-      { name: "Pentadbir Utama BPM", user: "admin", pass: "admin1234" }
+      { name: "Super Admin", user: "superadmin", pass: "Motac@1234" },
+      { name: "Urus Setia BPM", user: "urusetia.bpm", pass: "Motac@1234" }
     ];
 
     let participants = JSON.parse(localStorage.getItem('motac_p_v28')) || defaultParticipants;
-    let adminAccounts = JSON.parse(localStorage.getItem('motac_admins_v28')) || defaultAdmins;
+    // Akaun admin sentiasa dari kod (bukan simpanan pelayar), supaya akaun lama tidak boleh digunakan lagi
+    let adminAccounts = defaultAdmins;
+    localStorage.removeItem('motac_admins_v28');
     let winnersList = JSON.parse(localStorage.getItem('motac_winners_v28')) || [];
     let feedbackResponses = JSON.parse(localStorage.getItem('motac_feedbacks_v28')) || [];
     let currentParticipantEmail = localStorage.getItem('motac_logged_email') || null;
     let activeAdminUser = sessionStorage.getItem('motac_active_admin') || null;
     let html5ScannerInstance = null;
-    let databaseWebAppUrl = localStorage.getItem('motac_apps_script_url_v3') || 'https://script.google.com/macros/s/AKfycbyqVKhfzvzcnjFM_qnaQ4ugdkvMD7acBaFrJhG0r22DLOYVi-gmYGeXpTduusOZfg/exec';
+    let databaseWebAppUrl = localStorage.getItem('motac_apps_script_url_v4') || 'https://script.google.com/macros/s/AKfycbwdkeZFSclUzx6S17Am13EZG_UTOpXWbvq8J1XxjSdkHJpRN3jBJpqvTQxNLTp3C39y/exec';
 
     const databaseUrlInput = document.getElementById('databaseWebAppUrl');
     if (databaseUrlInput) databaseUrlInput.value = databaseWebAppUrl;
@@ -1201,7 +1511,7 @@
 
     function reloadLocalState() {
       participants = JSON.parse(localStorage.getItem('motac_p_v28')) || defaultParticipants;
-      adminAccounts = JSON.parse(localStorage.getItem('motac_admins_v28')) || defaultAdmins;
+      adminAccounts = defaultAdmins;
       winnersList = JSON.parse(localStorage.getItem('motac_winners_v28')) || [];
       feedbackResponses = JSON.parse(localStorage.getItem('motac_feedbacks_v28')) || [];
     }
@@ -1214,7 +1524,6 @@
 
     function saveState() {
       localStorage.setItem('motac_p_v28', JSON.stringify(participants));
-      localStorage.setItem('motac_admins_v28', JSON.stringify(adminAccounts));
       localStorage.setItem('motac_winners_v28', JSON.stringify(winnersList));
       localStorage.setItem('motac_feedbacks_v28', JSON.stringify(feedbackResponses));
       if (currentParticipantEmail) {
@@ -1269,7 +1578,20 @@
       setOutbox(list);
     }
 
+    // Ramai telefon serentak: pelayan mungkin jawab "sibuk" (retry:true) atau Google pulangkan
+    // halaman ralat. Cuba semula segera sehingga 3 kali sebelum diserahkan kepada baris gilir.
     async function sendToDatabase(payload) {
+      for (let attempt = 1; ; attempt++) {
+        try {
+          return await sendToDatabaseOnce(payload);
+        } catch (err) {
+          if (err.permanent || attempt >= 3) throw err;
+          await new Promise(r => setTimeout(r, 1500 * attempt + Math.random() * 1000));
+        }
+      }
+    }
+
+    async function sendToDatabaseOnce(payload) {
       const body = JSON.stringify(payload);
       let response;
       try {
@@ -1286,13 +1608,12 @@
       try {
         result = JSON.parse(text);
       } catch (parseError) {
-        const err = new Error('Web App tidak memulangkan JSON. Semak Deploy: Execute as "Me" dan Who has access "Anyone".');
-        err.permanent = true;
-        throw err;
+        // Biasanya halaman ralat sementara Google (kuota / beban). Tidak dibuang: dicuba semula.
+        throw new Error('Google tidak menjawab dengan betul (mungkin sibuk). Akan dicuba semula.');
       }
       if (!result.ok) {
         const err = new Error(result.error || 'Pelayan menolak permintaan.');
-        err.permanent = true;
+        err.permanent = !result.retry; // retry:true = sistem sibuk, bukan data salah
         throw err;
       }
       return result;
@@ -1374,7 +1695,7 @@
         return;
       }
       databaseWebAppUrl = url;
-      localStorage.setItem('motac_apps_script_url_v3', url);
+      localStorage.setItem('motac_apps_script_url_v4', url);
       await initializeDatabase(true);
     }
 
@@ -1402,19 +1723,26 @@
         const result = await readDatabaseState();
         if (!result || !result.ok || !result.state) throw new Error(result?.error || 'Respons database tidak sah.');
         const state = result.state;
+        walkinList = Array.isArray(state.walkins) ? state.walkins : [];
+        renderWalkinPanel();
         if (state.participants && state.participants.length) {
+          // Apps Script lama tidak memulangkan medan "attended": status hadir tidak akan tersimpan
+          if (!state.participants.some(p => 'attended' in p)) warnOldAppsScript();
           participants = state.participants.map(person => ({
             ...person,
             email: String(person.email || '').trim().toLowerCase(),
             stamps: normalizeStamps(person.stamps),
             feedbackDone: normalizeBool(person.feedbackDone),
             certDownloaded: normalizeBool(person.certDownloaded),
-            goodiesClaimed: normalizeBool(person.goodiesClaimed)
+            goodiesClaimed: normalizeBool(person.goodiesClaimed),
+            attended: normalizeBool(person.attended),
+            attendedAt: person.attendedAt || ''
           }));
           feedbackResponses = state.feedbackResponses || [];
           winnersList = state.winnersList || [];
           saveState();
           refreshViews();
+          databaseLoadedOnce = true;
         } else if (seedWhenEmpty) {
           await pushAllToDatabase(true);
         }
@@ -1446,6 +1774,571 @@
     }
 
     // ==============================================================
+    // PENGUNJUNG WALK-IN: daftar sendiri melalui QR (?daftar=walkin).
+    // Dikira untuk jumlah kehadiran program sahaja: tidak kumpul cop & tidak masuk cabutan.
+    // Admin boleh jadikan peserta (CONVERT_WALKIN) jika ada peserta yang tidak hadir.
+    // ==============================================================
+    const WALKIN_MODE = new URLSearchParams(location.search).get('daftar') === 'walkin';
+    const WALKIN_CONVERTED = 'Dijadikan Peserta';
+
+    // Skrin Pentas untuk paparan awam (?paparan=pentas): baca sahaja, tanpa butang cabutan.
+    // Pemenang baharu yang dicabut oleh admin dipaparkan bila data disegerakkan (setiap 15 saat).
+    const PUBLIC_STAGE = new URLSearchParams(location.search).get('paparan') === 'pentas';
+    let publicWinnerCount = null;
+
+    function showPublicStage() {
+      ['viewUser', 'viewAdmin'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById('navUser').parentElement.classList.add('hidden'); // sembunyi menu navigasi
+      document.querySelectorAll('.admin-draw-only').forEach(el => el.remove());
+      document.getElementById('viewStage').classList.remove('hidden');
+    }
+
+    // Dipanggil oleh renderStageView: umumkan pemenang terbaharu di skrin awam
+    function announcePublicWinner() {
+      if (!PUBLIC_STAGE) return;
+      const n = winnersList.length;
+      if (publicWinnerCount === null || !databaseLoadedOnce) { publicWinnerCount = n; return; }
+      if (n <= publicWinnerCount) { publicWinnerCount = n; return; }
+      publicWinnerCount = n;
+      const w = winnersList[n - 1];
+      const badge = document.getElementById('stageWinnerBadge');
+      badge.innerText = `🎉 TAHNIAH PEMENANG CABUTAN #${n} 🎉`;
+      badge.className = "text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest animate-bounce";
+      document.getElementById('stageWinnerName').innerText = w.name;
+      document.getElementById('stageWinnerAgency').innerText = w.agency || '';
+      confetti({ particleCount: 170, spread: 90, origin: { y: 0.6 } });
+    }
+    const WALKIN_TITLES = ['Encik', 'Puan', 'Cik', 'Tuan', 'Dr.', 'Ir.', 'Ts.', 'Haji', 'Hajah',
+      'Prof.', 'Prof. Madya', "Dato'", 'Datuk', 'Datin', "Dato' Sri", 'Tan Sri', 'Puan Sri'];
+    let walkinList = []; // dari GET_STATE (tanpa no telefon)
+
+    function isWalkinActive(w) { return w.status !== WALKIN_CONVERTED; }
+
+    // Senarai Bahagian / Agensi untuk borang walk-in (dikumpul ikut kategori dalam dropdown)
+    const WALKIN_AGENCIES = {
+      'Pejabat Pengurusan Tertinggi': [
+        'Pejabat Menteri', 'Pejabat Timbalan Menteri', 'Pejabat Ketua Setiausaha',
+        'Pejabat Timbalan Ketua Setiausaha (Pelancongan)', 'Pejabat Timbalan Ketua Setiausaha (Kebudayaan)',
+        'Pejabat Timbalan Ketua Setiausaha (Pengurusan)'
+      ],
+      'Bahagian & Unit': [
+        'Bahagian Dasar Pelancongan dan Hubungan Antarabangsa', 'Bahagian Dasar Kebudayaan',
+        'Bahagian Hubungan Antarabangsa Kebudayaan', 'Bahagian Pembangunan Industri', 'Bahagian Pengurusan Acara',
+        'Bahagian Kewangan', 'Bahagian Pentadbiran', 'Bahagian Akaun', 'Bahagian Pelesenan dan Penguatkuasaan Pelancongan',
+        'Bahagian Pengurusan Maklumat', 'Bahagian Pengurusan Sumber Manusia', 'Bahagian Pembangunan Prasarana',
+        'Pusat Pelancongan Malaysia (MaTiC)', 'Unit Komunikasi Korporat', 'Unit Perundangan', 'Unit Audit Dalam',
+        'Unit Integriti', 'Unit Petunjuk Prestasi Utama & Pemerkasaan Agenda Bumiputera',
+        'One Stop Centre Malaysia My Second Home (OSC MM2H)'
+      ],
+      'MOTAC Negeri': [
+        'MOTAC Perlis', 'MOTAC Kedah', 'MOTAC Pulau Pinang', 'MOTAC Perak', 'MOTAC Selangor', 'MOTAC Melaka',
+        'MOTAC Negeri Sembilan', 'MOTAC Johor', 'MOTAC Kelantan', 'MOTAC Terengganu', 'MOTAC Pahang',
+        'MOTAC Sarawak', 'MOTAC Sabah', 'MOTAC W.P Kuala Lumpur/Putrajaya', 'MOTAC W.P Labuan'
+      ],
+      'Jabatan & Agensi': [
+        'Lembaga Penggalakan Pelancongan Malaysia', 'Jabatan Warisan Negara', 'Jabatan Kebudayaan dan Kesenian Negara',
+        'Istana Budaya', 'Akademi Seni Budaya dan Warisan Kebangsaan', 'Perbadanan Kemajuan Kraftangan Malaysia',
+        'Lembaga Pembangunan Seni Visual Negara', 'Pusat Pelancongan Islam'
+      ]
+    };
+
+    function fillWalkinTitles(selectId) {
+      document.getElementById(selectId).innerHTML = '<option value="">Pilih gelaran</option>' +
+        WALKIN_TITLES.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+    }
+
+    function fillWalkinAgencies(selectId) {
+      document.getElementById(selectId).innerHTML = '<option value="">Pilih bahagian / agensi</option>' +
+        Object.entries(WALKIN_AGENCIES).map(([group, list]) =>
+          `<optgroup label="${escapeHtml(group)}">${list.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('')}</optgroup>`
+        ).join('') +
+        `<option value="${AGENCY_OTHER}">${AGENCY_OTHER} (nyatakan)</option>`;
+    }
+
+    // "Lain-lain": tunjuk kotak teks untuk pengunjung taip sendiri (prefix: 'walkin' atau 'aw')
+    const AGENCY_OTHER = 'Lain-lain';
+    function toggleAgencyOther(prefix) {
+      const isOther = document.getElementById(prefix + 'Agency').value === AGENCY_OTHER;
+      const other = document.getElementById(prefix + 'AgencyOther');
+      other.classList.toggle('hidden', !isOther);
+      other.required = isOther;
+      if (isOther) other.focus();
+      else other.value = '';
+    }
+
+    function showWalkinPage() {
+      ['viewUser', 'viewStage', 'viewAdmin'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById('navUser').parentElement.classList.add('hidden'); // sembunyi menu navigasi
+      fillWalkinTitles('walkinTitle');
+      fillWalkinAgencies('walkinAgency');
+      document.getElementById('viewWalkin').classList.remove('hidden');
+    }
+
+    function showWalkinDone(text) {
+      document.getElementById('walkinFormBox').classList.add('hidden');
+      document.getElementById('walkinDoneText').innerText = text;
+      document.getElementById('walkinDoneBox').classList.remove('hidden');
+    }
+
+    // Kiosk: kosongkan borang supaya pengunjung seterusnya boleh terus mendaftar
+    function resetWalkinForm() {
+      ['walkinTitle', 'walkinName', 'walkinEmail', 'walkinPhone', 'walkinAgency']
+        .forEach(id => document.getElementById(id).value = '');
+      toggleAgencyOther('walkin');
+      document.getElementById('walkinDoneBox').classList.add('hidden');
+      document.getElementById('walkinFormBox').classList.remove('hidden');
+      window.scrollTo(0, 0);
+      document.getElementById('walkinTitle').focus();
+    }
+
+    // Baca borang walk-in (prefix: 'walkin' = borang pengunjung, 'aw' = borang admin)
+    // Huruf besar di awal setiap perkataan (emel TIDAK diformat).
+    // Nama: "SITI aminah  binti ALI" -> "Siti Aminah Binti Ali", "a/l" -> "A/L"
+    function formatName(text) {
+      return String(text ?? '').trim().replace(/\s+/g, ' ').toLowerCase()
+        .replace(/(^|[\s\-\/(.])(\p{L})/gu, (m, sep, ch) => sep + ch.toUpperCase());
+    }
+
+    // Bahagian/agensi: jika ditaip semua huruf besar atau semua huruf kecil, format penuh seperti nama.
+    // Jika bercampur (cth "Bahagian Pengurusan Maklumat (BPM)", "MOTAC Perak"), singkatan dikekalkan
+    // dan hanya huruf awal setiap perkataan dibesarkan. Singkatan biasa sentiasa dikekalkan.
+    const AGENCY_ACRONYMS = ['MOTAC', 'BPM', 'MaTiC', 'OSC', 'MM2H', 'JKKN', 'ASWARA', 'ICT', 'KL', 'W.P', 'MyDigitalID'];
+    function formatAgency(text) {
+      const t = String(text ?? '').trim().replace(/\s+/g, ' ');
+      const out = (t === t.toUpperCase() || t === t.toLowerCase())
+        ? formatName(t)
+        : t.replace(/(^|[\s\-\/(])(\p{L})/gu, (m, sep, ch) => sep + ch.toUpperCase());
+      return AGENCY_ACRONYMS.reduce((s, a) =>
+        s.replace(new RegExp(`(^|[^\\p{L}])${a.replace('.', '\\.')}(?=[^\\p{L}]|$)`, 'giu'), (m, sep) => sep + a), out);
+    }
+
+    function readWalkinForm(prefix) {
+      const v = id => document.getElementById(prefix + id).value;
+      const walkin = {
+        title: v('Title'),
+        name: formatName(v('Name')),
+        email: v('Email').trim().toLowerCase(),
+        phone: v('Phone').replace(/\D/g, ''),
+        agency: formatAgency(v('Agency') === AGENCY_OTHER ? v('AgencyOther') : v('Agency'))
+      };
+      if (!/^0\d{8,10}$/.test(walkin.phone)) {
+        alert("No telefon tidak sah. Masukkan nombor sahaja, bermula dengan 0 (9-11 digit).");
+        return null;
+      }
+      return walkin;
+    }
+
+    // Hantar ke Sheet. Pulangkan 'ok', 'dupWalkin', 'dupPeserta' atau mesej ralat
+    async function submitWalkin(walkin) {
+      try {
+        await postDatabase('REGISTER_WALKIN', { walkin }, true);
+        return 'ok';
+      } catch (error) {
+        const msg = String(error.message || error);
+        if (msg.startsWith('DAH_WALKIN')) return 'dupWalkin';
+        if (msg.startsWith('DAH_PESERTA')) return 'dupPeserta';
+        return msg;
+      }
+    }
+
+    async function handleWalkinSubmit(e) {
+      e.preventDefault();
+      const walkin = readWalkinForm('walkin');
+      if (!walkin) return;
+      const btn = document.getElementById('walkinSubmitBtn');
+      btn.disabled = true;
+      btn.innerText = 'Menyimpan...';
+      const result = await submitWalkin(walkin);
+      btn.disabled = false;
+      btn.innerText = 'Rekod Kehadiran Saya ➔';
+      if (result === 'ok') {
+        showWalkinDone(`${walkin.title} ${walkin.name}, kehadiran anda ke Hari Pendigitalan MOTAC 2026 telah direkodkan.`);
+      } else if (result === 'dupWalkin') {
+        showWalkinDone('Kehadiran anda dengan emel ini sudah direkodkan sebelum ini.');
+      } else if (result === 'dupPeserta') {
+        // Kekal di borang (sesuai untuk kiosk); peserta berdaftar perlu ke kaunter pengesahan
+        alert('Emel ini sudah berdaftar sebagai PESERTA program.\n\nSila ke Kaunter Urus Setia untuk pengesahan kehadiran, kemudian log masuk di Cop Digital Peserta.');
+        resetWalkinForm();
+      } else {
+        alert(`Pendaftaran belum berjaya. Sila cuba semula.\n(${result})`);
+      }
+    }
+
+    // Admin daftarkan pengunjung walk-in di kaunter (sandaran jika tidak dapat imbas QR)
+    async function handleAdminWalkinSubmit(e) {
+      e.preventDefault();
+      const walkin = readWalkinForm('aw');
+      if (!walkin) return;
+      const btn = document.getElementById('awSubmitBtn');
+      btn.disabled = true;
+      btn.innerText = 'Menyimpan...';
+      const result = await submitWalkin(walkin);
+      btn.disabled = false;
+      btn.innerText = 'Simpan Pengunjung Walk-in';
+      if (result === 'ok') {
+        walkinList.push({ registeredAt: new Date().toLocaleString('ms-MY'), title: walkin.title, name: walkin.name,
+          email: walkin.email, agency: walkin.agency, status: 'Walk-in', convertedAt: '' });
+        ['awTitle', 'awName', 'awEmail', 'awPhone', 'awAgency'].forEach(id => document.getElementById(id).value = '');
+        toggleAgencyOther('aw');
+        renderWalkinPanel();
+        showWalkinAdminMsg(`✅ ${walkin.name} direkodkan sebagai pengunjung walk-in.`);
+        document.getElementById('awTitle').focus();
+      } else if (result === 'dupWalkin') {
+        alert(`${walkin.email} sudah direkodkan sebagai pengunjung walk-in.`);
+      } else if (result === 'dupPeserta') {
+        alert(`${walkin.email} ialah PESERTA berdaftar. Sahkan kehadirannya di Kaunter Pengesahan Kehadiran di atas.`);
+      } else {
+        alert(`❌ Gagal simpan: ${result}`);
+      }
+    }
+
+    function showWalkinAdminMsg(text) {
+      const box = document.getElementById('walkinList');
+      box.insertAdjacentHTML('afterbegin', `<p class="text-xs font-bold text-emerald-400">${escapeHtml(text)}</p>`);
+    }
+
+    function renderWalkinPanel() {
+      const box = document.getElementById('walkinList');
+      if (!box) return;
+      if (!document.getElementById('awTitle').options.length) fillWalkinTitles('awTitle');
+      if (!document.getElementById('awAgency').options.length) fillWalkinAgencies('awAgency');
+      const active = walkinList.filter(isWalkinActive);
+      const absent = participants.filter(p => !isAttended(p)).length;
+      document.getElementById('walkinActiveCount').innerText = active.length;
+      document.getElementById('walkinVacancyCount').innerText = absent;
+      // Walk-in yang sudah dijadikan peserta dikira sekali sahaja (sebagai peserta hadir)
+      document.getElementById('programAttendanceTotal').innerText = participants.filter(isAttended).length + active.length;
+
+      const q = (document.getElementById('walkinSearchInput').value || '').trim().toLowerCase();
+      const list = walkinList
+        .filter(w => !q || [w.name, w.email, w.agency].some(v => String(v || '').toLowerCase().includes(q)))
+        .sort((a, b) => isWalkinActive(b) - isWalkinActive(a)); // walk-in aktif dahulu
+      if (!list.length) {
+        box.innerHTML = `<p class="text-center py-6 text-xs text-slate-500">${walkinList.length ? 'Tiada pengunjung sepadan.' : 'Belum ada pengunjung walk-in. Cetak kad QR pendaftaran walk-in di tab "Cetakan Kad QR".'}</p>`;
+        return;
+      }
+      box.innerHTML = list.map(w => `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl border ${isWalkinActive(w) ? 'bg-slate-950/70 border-slate-700' : 'bg-emerald-950/30 border-emerald-500/30'}">
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-white truncate">${escapeHtml([w.title, w.name].filter(Boolean).join(' '))}</p>
+            <p class="text-[11px] text-cyan-300 font-mono truncate">${escapeHtml(w.email)} · <span class="text-slate-400">${escapeHtml(w.agency)}</span></p>
+            <p class="text-[10px] text-slate-500">Daftar: ${escapeHtml(w.registeredAt || '-')}</p>
+          </div>
+          ${isWalkinActive(w)
+            ? `<div class="shrink-0 flex gap-2">
+                 <button onclick="openWalkinEdit('${escapeHtml(w.email)}')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-violet-300 font-bold rounded-lg text-[11px]">✏️ Edit</button>
+                 <button onclick="convertWalkin('${escapeHtml(w.email)}')" class="px-3 py-1.5 bg-violet-500 hover:bg-violet-400 text-white font-black rounded-lg text-[11px]">Jadikan Peserta</button>
+                 <button onclick="deleteWalkin('${escapeHtml(w.email)}')" class="px-2 py-1.5 text-rose-400 hover:text-rose-300 text-[11px]">Padam</button>
+               </div>`
+            : (() => {
+                // Batal hanya dibenarkan jika belum kumpul cop & belum menang (sama seperti semakan pelayan)
+                const p = findParticipant(w.email);
+                const locked = p && (p.stamps.length > 0 || isWinner(p));
+                return `<div class="shrink-0 flex items-center gap-2">
+                  <span class="text-[11px] font-bold text-emerald-400">Peserta ✓</span>
+                  <button onclick="openWalkinEdit('${escapeHtml(w.email)}')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-violet-300 font-bold rounded-lg text-[11px]">✏️ Edit</button>
+                  ${locked
+                    ? `<span class="text-[10px] text-slate-500" title="Sudah kumpul cop atau menang cabutan">🔒 Tidak boleh dibatalkan</span>`
+                    : `<button onclick="revertWalkin('${escapeHtml(w.email)}')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-amber-300 font-bold rounded-lg text-[11px]">↩ Batal, kembali ke walk-in</button>`}
+                </div>`;
+              })()}
+        </div>`).join('');
+    }
+
+    async function convertWalkin(email) {
+      const w = walkinList.find(x => x.email === email);
+      if (!w) return;
+      const absent = participants.filter(p => !isAttended(p)).length;
+      if (!confirm(`⚠️ PASTIKAN PENGUNJUNG BERSETUJU menjadi peserta sebelum meneruskan.\n\n` +
+        `Jadikan ${w.name} sebagai PESERTA?\n\nPeserta tidak hadir sekarang: ${absent} orang.\n` +
+        `Selepas ini, ${w.name} terus disahkan hadir dan boleh kumpul cop & masuk cabutan dengan log masuk menggunakan emel ${w.email}.\n\n` +
+        `Jika tersilap, boleh dibatalkan selagi belum kumpul sebarang cop.`)) return;
+      try {
+        await postDatabase('CONVERT_WALKIN', { email, admin: activeAdminUser || '' }, true);
+      } catch (error) {
+        alert(`❌ Gagal jadikan peserta: ${error.message}`);
+        return;
+      }
+      if (!findParticipant(email)) {
+        participants.push({ name: w.name, email, agency: w.agency, stamps: [], feedbackDone: false,
+          certDownloaded: false, goodiesClaimed: false, attended: true, attendedAt: new Date().toLocaleString('ms-MY') });
+      }
+      w.status = WALKIN_CONVERTED;
+      saveState();
+      rerenderAttendanceViews();
+      alert(`✅ ${w.name} kini peserta dan telah disahkan hadir.`);
+    }
+
+    // Batal "Jadikan Peserta": rekod peserta dibuang, status kembali kepada walk-in
+    async function revertWalkin(email) {
+      const w = walkinList.find(x => x.email === email);
+      if (!w) return;
+      const p = findParticipant(email);
+      if (p && (p.stamps.length > 0 || isWinner(p))) {
+        alert(`${w.name} sudah mengumpul cop atau memenangi cabutan. Tidak boleh dibatalkan.`);
+        return;
+      }
+      if (!confirm(`Batalkan ${w.name} sebagai peserta?\n\nRekod peserta akan dibuang dan ${w.name} kembali sebagai pengunjung walk-in (masih dikira dalam jumlah kehadiran, tetapi tidak kumpul cop & tidak masuk cabutan).`)) return;
+      try {
+        await postDatabase('REVERT_WALKIN', { email }, true);
+      } catch (error) {
+        alert(`❌ Gagal batalkan: ${error.message}`);
+        return;
+      }
+      participants = participants.filter(x => x.email.toLowerCase() !== email.toLowerCase());
+      feedbackResponses = feedbackResponses.filter(f => f.email.toLowerCase() !== email.toLowerCase());
+      w.status = 'Walk-in';
+      w.convertedAt = '';
+      saveState();
+      rerenderAttendanceViews();
+      alert(`✅ ${w.name} kembali sebagai pengunjung walk-in.`);
+    }
+
+    // Kemaskini maklumat pengunjung walk-in (no telefon tidak dihantar ke pelayar: kosong = kekal)
+    function openWalkinEdit(email) {
+      const w = walkinList.find(x => x.email === email);
+      if (!w) return;
+      fillWalkinTitles('ewTitle');
+      fillWalkinAgencies('ewAgency');
+      const titleSel = document.getElementById('ewTitle');
+      if (w.title && ![...titleSel.options].some(o => o.value === w.title)) titleSel.add(new Option(w.title, w.title));
+      titleSel.value = w.title || '';
+      const agencySel = document.getElementById('ewAgency');
+      const known = [...agencySel.options].some(o => o.value === w.agency && o.value !== AGENCY_OTHER);
+      agencySel.value = known ? w.agency : (w.agency ? AGENCY_OTHER : '');
+      toggleAgencyOther('ew');
+      document.getElementById('ewAgencyOther').value = known ? '' : (w.agency || '');
+      document.getElementById('ewOriginalEmail').value = w.email;
+      document.getElementById('ewName').value = w.name || '';
+      document.getElementById('ewEmail').value = w.email || '';
+      document.getElementById('ewPhone').value = '';
+      document.getElementById('ewConvertedNote').classList.toggle('hidden', isWalkinActive(w));
+      document.getElementById('walkinEditModal').classList.remove('hidden');
+    }
+
+    function closeWalkinEdit() {
+      document.getElementById('walkinEditModal').classList.add('hidden');
+    }
+
+    async function handleWalkinEditSubmit(e) {
+      e.preventDefault();
+      const originalEmail = document.getElementById('ewOriginalEmail').value;
+      const w = walkinList.find(x => x.email === originalEmail);
+      if (!w) return;
+      const v = id => document.getElementById(id).value;
+      const walkin = {
+        title: v('ewTitle'),
+        name: formatName(v('ewName')),
+        email: v('ewEmail').trim().toLowerCase(),
+        phone: v('ewPhone').replace(/\D/g, ''),
+        agency: formatAgency(v('ewAgency') === AGENCY_OTHER ? v('ewAgencyOther') : v('ewAgency'))
+      };
+      if (walkin.phone && !/^0\d{8,10}$/.test(walkin.phone)) {
+        alert("No telefon tidak sah. Masukkan nombor sahaja, bermula dengan 0 (9-11 digit), atau kosongkan.");
+        return;
+      }
+      const btn = document.getElementById('ewSubmitBtn');
+      btn.disabled = true;
+      btn.innerText = 'Menyimpan...';
+      try {
+        await postDatabase('UPDATE_WALKIN', { originalEmail, walkin }, true);
+      } catch (error) {
+        alert(`❌ Gagal kemaskini: ${error.message}`);
+        return;
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Simpan Perubahan';
+      }
+      // Jika sudah dijadikan peserta, kemas kini rekod peserta dalam pelayar juga
+      if (!isWalkinActive(w)) {
+        const p = findParticipant(originalEmail);
+        if (p) Object.assign(p, { name: walkin.name, email: walkin.email, agency: walkin.agency });
+        saveState();
+      }
+      Object.assign(w, { title: walkin.title, name: walkin.name, email: walkin.email, agency: walkin.agency });
+      closeWalkinEdit();
+      rerenderAttendanceViews();
+      alert(`✅ Maklumat ${walkin.name} telah dikemas kini.`);
+    }
+
+    async function deleteWalkin(email) {
+      if (!confirm(`Padam rekod pengunjung walk-in ${email}?`)) return;
+      try {
+        await postDatabase('DELETE_WALKIN', { email }, true);
+      } catch (error) {
+        alert(`❌ Gagal padam: ${error.message}`);
+        return;
+      }
+      walkinList = walkinList.filter(w => w.email !== email);
+      renderWalkinPanel();
+    }
+
+    // ==============================================================
+    // KEHADIRAN: admin sahkan di kaunter sebelum peserta boleh kumpul cop
+    // ==============================================================
+    function isAttended(p) { return !!(p && p.attended); }
+
+    // Amaran sekali sahaja kepada admin jika URL Web App masih menghala ke Apps Script lama
+    let oldAppsScriptWarned = false;
+    function warnOldAppsScript() {
+      const msg = 'AMARAN: Apps Script yang disambung ialah versi lama (tiada sokongan kehadiran). Pengesahan kehadiran tidak akan tersimpan. Deploy Code.gs baharu dan kemas kini URL Web App.';
+      updateDatabaseStatus(msg);
+      if (oldAppsScriptWarned || !activeAdminUser) return;
+      oldAppsScriptWarned = true;
+      alert('⚠️ ' + msg + '\n\nURL semasa:\n' + databaseWebAppUrl);
+    }
+
+    function findParticipant(email) {
+      const key = String(email || '').toLowerCase();
+      return participants.find(p => p.email.toLowerCase() === key);
+    }
+
+    // Telefon peserta semak Sheet secara berkala:
+    // - belum disahkan hadir: setiap 10 saat, supaya skrin terbuka sendiri selepas admin sahkan
+    // - layak cabutan (hadir + 11 cop, belum menang): setiap 20 saat, supaya peserta terus
+    //   tahu bila namanya dicabut di pentas
+    const ATTENDANCE_POLL_MS = 10000;
+    const WINNER_POLL_EVERY = 2; // 2 x 10 saat = 20 saat
+    let attendanceChecking = false;
+    let pollTick = 0;
+
+    function isWinner(user) {
+      return !!user && winnersList.some(w => w.email.toLowerCase() === user.email.toLowerCase());
+    }
+
+    async function checkAttendanceNow() {
+      if (attendanceChecking || !databaseWebAppUrl) return;
+      attendanceChecking = true;
+      const wonBefore = isWinner(findParticipant(currentParticipantEmail));
+      try {
+        await initializeDatabase(false);
+      } finally {
+        attendanceChecking = false;
+      }
+      // Hanya raikan bila status berubah semasa skrin dibuka, bukan setiap kali halaman dimuat
+      const user = findParticipant(currentParticipantEmail);
+      if (!wonBefore && isWinner(user)) celebrateParticipantWin(user);
+    }
+
+    function celebrateParticipantWin(user) {
+      if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 600]);
+      const end = Date.now() + 3000;
+      (function burst() {
+        confetti({ particleCount: 60, spread: 100, origin: { x: Math.random(), y: 0.4 } });
+        if (Date.now() < end) setTimeout(burst, 250);
+      })();
+      document.getElementById('bigRemarkQualified').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => alert(`🎉 TAHNIAH ${user.name}!\n\nAnda telah memenangi Cabutan Bertuah Hari Pendigitalan MOTAC.\nSila ke pentas / Kaunter Urus Setia untuk menuntut hadiah.`), 800);
+    }
+
+    setInterval(() => {
+      if (document.hidden || !currentParticipantEmail) return;
+      if (document.getElementById('viewUser').classList.contains('hidden')) return;
+      const user = findParticipant(currentParticipantEmail);
+      if (!user) return;
+      pollTick++;
+      if (!isAttended(user)) checkAttendanceNow();
+      else if (user.stamps.length === 11 && !isWinner(user) && pollTick % WINNER_POLL_EVERY === 0) checkAttendanceNow();
+    }, ATTENDANCE_POLL_MS);
+
+    function setAttendance(email, attended) {
+      const user = findParticipant(email);
+      if (!user) return;
+      if (!attended && !confirm(`Batalkan pengesahan kehadiran ${user.name}?`)) return;
+      const before = { attended: user.attended, attendedAt: user.attendedAt };
+      user.attended = attended;
+      user.attendedAt = attended ? new Date().toLocaleString('ms-MY') : '';
+      saveState();
+      rerenderAttendanceViews();
+
+      const payload = { email: user.email, attended, admin: activeAdminUser || '' };
+      postDatabase('SET_ATTENDANCE', payload, true).catch(error => {
+        console.error('[MOTAC Kehadiran]', error);
+        if (!error.permanent) {
+          // Tiada internet / Google lambat: simpan dalam baris gilir, dicuba semula sendiri
+          queueOutbox({ action: 'SET_ATTENDANCE', ...payload });
+          updateDatabaseStatus(`Kehadiran belum dihantar (${error.message}). ${getOutbox().length} perubahan akan dicuba semula secara automatik.`);
+          return;
+        }
+        // Pelayan menolak (cth Apps Script lama tiada SET_ATTENDANCE): pulihkan status asal
+        // supaya admin tidak sangka kehadiran sudah tersimpan
+        Object.assign(user, before);
+        saveState();
+        rerenderAttendanceViews();
+        alert(`❌ Kehadiran ${user.name} TIDAK tersimpan dalam Google Sheet.\n\n${error.message}\n\n` +
+          `Jika mesej menyebut "Tindakan tidak dikenali", Apps Script yang disambung masih versi lama. ` +
+          `Deploy Code.gs baharu dan kemas kini URL Web App dalam sistem.`);
+      });
+    }
+
+    function rerenderAttendanceViews() {
+      renderIntegratedParticipantsTable();
+      renderStageView();
+      renderUserView();
+    }
+
+    // Sahkan dari kotak Kaunter Kehadiran: kosongkan carian supaya admin terus taip peserta seterusnya
+    function confirmAttendanceFromCounter(email) {
+      const user = findParticipant(email);
+      if (!user) return;
+      setAttendance(user.email, true);
+      const input = document.getElementById('attendSearchInput');
+      input.value = '';
+      renderAttendanceCounter(`✅ ${user.name} disahkan hadir.`);
+      input.focus();
+    }
+
+    function attendanceMatches() {
+      const q = (document.getElementById('attendSearchInput')?.value || '').trim().toLowerCase();
+      if (!q) return [];
+      return participants
+        .filter(p => p.name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
+        .sort((a, b) => isAttended(a) - isAttended(b)); // belum hadir dahulu
+    }
+
+    function renderAttendanceCounter(message = '') {
+      const box = document.getElementById('attendSearchResults');
+      if (!box) return;
+      const attendedCount = participants.filter(isAttended).length;
+      document.getElementById('attendCounterRatio').innerText = `${attendedCount} / ${participants.length}`;
+
+      const q = document.getElementById('attendSearchInput').value.trim();
+      if (!q) {
+        box.innerHTML = message
+          ? `<p class="text-xs font-bold text-emerald-400">${escapeHtml(message)}</p>`
+          : `<p class="text-[11px] text-slate-500">Taip sekurang-kurangnya 2-3 huruf nama atau emel.</p>`;
+        return;
+      }
+      const list = attendanceMatches();
+      if (!list.length) {
+        box.innerHTML = `<p class="text-xs text-amber-400">Tiada peserta sepadan. Jika belum berdaftar, daftarkan sebagai Pengunjung Walk-in di bawah, kemudian tekan \"Jadikan Peserta\".</p>`;
+        return;
+      }
+      box.innerHTML = list.slice(0, 8).map(p => `
+        <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl border ${isAttended(p) ? 'bg-emerald-950/40 border-emerald-500/30' : 'bg-slate-950/70 border-slate-700'}">
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-white truncate">${escapeHtml(p.name)}</p>
+            <p class="text-[11px] text-cyan-300 font-mono truncate">${escapeHtml(p.email)} · <span class="text-slate-400">${escapeHtml(p.agency)}</span></p>
+          </div>
+          ${isAttended(p)
+            ? `<span class="shrink-0 text-[11px] font-bold text-emerald-400">Hadir ✓</span>`
+            : `<button onclick="confirmAttendanceFromCounter('${escapeHtml(p.email)}')" class="shrink-0 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs active:scale-95 transition">Sahkan Hadir</button>`}
+        </div>
+      `).join('') + (list.length > 8 ? `<p class="text-[11px] text-slate-500">+${list.length - 8} lagi. Taip lebih spesifik.</p>` : '');
+    }
+
+    function handleAttendSearchKey(e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const pending = attendanceMatches().filter(p => !isAttended(p));
+      if (pending.length === 1) confirmAttendanceFromCounter(pending[0].email);
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+    }
+
+    // ==============================================================
     // 2. LOGIK KEMAJUAN TINDAKAN PESERTA
     // ==============================================================
     function handleUserLogin(e) {
@@ -1459,6 +2352,8 @@
       currentParticipantEmail = user.email;
       saveState();
       renderUserView();
+      // Dapatkan status hadir terkini dari Sheet (admin mungkin sudah sahkan di kaunter)
+      if (!isAttended(user)) checkAttendanceNow();
     }
 
     function handleUserLogout() {
@@ -1557,7 +2452,20 @@
       }
 
       // Kawalan Kotak Tindakan
-      if (!isStampsDone) {
+      if (!isAttended(user)) {
+        progressBar.style.width = "0%";
+        node1.className = defaultNode; node1.innerText = "1";
+        titleText.innerHTML = `<span>🪪</span> Menunggu Pengesahan Kehadiran`;
+        stepBadge.innerText = `Langkah Awal: Sahkan Kehadiran`;
+        stepBadge.className = "text-[11px] font-mono px-3 py-1 rounded-full font-bold bg-rose-500/20 text-rose-300 border border-rose-400/40 animate-pulse";
+
+        alertBox.className = "p-3.5 bg-gradient-to-r from-rose-950/70 via-slate-950 to-slate-950 rounded-2xl border border-rose-400/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner";
+        alertIcon.innerText = "🪪";
+        alertText.innerText = "Sila ke Kaunter Urus Setia untuk pengesahan kehadiran. Skrin ini akan terbuka sendiri selepas disahkan.";
+        alertBtn.innerText = "Semak Status Kehadiran";
+        window.currentRoadmapTarget = "ATTEND";
+
+      } else if (!isStampsDone) {
         progressPct = Math.round((count / 11) * 25);
         progressBar.style.width = `${progressPct}%`;
         titleText.innerHTML = `<span>🚀</span> Kumpul Cop: ${progressPct}% Selesai`;
@@ -1609,7 +2517,8 @@
     }
 
     function handleRoadmapActionClick() {
-      if (window.currentRoadmapTarget === "SCAN") startQRScanner();
+      if (window.currentRoadmapTarget === "ATTEND") checkAttendanceNow();
+      else if (window.currentRoadmapTarget === "SCAN") startQRScanner();
       else if (window.currentRoadmapTarget === "SURVEY") openFeedbackModal();
       else if (window.currentRoadmapTarget === "CERT") openCertificateModal();
       else if (window.currentRoadmapTarget === "GOODIES") showGoodiesModal();
@@ -1653,6 +2562,16 @@
 
       updateParticipantActionRoadmap(user);
 
+      // Butang imbas QR dikunci selagi kehadiran belum disahkan
+      const scanBtn = document.getElementById('btnScanQR');
+      const scanHint = document.getElementById('scanHintText');
+      scanBtn.disabled = !isAttended(user);
+      scanBtn.classList.toggle('opacity-40', !isAttended(user));
+      scanBtn.classList.toggle('cursor-not-allowed', !isAttended(user));
+      scanHint.innerText = isAttended(user)
+        ? "Halakan kamera telefon ke kod QR di atas meja setiap pempamer."
+        : "🔒 Dikunci: sahkan kehadiran di Kaunter Urus Setia dahulu.";
+
       const bigRemark = document.getElementById('bigRemarkQualified');
       const winStatusText = document.getElementById('userWinStatusText');
       const isAlreadyWinner = winnersList.some(w => w.email.toLowerCase() === user.email.toLowerCase());
@@ -1674,7 +2593,7 @@
       MOTAC_BOOTHS.forEach(b => {
         const hasStamp = user.stamps.includes(b.id);
         const card = document.createElement('div');
-        card.className = `p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
+        card.className = `p-3 sm:p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
           hasStamp ? 'bg-emerald-950/50 border-emerald-400/60 text-emerald-200' : 'bg-slate-900/60 border-slate-700/60 text-slate-300'
         }`;
         card.innerHTML = `
@@ -1697,19 +2616,94 @@
     // ==============================================================
     // 3. IMBAS QR & PENERIMAAN COP
     // ==============================================================
-    function startQRScanner() {
+    async function startQRScanner() {
+      const user = findParticipant(currentParticipantEmail);
+      if (!isAttended(user)) {
+        alert("Kehadiran anda belum disahkan. Sila ke Kaunter Urus Setia dahulu.");
+        return;
+      }
       document.getElementById('scannerModal').classList.remove('hidden');
-      if (html5ScannerInstance) { try { html5ScannerInstance.clear(); } catch(e) {} }
-      html5ScannerInstance = new Html5Qrcode("readerBox");
+      document.getElementById('scannerCodeBox').classList.add('hidden');
+      clearTimeout(scanFallbackTimer);
+      if (html5ScannerInstance) {
+        try { await html5ScannerInstance.stop(); } catch (e) {}
+        try { html5ScannerInstance.clear(); } catch (e) {}
+      }
+      scanHandled = false;
+
+      // Minta kebenaran kamera dahulu: pelayar memaparkan popup "Allow camera"
+      const camError = await requestCameraPermission();
+      if (camError) {
+        showScannerCodeBox(camError, true);
+        return;
+      }
+
+      // Kamera terbuka tetapi QR tidak dikesan dalam 15 saat: tawarkan kod reruai
+      scanFallbackTimer = setTimeout(() => {
+        if (!scanHandled) showScannerCodeBox('Kamera tidak dapat mengesan QR. Dekatkan telefon ke kod QR dan pastikan cahaya mencukupi.', false);
+      }, SCAN_FALLBACK_MS);
+      html5ScannerInstance = new Html5Qrcode("readerBox", {
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+        experimentalFeatures: { useBarCodeDetectorIfSupported: true } // pengesan terbina dalam telefon: lebih laju
+      });
       html5ScannerInstance.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        (decodedText) => verifyScannedPayload(decodedText),
+        {
+          fps: 15,
+          aspectRatio: 1,
+          // Kotak imbas = 80% daripada sisi terpendek kamera (ikut saiz skrin telefon)
+          qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.8); return { width: s, height: s }; }
+        },
+        (decodedText) => {
+          if (scanHandled) return; // kamera boleh membaca QR yang sama beberapa kali sesaat
+          scanHandled = true;
+          verifyScannedPayload(decodedText);
+        },
         () => {}
-      ).catch(() => alert("Sila benarkan akses kamera."));
+      ).catch(() => {
+        clearTimeout(scanFallbackTimer);
+        showScannerCodeBox('Kamera tidak dapat dibuka.', true);
+      });
+    }
+    let scanHandled = false;
+    const SCAN_FALLBACK_MS = 15000;
+    let scanFallbackTimer = null;
+
+    // Paparkan popup kebenaran kamera pelayar. Pulangkan null jika dibenarkan, atau mesej ralat
+    async function requestCameraPermission() {
+      if (!window.isSecureContext) {
+        return 'Kamera hanya boleh digunakan melalui laman HTTPS. Buka sistem melalui alamat rasmi (https://...).';
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        return 'Pelayar ini tidak menyokong kamera. Cuba buka dengan Chrome (Android) atau Safari (iPhone).';
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        stream.getTracks().forEach(t => t.stop()); // kebenaran diperoleh; pengimbas akan buka kamera sendiri
+        return null;
+      } catch (err) {
+        if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+          return 'Akses kamera ditolak. Tekan ikon 🔒 / ⓘ di sebelah alamat laman → Kamera → Benarkan (Allow), kemudian tekan "Benarkan Kamera & Cuba Lagi".';
+        }
+        if (err && (err.name === 'NotFoundError' || err.name === 'OverconstrainedError')) {
+          return 'Kamera tidak dijumpai pada peranti ini.';
+        }
+        if (err && err.name === 'NotReadableError') {
+          return 'Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi kamera lain, kemudian cuba lagi.';
+        }
+        return 'Kamera tidak dapat dibuka.';
+      }
+    }
+
+    // canRetry: tunjuk butang untuk minta kebenaran kamera semula
+    function showScannerCodeBox(message, canRetry) {
+      document.getElementById('scannerCodeMsg').innerText = '⚠️ ' + message;
+      document.getElementById('scannerRetryBtn').classList.toggle('hidden', !canRetry);
+      document.getElementById('scannerCodeBox').classList.remove('hidden');
     }
 
     function stopQRScanner() {
+      clearTimeout(scanFallbackTimer);
       const modal = document.getElementById('scannerModal');
       if (html5ScannerInstance) {
         html5ScannerInstance.stop().then(() => {
@@ -1721,6 +2715,35 @@
       }
     }
 
+    // Kod reruai ditaip manual (kamera bermasalah). Kod yang sama seperti dalam QR, jadi semakan
+    // & penerimaan cop melalui verifyScannedPayload. Salah 5 kali = dikunci 60 saat (elak teka kod).
+    let manualCodeFails = 0;
+    let manualCodeLockedUntil = 0;
+    function submitManualBoothCode(e, inputId) {
+      e.preventDefault();
+      const input = document.getElementById(inputId);
+      const wait = Math.ceil((manualCodeLockedUntil - Date.now()) / 1000);
+      if (wait > 0) { alert(`Terlalu banyak cubaan salah. Sila tunggu ${wait} saat.`); return; }
+      const code = input.value.replace(/\s+/g, '').toUpperCase();
+      const booth = MOTAC_BOOTHS.find(b => b.token.toUpperCase() === code);
+      if (!booth) {
+        manualCodeFails++;
+        if (manualCodeFails >= 5) {
+          manualCodeFails = 0;
+          manualCodeLockedUntil = Date.now() + 60 * 1000;
+          alert("Kod reruai tidak sah. Terlalu banyak cubaan salah, sila tunggu 60 saat.");
+        } else {
+          alert("Kod reruai tidak sah. Semak kod pada kad QR pempamer.");
+        }
+        input.select();
+        return;
+      }
+      manualCodeFails = 0;
+      input.value = '';
+      scanHandled = true; // hentikan bacaan kamera serentak jika pengimbas sedang dibuka
+      verifyScannedPayload(`MOTAC_STAMP:${booth.id}:${booth.token}`);
+    }
+
     function verifyScannedPayload(payload) {
       const parts = payload.split(':');
       let boothId = null, token = null;
@@ -1728,13 +2751,18 @@
         boothId = parseInt(parts[1]);
         token = parts[2];
       }
-      if (!boothId || !token) { alert("Kod QR tidak sah."); return; }
+      if (!boothId || !token) { alert("Kod QR tidak sah. Sila imbas kod QR reruai."); scanHandled = false; return; }
 
       const targetBooth = MOTAC_BOOTHS.find(b => b.id === boothId && b.token === token);
-      if (!targetBooth) { alert("Token reruai tidak sah."); return; }
+      if (!targetBooth) { alert("Token reruai tidak sah."); scanHandled = false; return; }
 
       const user = participants.find(p => p.email.toLowerCase() === currentParticipantEmail.toLowerCase());
       if (!user) return;
+      if (!isAttended(user)) {
+        alert("Kehadiran anda belum disahkan. Sila ke Kaunter Urus Setia dahulu.");
+        stopQRScanner();
+        return;
+      }
 
       if (user.stamps.includes(boothId)) {
         alert("Anda telah pun menerima cop ini!");
@@ -1850,6 +2878,8 @@
     async function createCertificatePdfBase64(user) {
       if (!window.html2pdf) throw new Error('Modul jana PDF belum dimuatkan.');
       const certificate = document.getElementById('printableCertificateArea').cloneNode(true);
+      forceCertDesktopClasses(certificate); // rupa PDF sama seperti desktop walaupun dijana di telefon
+      certificate.style.marginRight = ''; certificate.style.marginBottom = '';
       const serial = `MOTAC-ICT-${String(participants.findIndex(p => p.email.toLowerCase() === user.email.toLowerCase()) + 1).padStart(4, '0')}`;
       certificate.querySelector('#certRecipientName').innerText = (user.name || '').toUpperCase();
       certificate.querySelector('#certSerialNo').innerText = serial;
@@ -1894,13 +2924,16 @@
         }
       }
 
+      // Saiz sama seperti mod cetak sebelum diskala 1.25 (237.6 x 168 mm = 898 x 635 px), supaya
+      // kedudukan teks (cth kementerian di bawah Jata) sama tepat, kemudian diskala 1.25 = A4 penuh.
       Object.assign(certificate.style, {
-        width: '1122px',
-        height: '794px',
+        width: '898px',
+        height: '635px',
         maxWidth: 'none',
         aspectRatio: 'auto',
         borderRadius: '0',
-        transform: 'none'
+        transform: 'scale(1.25)',
+        transformOrigin: 'top left'
       });
 
       // Fix gradient text BEFORE rendering — html2canvas cannot render bg-clip:text
@@ -1913,7 +2946,7 @@
           'from-cyan-300', 'via-sky-100', 'to-indigo-200',
           'from-amber-300', 'via-yellow-100', 'to-amber-200');
         // Force solid color with !important via cssText
-        const solidColor = i === 0 ? '#67e8f9' : '#fde047';
+        const solidColor = i === 0 ? '#ffffff' : '#fde047';
         el.style.cssText = `
           background: none !important;
           background-image: none !important;
@@ -1937,8 +2970,16 @@
         opacity: '0',
         pointerEvents: 'none'
       });
-      container.appendChild(certificate);
+      // Halaman A4 bersaiz tetap: html2pdf mengukur saiz elemen sebelum skala, jadi yang ditangkap
+      // ialah halaman ini (1122 x 794), bukan sijil berskala di dalamnya
+      const page = document.createElement('div');
+      Object.assign(page.style, { width: '1122px', height: '794px', overflow: 'hidden', backgroundColor: '#030a21' });
+      page.appendChild(certificate);
+      container.appendChild(page);
       document.body.appendChild(container);
+      // Tailwind CDN menjana CSS untuk kelas baharu (cth text-6xl) secara tak segerak: tunggu sebentar
+      await new Promise(r => setTimeout(r, 300));
+      fitCertName(certificate.querySelector('#certRecipientName'));
 
       const renderPdf = () => window.html2pdf().set({
         margin: 0,
@@ -1955,11 +2996,12 @@
               position: 'relative',
               left: '0',
               top: '0',
-              width: '1122px',
-              height: '794px',
+              width: '898px',
+              height: '635px',
               opacity: '1',
               visibility: 'visible',
-              transform: 'none',
+              transform: 'scale(1.25)',
+              transformOrigin: 'top left',
               backgroundColor: '#030a21'
             });
             const title = clonedCertificate.querySelector('h1');
@@ -1971,15 +3013,15 @@
                 background: 'none',
                 backgroundImage: 'none',
                 backgroundClip: 'border-box',
-                color: index === 0 ? '#67e8f9' : '#fde047',
-                webkitTextFillColor: index === 0 ? '#67e8f9' : '#fde047',
+                color: index === 0 ? '#ffffff' : '#fde047',
+                webkitTextFillColor: index === 0 ? '#ffffff' : '#fde047',
                 webkitBackgroundClip: 'border-box'
               });
             });
           }
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-      }).from(certificate).outputPdf('datauristring');
+      }).from(page).outputPdf('datauristring');
 
       try {
         const dataUri = await renderPdf();
@@ -2048,6 +3090,60 @@
       openCertificateModal();
     }
 
+    // Sijil direka untuk saiz desktop (kelas sm:). Di skrin kecil kelas sm: tidak aktif, jadi
+    // paksa gaya desktop: buang kelas asas sekeluarga dan guna nilai sm:. Juga digunakan untuk PDF
+    // emel yang dijana di telefon peserta, supaya rupa PDF sama seperti di desktop.
+    const CERT_W = 898, CERT_H = 635; // saiz sijil desktop (sama seperti mod cetak sebelum skala)
+    function forceCertDesktopClasses(root) {
+      const famOf = t => /^text-(xs|sm|base|l|lg|xl|\d?xl|\[[\d.]+px\])$/.test(t) ? 'text-size' : t.replace(/-[^-]+$/, '');
+      [root, ...root.querySelectorAll('*')].forEach(el => {
+        const cls = [...el.classList];
+        const sm = cls.filter(c => c.startsWith('sm:')).map(c => c.slice(3));
+        if (!sm.length) return;
+        const fams = new Set(sm.map(famOf));
+        el.className = cls.filter(c => !c.startsWith('sm:') && !fams.has(famOf(c))).concat(sm).join(' ');
+      });
+    }
+
+    // Pratonton sijil di telefon: rupa desktop yang dikecilkan sekata supaya muat lebar skrin
+    function fitCertPreview() {
+      const c = document.getElementById('printableCertificateArea');
+      const modal = document.getElementById('certificateModal');
+      if (window.innerWidth >= 640) {
+        ['width', 'height', 'maxWidth', 'aspectRatio', 'transform', 'transformOrigin', 'marginRight', 'marginBottom', 'flexShrink']
+          .forEach(k => c.style[k] = '');
+        modal.style.justifyContent = '';
+        modal.firstElementChild.style.marginTop = '';
+        return;
+      }
+      // Margin negatif di bawah membatalkan margin auto: tengahkan kandungan secara terus
+      modal.style.justifyContent = 'center';
+      modal.firstElementChild.style.marginTop = '0';
+      forceCertDesktopClasses(c);
+      const avail = window.innerWidth - 24; // p-3 pada #certificateModal
+      const s = avail / CERT_W;
+      Object.assign(c.style, {
+        width: CERT_W + 'px', height: CERT_H + 'px', maxWidth: 'none', aspectRatio: 'auto', flexShrink: '0',
+        transform: `scale(${s})`, transformOrigin: 'top left',
+        // margin negatif: ruang susun atur = saiz selepas skala (mod cetak menimpa dengan !important)
+        marginRight: (avail - CERT_W) + 'px', marginBottom: (CERT_H * s - CERT_H) + 'px'
+      });
+    }
+    window.addEventListener('resize', () => {
+      if (!document.getElementById('certificateModal').classList.contains('hidden')) fitCertPreview();
+    });
+
+    // Nama peserta sentiasa satu baris: kecilkan huruf sedikit demi sedikit jika nama terlalu panjang
+    function fitCertName(el) {
+      if (!el) return;
+      el.style.fontSize = '';
+      if (!el.clientWidth) return; // belum dipaparkan
+      let size = parseFloat(getComputedStyle(el).fontSize);
+      while (el.scrollWidth > el.clientWidth && size > 12) {
+        size -= 1;
+        el.style.fontSize = size + 'px';
+      }
+    }
     function openCertificateModal() {
       const user = participants.find(p => p.email.toLowerCase() === currentParticipantEmail?.toLowerCase());
       if (!user) return;
@@ -2059,6 +3155,8 @@
       document.getElementById('certSerialNo').innerText = `MOTAC-ICT-${String(idx).padStart(4, '0')}`;
 
       document.getElementById('certificateModal').classList.remove('hidden');
+      fitCertPreview();
+      fitCertName(document.getElementById('certRecipientName'));
     }
 
     function closeCertificateModal() {
@@ -2074,6 +3172,7 @@
         renderUserView();
       }
 
+      fitCertName(document.getElementById('certRecipientName')); // pastikan nama muat satu baris sebelum cetak
       document.body.classList.add('printing-cert');
 
       requestAnimationFrame(() => {
@@ -2158,6 +3257,8 @@
       const idx = participants.findIndex(p => p.email.toLowerCase() === user.email.toLowerCase()) + 1;
       document.getElementById('certSerialNo').innerText = `MOTAC-ICT-${String(idx).padStart(4, '0')}`;
       document.getElementById('certificateModal').classList.remove('hidden');
+      fitCertPreview();
+      fitCertName(document.getElementById('certRecipientName'));
     }
 
     function closeAdminFeedbackPreview() {
@@ -2181,10 +3282,15 @@
       document.getElementById('hubEligibleCount').innerText = eligible;
       document.getElementById('hubFeedbackCount').innerText = fbCount;
       document.getElementById('hubClaimedCount').innerText = claimed;
+      document.getElementById('hubAttendedCount').innerText = participants.filter(isAttended).length;
+      renderAttendanceCounter();
+      renderWalkinPanel();
 
       let list = participants;
 
-      if (filterCat === "QUALIFIED") list = list.filter(p => p.stamps.length === 11);
+      if (filterCat === "ATTENDED") list = list.filter(isAttended);
+      else if (filterCat === "NOT_ATTENDED") list = list.filter(p => !isAttended(p));
+      else if (filterCat === "QUALIFIED") list = list.filter(p => p.stamps.length === 11);
       else if (filterCat === "GOODIES_UNCLAIMED") list = list.filter(p => p.stamps.length === 11 && !p.goodiesClaimed);
       else if (filterCat === "GOODIES_CLAIMED") list = list.filter(p => p.goodiesClaimed);
       else if (filterCat === "FEEDBACK_DONE") list = list.filter(p => p.feedbackDone);
@@ -2201,7 +3307,7 @@
       document.getElementById('hubSearchResultCount').innerText = `Menunjukkan ${list.length} daripada ${participants.length} peserta berdaftar`;
 
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-amber-400">Tiada rekod peserta yang sepadan dengan kriteria carian.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-amber-400">Tiada rekod peserta yang sepadan dengan kriteria carian.</td></tr>`;
         return;
       }
 
@@ -2220,6 +3326,11 @@
           <td class="py-2.5 px-3">
             <p class="text-cyan-300 font-mono text-[11px]">${p.email}</p>
             <p class="text-slate-400 text-[10px]">${p.agency}</p>
+          </td>
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            ${isAttended(p)
+              ? `<button onclick="setAttendance('${p.email}', false)" title="Klik untuk batalkan" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">Hadir ✓</button>`
+              : `<button onclick="setAttendance('${p.email}', true)" class="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[10px] font-black">Sahkan Hadir</button>`}
           </td>
           <td class="py-2.5 px-3 text-center">
             <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${isEligible ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' : 'bg-slate-900 text-amber-400 border border-slate-700'}">
@@ -2263,15 +3374,16 @@
     // 6. KAWALAN CABUTAN PENTAS & STATISTIK ANALITIK
     // ==============================================================
     function triggerLuckyDraw() {
+      if (PUBLIC_STAGE) return;
       if (!activeAdminUser) {
         alert("Akses dinafikan. Hanya admin urus setia yang sah boleh memulakan cabutan bertuah!");
         return;
       }
 
-      const allQualified = participants.filter(p => p.stamps.length === 11);
+      // Hanya peserta yang disahkan hadir dan lengkap 11 cop masuk balang cabutan
+      const allQualified = participants.filter(p => isAttended(p) && p.stamps.length === 11);
       const remainingPool = allQualified.filter(p => !winnersList.some(w => w.email.toLowerCase() === p.email.toLowerCase()));
 
-      const btn = document.getElementById('btnAdminTriggerDraw');
       const adminName = document.getElementById('adminWinnerName');
       const adminAgency = document.getElementById('adminWinnerAgency');
       const adminBadge = document.getElementById('adminWinnerBadge');
@@ -2285,8 +3397,8 @@
         return;
       }
 
-      btn.disabled = true;
-      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      if (isDrawing) return;
+      setDrawButtonsBusy(true);
 
       const msgRunning = `SEDANG MENCABUT PEMENANG #${winnersList.length + 1}...`;
       adminBadge.innerText = msgRunning;
@@ -2301,7 +3413,7 @@
         adminAgency.innerText = `${randomItem.agency} (${randomItem.email})`;
 
         stageName.innerText = randomItem.name;
-        stageAgency.innerText = `${randomItem.agency} • ${randomItem.email}`;
+        stageAgency.innerText = randomItem.agency;
 
         rollCount++;
 
@@ -2329,17 +3441,43 @@
           stageBadge.className = "text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest animate-bounce";
           stageName.innerText = finalWinner.name;
           stageName.className = "text-3xl sm:text-5xl font-black text-amber-300 my-3 drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]";
-          stageAgency.innerText = `${finalWinner.agency} • ${finalWinner.email}`;
+          stageAgency.innerText = finalWinner.agency;
 
           confetti({ particleCount: 170, spread: 90, origin: { y: 0.6 } });
 
-          btn.disabled = false;
-          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          setDrawButtonsBusy(false);
 
           renderStageView();
         }
       }, 90);
     }
+
+    // Butang cabutan di Panel Admin & Skrin Pentas dikunci bersama semasa putaran berjalan
+    let isDrawing = false;
+    function setDrawButtonsBusy(busy) {
+      isDrawing = busy;
+      ['btnAdminTriggerDraw', 'btnStageTriggerDraw'].forEach(id => {
+        const b = document.getElementById(id);
+        if (!b) return;
+        b.disabled = busy;
+        b.classList.toggle('opacity-50', busy);
+        b.classList.toggle('cursor-not-allowed', busy);
+      });
+    }
+
+    function toggleStageFullscreen() {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen().catch(() => {});
+    }
+
+    // Spacebar di Skrin Pentas = Putar Cabutan (diabaikan jika sedang menaip dalam kotak input)
+    document.addEventListener('keydown', e => {
+      if (e.code !== 'Space' || e.repeat || PUBLIC_STAGE) return;
+      if (document.getElementById('viewStage').classList.contains('hidden')) return;
+      if (/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(document.activeElement?.tagName || '')) return;
+      e.preventDefault();
+      triggerLuckyDraw();
+    });
 
     function removeWinner(email) {
       if (!confirm(`Batalkan kemenangan untuk ${email} dan kembalikan peserta ke dalam balang cabutan?`)) return;
@@ -2469,7 +3607,7 @@
       const zero = participants.filter(p => p.stamps.length === 0).length;
       const active = participants.filter(p => p.stamps.length >= 1 && p.stamps.length < 11).length;
       const qualified = participants.filter(p => p.stamps.length === 11);
-      const remainingPool = qualified.filter(p => !winnersList.some(w => w.email.toLowerCase() === p.email.toLowerCase()));
+      const remainingPool = qualified.filter(p => isAttended(p)).filter(p => !winnersList.some(w => w.email.toLowerCase() === p.email.toLowerCase()));
 
       document.getElementById('statTotal').innerText = total;
       document.getElementById('statZeroStamps').innerText = zero;
@@ -2479,6 +3617,9 @@
 
       const adminRemainingEl = document.getElementById('adminRemainingCount');
       if (adminRemainingEl) adminRemainingEl.innerText = remainingPool.length;
+
+      const stageRemainingEl = document.getElementById('stageRemainingCount');
+      if (stageRemainingEl) stageRemainingEl.innerText = remainingPool.length;
 
       const adminWonEl = document.getElementById('adminWonCount');
       if (adminWonEl) adminWonEl.innerText = winnersList.length;
@@ -2492,21 +3633,157 @@
           <td class="py-2.5 px-3 font-bold text-amber-400">#${idx + 1}</td>
           <td class="py-2.5 px-3 font-semibold text-white">${w.name}</td>
           <td class="py-2.5 px-3 text-slate-300">${w.agency}</td>
-          <td class="py-2.5 px-3 text-cyan-300 font-mono">${w.email}</td>
           <td class="py-2.5 px-3 text-right"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">PEMENANG SAH</span></td>
         `;
         tbody.appendChild(tr);
       });
 
+      renderStageRace();
+      announcePublicWinner();
       renderAdminWinnersTable();
       renderAdminReportsView();
     }
 
     // ==============================================================
+    // 6b. PERLUMBAAN COP DI SKRIN PENTAS
+    // ==============================================================
+    // Bila peserta mula layak (dilihat oleh skrin ini). Peserta yang sudah layak semasa
+    // skrin dibuka diberi 0, supaya hanya yang BARU layak diserlahkan & diumumkan
+    const qualifiedSeenAt = new Map();
+    let databaseLoadedOnce = false; // ditetapkan oleh initializeDatabase selepas muatan pertama berjaya
+    let stageRaceInitialized = false;
+    const NEW_QUALIFIER_MS = 90 * 1000; // tempoh lencana "BARU!"
+
+    function renderStageRace() {
+      const wall = document.getElementById('stageQualifiedWall');
+      if (!wall) return;
+
+      const now = Date.now();
+      const qualified = participants.filter(p => p.stamps.length === 11);
+      const newcomers = [];
+      qualified.forEach(p => {
+        const key = p.email.toLowerCase();
+        if (qualifiedSeenAt.has(key)) return;
+        // Sebelum data pertama dari Sheet dimuatkan, semua dianggap sedia ada (data pelayar mungkin lama)
+        const isNew = stageRaceInitialized && databaseLoadedOnce;
+        qualifiedSeenAt.set(key, isNew ? now : 0);
+        if (isNew) newcomers.push(p);
+      });
+      stageRaceInitialized = true;
+
+      document.getElementById('stageWallCount').innerText = qualified.length;
+
+      // Ikut abjad supaya peserta mudah cari nama sendiri; yang BARU layak diserlahkan & diumumkan
+      wallList = qualified.slice().sort((a, b) => a.name.localeCompare(b.name, 'ms'));
+      renderStageWall();
+
+      if (newcomers.length) announceNewQualifiers(newcomers);
+    }
+
+    // Senarai bergerak ke atas tanpa henti (sesuai untuk 100+ nama di projektor).
+    // Bila senarai lebih tinggi daripada kotak, kandungan digandakan: sebaik salinan pertama
+    // habis, kedudukan dikembalikan ke atas tanpa lompatan yang kelihatan.
+    const WALL_SCROLL_PX_PER_SEC = 28;
+    let wallList = [];
+    let wallPos = 0;      // kedudukan skrol (pecahan piksel; scrollTop dibundarkan pelayar)
+    let wallLoopPx = 0;   // tinggi satu salinan senarai; 0 = tidak perlu bergerak
+
+    function renderStageWall() {
+      const wall = document.getElementById('stageQualifiedWall');
+      if (!wall) return;
+      if (!wallList.length) {
+        wallLoopPx = 0;
+        wallPos = 0;
+        wall.innerHTML = `<p class="text-center py-10 text-slate-400 text-sm">Belum ada peserta yang lengkap 11 cop. <span class="text-emerald-300 font-bold">Jadilah yang pertama!</span> 🚀</p>`;
+        return;
+      }
+      const now = Date.now();
+      const items = wallList.map((p, i) => {
+        const won = isWinner(p);
+        const fresh = now - (qualifiedSeenAt.get(p.email.toLowerCase()) || 0) < NEW_QUALIFIER_MS;
+        const style = won ? 'bg-amber-500/15 border-amber-400/60'
+          : fresh ? 'chip-new bg-emerald-500/30 border-emerald-300'
+          : 'bg-slate-950/50 border-slate-800';
+        return `
+          <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border ${style} min-w-0">
+            <span class="shrink-0 w-8 text-right text-[11px] font-mono font-bold text-slate-500">${i + 1}.</span>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-bold text-white truncate" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</p>
+              <p class="text-[10px] text-slate-400 truncate">${escapeHtml(p.agency)}</p>
+            </div>
+            ${won ? '<span class="shrink-0 text-base" title="Pemenang">🏆</span>'
+              : fresh ? '<span class="shrink-0 text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950">BARU!</span>' : ''}
+          </div>`;
+      }).join('');
+
+      const grid = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-1.5 py-4">${items}</div>`;
+      wall.innerHTML = grid;
+      const first = wall.firstElementChild;
+      if (first.offsetHeight > wall.clientHeight) {
+        wall.insertAdjacentHTML('beforeend', grid.replace('<div ', '<div aria-hidden="true" '));
+        wallLoopPx = first.offsetHeight;
+        wallPos %= wallLoopPx; // data baharu: teruskan dari kedudukan semasa
+      } else {
+        wallLoopPx = 0;
+        wallPos = 0;
+      }
+      wall.scrollTop = wallPos;
+    }
+
+    let wallLastFrame = 0;
+    function wallScrollFrame(t) {
+      const dt = wallLastFrame ? Math.min(100, t - wallLastFrame) : 0;
+      wallLastFrame = t;
+      const wall = document.getElementById('stageQualifiedWall');
+      if (wall && wallLoopPx && !document.getElementById('viewStage').classList.contains('hidden')) {
+        wallPos = (wallPos + WALL_SCROLL_PX_PER_SEC * dt / 1000) % wallLoopPx;
+        wall.scrollTop = wallPos;
+      }
+      requestAnimationFrame(wallScrollFrame);
+    }
+    requestAnimationFrame(wallScrollFrame);
+
+    // Saiz tetingkap berubah (cth masuk Skrin Penuh): kira semula lajur & tinggi senarai
+    window.addEventListener('resize', () => renderStageWall());
+
+    let stageToastTimer = null;
+    function announceNewQualifiers(list) {
+      if (document.getElementById('viewStage').classList.contains('hidden')) return;
+      const toast = document.getElementById('stageQualifyToast');
+      toast.style.transform = 'translateX(-50%)';
+      toast.innerHTML = list.length === 1
+        ? `<p class="text-[11px] font-black uppercase tracking-widest">🎉 Peserta Baharu Layak Cabutan!</p>
+           <p class="text-xl sm:text-3xl font-black mt-0.5">${escapeHtml(list[0].name)}</p>
+           <p class="text-xs font-bold opacity-80">${escapeHtml(list[0].agency)} • Lengkap 11/11 cop</p>`
+        : `<p class="text-[11px] font-black uppercase tracking-widest">🎉 Peserta Baharu Layak Cabutan!</p>
+           <p class="text-xl sm:text-3xl font-black mt-0.5">${list.length} peserta baharu</p>
+           <p class="text-xs font-bold opacity-80">${list.slice(0, 3).map(p => escapeHtml(p.name)).join(', ')}${list.length > 3 ? ' dan lain-lain' : ''}</p>`;
+      toast.classList.remove('hidden', 'toast-in');
+      void toast.offsetWidth; // mulakan semula animasi
+      toast.classList.add('toast-in');
+      if (!isDrawing) confetti({ particleCount: 80, spread: 70, origin: { y: 0.15 } });
+      clearTimeout(stageToastTimer);
+      stageToastTimer = setTimeout(() => toast.classList.add('hidden'), 6000);
+    }
+
+    // Skrin pentas: segerak dengan Sheet setiap 15 saat supaya cop & nama layak dari telefon
+    // peserta muncul sendiri. Dilangkau semasa cabutan berputar atau bila ada perubahan
+    // tempatan yang belum dihantar (elak data lama Sheet menimpa pemenang terbaharu)
+    const STAGE_SYNC_MS = 15000;
+    let stageSyncing = false;
+    setInterval(async () => {
+      if (document.hidden || stageSyncing || isDrawing || !databaseWebAppUrl) return;
+      if (document.getElementById('viewStage').classList.contains('hidden')) return;
+      if (getOutbox().length) return;
+      stageSyncing = true;
+      try { await initializeDatabase(false); } finally { stageSyncing = false; }
+    }, STAGE_SYNC_MS);
+
+    // ==============================================================
     // 7. EKSPORT & PENGURUSAN DATA
     // ==============================================================
     function exportComprehensiveReportExcel() {
-      if (participants.length === 0) {
+      if (participants.length === 0 && walkinList.length === 0) {
         alert("Tiada rekod data peserta untuk dieksport.");
         return;
       }
@@ -2523,6 +3800,7 @@
         [],
         ["METRIK UTAMA", "BILANGAN PESERTA", "PERATUSAN (%)"],
         ["Jumlah Pendaftar", total, "100.0%"],
+        ["Hadir Disahkan", participants.filter(isAttended).length, `${total > 0 ? ((participants.filter(isAttended).length/total)*100).toFixed(1) : 0}%`],
         ["Layak Cabutan Bertuah (11/11 Cop)", qualCount, `${total > 0 ? ((qualCount/total)*100).toFixed(1) : 0}%`],
         ["Sedang Mengumpul Cop (1-10 Cop)", activeCount, `${total > 0 ? ((activeCount/total)*100).toFixed(1) : 0}%`],
         ["Belum Mula Melawat (0 Cop)", zeroCount, `${total > 0 ? ((zeroCount/total)*100).toFixed(1) : 0}%`],
@@ -2537,11 +3815,44 @@
         summaryData.push([`${b.lot} - ${b.name} (${b.slot})`, vCount, `${vPct}%`]);
       });
 
+      // Kehadiran program: peserta hadir + pengunjung walk-in (yang belum dijadikan peserta,
+      // supaya walk-in yang sudah jadi peserta tidak dikira dua kali)
+      const attendedCount = participants.filter(isAttended).length;
+      const activeWalkins = walkinList.filter(isWalkinActive);
+      summaryData.push(
+        [],
+        ["KEHADIRAN PROGRAM", "BILANGAN", ""],
+        ["Peserta Hadir Disahkan", attendedCount, ""],
+        ["Peserta Tidak Hadir", total - attendedCount, ""],
+        ["Pengunjung Walk-in", activeWalkins.length, ""],
+        ["Walk-in Dijadikan Peserta", walkinList.length - activeWalkins.length, "(sudah dikira dalam Peserta Hadir)"],
+        ["JUMLAH KEHADIRAN PROGRAM", attendedCount + activeWalkins.length, ""]
+      );
+
+      // Kehadiran mengikut bahagian / agensi (paling ramai hadir dahulu)
+      const byAgency = {};
+      const agencyRow = name => byAgency[name || 'Tidak Dinyatakan'] ||= { registered: 0, attended: 0, walkin: 0 };
+      participants.forEach(p => {
+        const r = agencyRow(p.agency);
+        r.registered++;
+        if (isAttended(p)) r.attended++;
+      });
+      activeWalkins.forEach(w => agencyRow(w.agency).walkin++);
+      summaryData.push(
+        [],
+        ["KEHADIRAN MENGIKUT BAHAGIAN / AGENSI", "PESERTA BERDAFTAR", "PESERTA HADIR", "PENGUNJUNG WALK-IN", "JUMLAH KEHADIRAN"]
+      );
+      Object.entries(byAgency)
+        .sort((a, b) => (b[1].attended + b[1].walkin) - (a[1].attended + a[1].walkin) || a[0].localeCompare(b[0], 'ms'))
+        .forEach(([name, r]) => summaryData.push([name, r.registered, r.attended, r.walkin, r.attended + r.walkin]));
+      summaryData.push(["JUMLAH", total, attendedCount, activeWalkins.length, attendedCount + activeWalkins.length]);
+
       const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+      wsSummary['!cols'] = [{ wch: 55 }, { wch: 18 }, { wch: 16 }, { wch: 20 }, { wch: 18 }];
       XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan_Statistik");
 
       const participantsData = [
-        ["Bil", "Nama Peserta / Wakil", "Alamat Emel", "Bahagian / Agensi", "Bilangan Cop", "Status Kelayakan", "Status Goodies", "Senarai Lot Booth Dilawati"]
+        ["Bil", "Nama Peserta / Wakil", "Alamat Emel", "Bahagian / Agensi", "Kehadiran", "Bilangan Cop", "Status Kelayakan", "Status Goodies", "Senarai Lot Booth Dilawati"]
       ];
 
       participants.forEach((p, idx) => {
@@ -2559,6 +3870,7 @@
           p.name,
           p.email,
           p.agency,
+          isAttended(p) ? "Hadir" : "Belum Hadir",
           p.stamps.length,
           status,
           p.goodiesClaimed ? "Telah Ditebus" : "Belum Ditebus",
@@ -2586,6 +3898,14 @@
       const wsWinners = XLSX.utils.aoa_to_sheet(winnersData);
       XLSX.utils.book_append_sheet(wb, wsWinners, "Senarai_Pemenang_Cabutan");
 
+      // Senarai pengunjung walk-in (no telefon tidak dihantar ke pelayar: lihat tab Pengunjung_WalkIn dalam Sheet)
+      const walkinData = [["Bil", "Masa Daftar", "Gelaran", "Nama Penuh", "Alamat Emel", "Bahagian / Agensi", "Status"]];
+      walkinList.forEach((w, idx) => {
+        walkinData.push([idx + 1, w.registeredAt || '-', w.title || '', w.name, w.email, w.agency, w.status || 'Walk-in']);
+      });
+      const wsWalkins = XLSX.utils.aoa_to_sheet(walkinData);
+      XLSX.utils.book_append_sheet(wb, wsWalkins, "Senarai_Pengunjung_WalkIn");
+
       const dateStr = new Date().toISOString().slice(0,10);
       XLSX.writeFile(wb, `Laporan_Statistik_MOTAC_${dateStr}.xlsx`);
     }
@@ -2596,11 +3916,11 @@
 
     function exportStampMatrixExcel() {
       if (participants.length === 0) { alert("Tiada data peserta."); return; }
-      const headers = ["Bil", "Nama Peserta", "Emel", "Bahagian", "Lot 1", "Lot 2", "Lot 3", "Lot 4", "Lot 5", "Lot 6", "Lot 7", "Lot 8", "Lot 9", "Lot 10", "Lot 11", "Jumlah Cop", "Maklum Balas", "Status Goodies"];
+      const headers = ["Bil", "Nama Peserta", "Emel", "Bahagian", "Kehadiran", "Masa Hadir", "Lot 1", "Lot 2", "Lot 3", "Lot 4", "Lot 5", "Lot 6", "Lot 7", "Lot 8", "Lot 9", "Lot 10", "Lot 11", "Jumlah Cop", "Maklum Balas", "Status Goodies"];
       const rows = [headers];
       participants.forEach((p, idx) => {
         const checks = [1,2,3,4,5,6,7,8,9,10,11].map(id => p.stamps.includes(id) ? "✓" : "-");
-        rows.push([idx + 1, p.name, p.email, p.agency, ...checks, p.stamps.length, p.feedbackDone ? "Selesai" : "Belum", p.goodiesClaimed ? "Telah Ditebus" : "Belum"]);
+        rows.push([idx + 1, p.name, p.email, p.agency, isAttended(p) ? "Hadir" : "Belum Hadir", p.attendedAt || "-", ...checks, p.stamps.length, p.feedbackDone ? "Selesai" : "Belum", p.goodiesClaimed ? "Telah Ditebus" : "Belum"]);
       });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Matriks_Cop");
@@ -2618,30 +3938,6 @@
       XLSX.writeFile(wb, `Maklum_Balas_MOTAC_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    function addParticipantManual(e) {
-      e.preventDefault();
-      const name = document.getElementById('mName').value.trim();
-      const email = document.getElementById('mEmail').value.trim().toLowerCase();
-      const agency = document.getElementById('mAgency').value.trim();
-
-      if (participants.some(p => p.email.toLowerCase() === email)) {
-        alert("Emel ini telah berdaftar.");
-        return;
-      }
-
-      const newUser = { name, email, agency, stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false };
-      participants.push(newUser);
-      saveState();
-      postDatabase('UPSERT_PARTICIPANTS', { participants: [newUser] });
-      renderIntegratedParticipantsTable();
-      renderStageView();
-
-      document.getElementById('mName').value = '';
-      document.getElementById('mEmail').value = '';
-      document.getElementById('mAgency').value = '';
-      alert(`Peserta ${name} berjaya didaftarkan!`);
-    }
-
     function handleExcelUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -2655,11 +3951,11 @@
           for (let i = 1; i < rows.length; i++) {
             const r = rows[i];
             if (!r || r.length < 2) continue;
-            const name = String(r[0] || '').trim();
+            const name = formatName(r[0]);
             const email = String(r[1] || '').trim().toLowerCase();
-            const agency = String(r[2] || 'MOTAC').trim();
+            const agency = r[2] ? formatAgency(r[2]) : 'MOTAC';
             if (email && !participants.some(p => p.email.toLowerCase() === email)) {
-              const newUser = { name: name || 'Peserta', email, agency, stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false };
+              const newUser = { name: name || 'Peserta', email, agency, stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false, attended: false, attendedAt: "" };
               participants.push(newUser);
               importedParticipants.push(newUser);
               count++;
@@ -2692,9 +3988,9 @@
             const r = rows[i];
             if (!r || r.length < 3) continue;
 
-            const name = String(r[0] || '').trim();
+            const name = formatName(r[0]);
             const email = String(r[1] || '').trim().toLowerCase();
-            const agency = String(r[2] || '').trim();
+            const agency = formatAgency(r[2]);
 
             if (!email) continue;
 
@@ -2712,7 +4008,9 @@
                 stamps: [],
                 feedbackDone: false,
                 certDownloaded: false,
-                goodiesClaimed: false
+                goodiesClaimed: false,
+                attended: false,
+                attendedAt: ""
               };
               participants.push(newUser);
               changedParticipants.push(newUser);
@@ -2784,9 +4082,9 @@
     function handleSaveProxy(e) {
       e.preventDefault();
       const orig = document.getElementById('proxyOriginalEmail').value;
-      const nName = document.getElementById('proxyNewName').value.trim();
+      const nName = formatName(document.getElementById('proxyNewName').value);
       const nEmail = document.getElementById('proxyNewEmail').value.trim().toLowerCase();
-      const nAgency = document.getElementById('proxyAgencyDisplay').value.trim();
+      const nAgency = formatAgency(document.getElementById('proxyAgencyDisplay').value);
 
       const user = participants.find(p => p.email.toLowerCase() === orig.toLowerCase());
       if (!user) return;
@@ -2808,31 +4106,82 @@
       alert("Maklumat wakil berjaya dikemas kini!");
     }
 
+    // Satu helaian A4 = 2 kad A5 yang sama (atas & bawah), untuk digunting dua
+    const QR_JATA_SRC = 'https://upload.wikimedia.org/wikipedia/commons/2/26/Coat_of_arms_of_Malaysia.svg';
+    const QR_JATA_FALLBACK = 'https://www.motac.gov.my/images/jata_negara.png';
+
+    function buildQRSheet({ lot, name, slot, instr, footer, qrText, level, walkin = false }) {
+      const sheet = document.createElement('div');
+      sheet.className = `qr-sheet${walkin ? ' walkin' : ''}`;
+      const half = `
+        <div class="qr-half">
+          <div class="qr-head">
+            <img src="${QR_JATA_SRC}" alt="Jata Negara Malaysia" onerror="this.onerror=null; this.src='${QR_JATA_FALLBACK}';">
+            <div>
+              <p class="qr-event">HARI PENDIGITALAN MOTAC TAHUN 2026</p>
+              <p class="qr-ministry">Kementerian Pelancongan, Seni dan Budaya Malaysia</p>
+            </div>
+          </div>
+          <div class="qr-body">
+            <div class="qr-info">
+              <div style="display:flex;flex-direction:column">
+                <span class="qr-lot">${escapeHtml(lot)}</span>
+                <p class="qr-name">${escapeHtml(name)}</p>
+                ${slot ? `<p class="qr-slot">${escapeHtml(slot)}</p>` : ''}
+              </div>
+              <p class="qr-instr">${instr}</p>
+              <p class="qr-token">${footer}</p>
+            </div>
+            <div class="qr-code"></div>
+          </div>
+        </div>`;
+      sheet.innerHTML = half + half;
+      sheet.querySelectorAll('.qr-code').forEach(el => new QRCode(el, {
+        text: qrText, width: 512, height: 512, // resolusi tinggi supaya tajam bila dicetak
+        colorDark: "#0f172a", colorLight: "#ffffff", correctLevel: level
+      }));
+      return sheet;
+    }
+
     function renderAdminQRCards() {
       const container = document.getElementById('printableQRCards');
       container.innerHTML = '';
-      MOTAC_BOOTHS.forEach(b => {
-        const card = document.createElement('div');
-        card.className = "qr-card-print bg-white text-slate-900 border-2 border-slate-900 rounded-3xl p-6 text-center flex flex-col items-center justify-between shadow-md";
-        card.innerHTML = `
-          <div class="w-full border-b-2 border-slate-900 pb-2 mb-3">
-            <span class="text-xs font-mono font-black bg-slate-900 text-white px-2 py-0.5 rounded">${b.lot}</span>
-            <h3 class="text-xl font-black text-slate-900 mt-1">${b.name}</h3>
-            <p class="text-[10px] text-slate-600">${b.slot}</p>
-          </div>
-          <div id="admin-qr-${b.id}" class="my-2 p-2 bg-white border border-slate-300 rounded-xl"></div>
-          <p class="text-[10px] font-mono text-slate-500">Kod Keselamatan: <strong>${b.token}</strong></p>
-        `;
-        container.appendChild(card);
-        new QRCode(document.getElementById(`admin-qr-${b.id}`), {
-          text: `MOTAC_STAMP:${b.id}:${b.token}`,
-          width: 140,
-          height: 140,
-          colorDark: "#0f172a",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      });
+
+      // Kad QR pendaftaran pengunjung walk-in (diletak di kaunter / pintu masuk)
+      const walkinUrl = `${location.origin}${location.pathname}?daftar=walkin`;
+      const isLocal = location.protocol === 'file:' || /^(localhost|127\.|192\.168\.)/.test(location.hostname);
+      if (isLocal) {
+        container.insertAdjacentHTML('beforeend', `<p class="no-print w-full text-center text-xs font-bold text-rose-400">⚠️ QR walk-in menghala ke ${escapeHtml(walkinUrl)} yang hanya berfungsi di komputer ini. Buka Panel Admin dari laman yang dihoskan sebelum mencetak.</p>`);
+      }
+      container.appendChild(buildQRSheet({
+        walkin: true, lot: 'PENGUNJUNG WALK-IN', name: 'Rekod Kehadiran',
+        instr: 'Imbas kod QR ini dengan kamera telefon untuk merekodkan kehadiran anda.',
+        footer: escapeHtml(walkinUrl), qrText: walkinUrl, level: QRCode.CorrectLevel.M
+      }));
+
+      MOTAC_BOOTHS.forEach(b => container.appendChild(buildQRSheet({
+        lot: b.lot, name: b.name, slot: b.slot,
+        instr: 'Imbas kod QR ini melalui <b>Cop Digital Peserta</b> untuk mendapatkan cop reruai.',
+        footer: `Kod manual (jika kamera bermasalah):<strong>${escapeHtml(b.token)}</strong>`,
+        qrText: `MOTAC_STAMP:${b.id}:${b.token}`, level: QRCode.CorrectLevel.H
+      })));
+    }
+
+    // Cetak kad QR sahaja: pindahkan helaian ke bawah <body> sementara supaya bahagian lain
+    // tidak dicetak, kemudian kembalikan ke Panel Admin selepas dialog cetak ditutup
+    function printQRCards() {
+      const cards = document.getElementById('printableQRCards');
+      const home = cards.parentElement;
+      document.body.appendChild(cards);
+      document.body.classList.add('printing-qr');
+      const restore = () => {
+        document.body.classList.remove('printing-qr');
+        home.appendChild(cards);
+        window.removeEventListener('afterprint', restore);
+      };
+      window.addEventListener('afterprint', restore);
+      // Beri masa imej Jata Negara & QR dimuatkan sebelum dialog cetak dibuka
+      setTimeout(() => window.print(), 400);
     }
 
     function renderBoothAnalytics() {
@@ -2863,17 +4212,30 @@
       activeAdminUser = match.user;
       sessionStorage.setItem('motac_active_admin', activeAdminUser);
       renderAdminView();
+      // Admin cuba buka Skrin Pentas sebelum log masuk: terus ke skrin pentas
+      if (pendingStageAfterLogin) {
+        pendingStageAfterLogin = false;
+        switchTab('stage');
+      }
     }
 
     function handleAdminLogout() {
       activeAdminUser = null;
       sessionStorage.removeItem('motac_active_admin');
       renderAdminView();
+      if (!document.getElementById('viewStage').classList.contains('hidden')) switchTab('user');
+    }
+
+    // Skrin Pentas hanya untuk admin: tunjuk/sembunyi butang navigasi ikut status log masuk
+    let pendingStageAfterLogin = false;
+    function updateAdminNav() {
+      document.getElementById('navStage').classList.toggle('hidden', !activeAdminUser);
     }
 
     function renderAdminView() {
       const loginBox = document.getElementById('adminLoginBox');
       const dashBox = document.getElementById('adminDashboardBox');
+      updateAdminNav();
       if (!activeAdminUser) {
         loginBox.classList.remove('hidden');
         dashBox.classList.add('hidden');
@@ -2908,6 +4270,11 @@
 
     // Switch Tab Navigasi
     function switchTab(tab) {
+      if (tab === 'stage' && !activeAdminUser) {
+        alert("Skrin Pentas hanya boleh dibuka oleh admin. Sila log masuk dahulu.");
+        pendingStageAfterLogin = true;
+        tab = 'admin';
+      }
       ['viewUser', 'viewStage', 'viewAdmin'].forEach(id => document.getElementById(id).classList.add('hidden'));
       ['navUser', 'navStage', 'navAdmin'].forEach(id => document.getElementById(id).className = "px-3.5 py-1.5 rounded-xl font-bold text-slate-300 hover:text-white transition-all");
 
@@ -2924,6 +4291,7 @@
         document.getElementById('navAdmin').className = "px-3.5 py-1.5 rounded-xl font-bold bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow";
         renderAdminView();
       }
+      updateAdminNav(); // className di atas membuang kelas 'hidden' pada butang Skrin Pentas
     }
 
     function switchAdminSub(sub) {
@@ -2959,9 +4327,14 @@
     }
 
     window.onload = function() {
+      // Halaman walk-in: borang sahaja. Tidak muat/hantar data peserta dari pelayar ini.
+      if (WALKIN_MODE) { showWalkinPage(); return; }
+      // Paparan awam: hanya baca dari Sheet (false = tidak sesekali menghantar data pelayar ini)
+      if (PUBLIC_STAGE) { showPublicStage(); renderStageView(); initializeDatabase(false); return; }
       preConvertCertImages();
       renderUserView();
       renderStageView();
+      updateAdminNav();
       if (activeAdminUser) renderAdminView();
       initializeDatabase(true);
     };
