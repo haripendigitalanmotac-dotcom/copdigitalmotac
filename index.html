@@ -2102,8 +2102,13 @@
       const w = walkinList.find(x => x.email === email);
       if (!w) return;
       const absent = participants.filter(p => !isAttended(p)).length;
+      if (!quotaLeft()) {
+        alert(`Kuota peserta sudah penuh (${participants.length} / ${MAX_PESERTA}).\n\n` +
+          `${w.name} tidak boleh dijadikan peserta dan kekal sebagai pengunjung walk-in.`);
+        return;
+      }
       if (!confirm(`⚠️ PASTIKAN PENGUNJUNG BERSETUJU menjadi peserta sebelum meneruskan.\n\n` +
-        `Jadikan ${w.name} sebagai PESERTA?\n\nPeserta tidak hadir sekarang: ${absent} orang.\n` +
+        `Jadikan ${w.name} sebagai PESERTA?\n\nKuota peserta: ${participants.length} / ${MAX_PESERTA} (baki ${quotaLeft()}).\nPeserta tidak hadir sekarang: ${absent} orang.\n` +
         `Selepas ini, ${w.name} terus disahkan hadir dan boleh kumpul cop & masuk cabutan dengan log masuk menggunakan emel ${w.email}.\n\n` +
         `Jika tersilap, boleh dibatalkan selagi belum kumpul sebarang cop.`)) return;
       try {
@@ -3331,7 +3336,7 @@
       const fbCount = participants.filter(p => p.feedbackDone).length;
       const claimed = participants.filter(p => p.goodiesClaimed).length;
 
-      document.getElementById('hubTotalCount').innerText = total;
+      document.getElementById('hubTotalCount').innerText = `${total} / ${MAX_PESERTA}`;
       document.getElementById('hubEligibleCount').innerText = eligible;
       document.getElementById('hubFeedbackCount').innerText = fbCount;
       document.getElementById('hubClaimedCount').innerText = claimed;
@@ -3991,6 +3996,11 @@
       XLSX.writeFile(wb, `Maklum_Balas_MOTAC_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
+    // Had kuota peserta (sama dengan MAX_PESERTA dalam Code.gs). Pelayan juga menolak peserta
+    // baharu bila penuh, jadi had ini tidak boleh dipintas dari pelayar.
+    const MAX_PESERTA = 160;
+    function quotaLeft() { return Math.max(0, MAX_PESERTA - participants.length); }
+
     function handleExcelUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -3999,7 +4009,7 @@
         try {
           const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
           const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
-          let count = 0;
+          let count = 0, overQuota = 0;
           const importedParticipants = [];
           for (let i = 1; i < rows.length; i++) {
             const r = rows[i];
@@ -4008,6 +4018,7 @@
             const email = String(r[1] || '').trim().toLowerCase();
             const agency = r[2] ? formatAgency(r[2]) : 'MOTAC';
             if (email && !participants.some(p => p.email.toLowerCase() === email)) {
+              if (!quotaLeft()) { overQuota++; continue; }
               const newUser = { name: name || 'Peserta', email, agency, stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false, attended: false, attendedAt: "" };
               participants.push(newUser);
               importedParticipants.push(newUser);
@@ -4018,7 +4029,8 @@
           postDatabase('UPSERT_PARTICIPANTS', { participants: importedParticipants });
           renderIntegratedParticipantsTable();
           renderStageView();
-          alert(`Berjaya memuat naik ${count} peserta baharu!`);
+          alert(`Berjaya memuat naik ${count} peserta baharu!` + (overQuota
+            ? `\n\n⚠️ ${overQuota} peserta TIDAK diterima kerana kuota ${MAX_PESERTA} peserta telah penuh.` : ''));
         } catch(err) {
           alert("Format fail Excel tidak sah.");
         }
@@ -4036,6 +4048,7 @@
           const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
           let updated = 0;
           let added = 0;
+          let overQuota = 0;
           const changedParticipants = [];
           for (let i = 1; i < rows.length; i++) {
             const r = rows[i];
@@ -4053,6 +4066,8 @@
               existing.agency = agency || existing.agency;
               changedParticipants.push(existing);
               updated++;
+            } else if (!quotaLeft()) {
+              overQuota++;
             } else {
               const newUser = {
                 name: name || 'Peserta',
@@ -4078,7 +4093,8 @@
           renderUserView();
           if (activeAdminUser) renderAdminView();
 
-          alert(`Kemas kini pukal selesai: ${updated} rekod dikemaskini, ${added} peserta baru ditambah.`);
+          alert(`Kemas kini pukal selesai: ${updated} rekod dikemaskini, ${added} peserta baru ditambah.` + (overQuota
+            ? `\n\n⚠️ ${overQuota} peserta baharu TIDAK diterima kerana kuota ${MAX_PESERTA} peserta telah penuh.` : ''));
         } catch(err) {
           alert("Format fail Excel tidak sah untuk kemaskini pukal.");
         }
