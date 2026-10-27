@@ -179,6 +179,8 @@
     .qr-code img, .qr-code canvas { width: 100% !important; height: 100% !important; }
     .qr-sheet.walkin .qr-lot { background: #6d28d9; }
     .qr-sheet.walkin .qr-head { border-color: #6d28d9; }
+    .qr-sheet.peserta .qr-lot { background: #1d4ed8; }
+    .qr-sheet.peserta .qr-head { border-color: #1d4ed8; }
 
     @media print {
       /* 1. Mod Cetak e-Sijil Rasmi A4 Landscape */
@@ -641,7 +643,7 @@
       <div id="stageQualifyToast" class="hidden fixed top-6 left-1/2 z-50 max-w-[90vw] px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 shadow-2xl shadow-emerald-500/40 border-2 border-white/60 text-center"></div>
 
       <!-- Jadual Pemenang Sah -->
-      <div class="glass-card border-amber-500/30 rounded-2xl p-5">
+      <div id="stageWinnersCard" class="glass-card border-amber-500/30 rounded-2xl p-5">
         <h3 class="font-bold text-amber-300 text-sm mb-3">🎉 Senarai Pemenang Bertuah Yang Berjaya Dicabut</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
@@ -678,8 +680,16 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Kata Laluan (Password)</label>
-            <input type="password" id="adminPass" required
-              class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white">
+            <div class="relative">
+              <input type="password" id="adminPass" required
+                class="w-full bg-slate-950/80 border border-slate-700 rounded-xl pl-3 pr-11 py-2.5 text-xs text-white">
+              <!-- Butang mata: tunjuk / sembunyi kata laluan -->
+              <button type="button" onclick="togglePasswordView('adminPass', this)" title="Tunjuk kata laluan" aria-label="Tunjuk kata laluan"
+                class="absolute inset-y-0 right-0 w-10 flex items-center justify-center text-slate-400 hover:text-white">
+                <svg class="eye-open w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed hidden w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A9.7 9.7 0 0112 5c6 0 9.5 7 9.5 7a17 17 0 01-3.2 4.1M6.6 6.6C3.9 8.3 2.5 12 2.5 12s3.5 7 9.5 7a9.6 9.6 0 004.3-1"/></svg>
+              </button>
+            </div>
           </div>
           <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-cyan-600 text-white font-bold rounded-xl text-xs shadow-lg">
             Log Masuk Admin
@@ -704,6 +714,9 @@
           </button>
           <button onclick="switchAdminSub('participantsHub')" id="subBtnHub" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
             👥 Pengurusan Peserta & Goodies
+          </button>
+          <button onclick="switchAdminSub('walkin')" id="subBtnWalkin" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
+            🚶 Pengunjung Walk-in
           </button>
           <button onclick="switchAdminSub('reports')" id="subBtnReports" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
             📊 Pelaporan & Analitik
@@ -782,51 +795,6 @@
               placeholder="Taip nama atau emel peserta... (Enter = sahkan jika tinggal seorang)"
               class="w-full bg-slate-950/80 border border-emerald-500/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono">
             <div id="attendSearchResults" class="mt-3 space-y-2"></div>
-          </div>
-
-          <!-- PENGUNJUNG WALK-IN: jumlah kehadiran program sahaja; boleh dijadikan peserta jika ada kekosongan -->
-          <div class="glass-card rounded-2xl p-5 border border-violet-500/40">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
-              <div>
-                <h3 class="text-sm font-bold text-white flex items-center gap-2"><span>🚶</span> Pengunjung Walk-in</h3>
-                <p class="text-[11px] text-slate-400">Tidak kumpul cop &amp; tidak layak cabutan. Tekan "Jadikan Peserta" jika ada peserta tidak hadir.</p>
-              </div>
-              <div class="grid grid-cols-3 gap-2 text-center">
-                <div class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-1.5">
-                  <p id="walkinActiveCount" class="text-lg font-black text-violet-300">0</p>
-                  <p class="text-[9px] text-slate-400 uppercase">Walk-in</p>
-                </div>
-                <div class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-1.5">
-                  <p id="walkinVacancyCount" class="text-lg font-black text-rose-300">0</p>
-                  <p class="text-[9px] text-slate-400 uppercase">Peserta Tak Hadir</p>
-                </div>
-                <div class="bg-slate-950/70 border border-emerald-500/40 rounded-xl px-3 py-1.5">
-                  <p id="programAttendanceTotal" class="text-lg font-black text-emerald-300">0</p>
-                  <p class="text-[9px] text-slate-400 uppercase">Jumlah Kehadiran</p>
-                </div>
-              </div>
-            </div>
-            <!-- Sandaran jika pengunjung tidak dapat imbas QR: admin daftarkan terus di kaunter -->
-            <details id="adminWalkinBox" class="mb-3 bg-slate-950/60 border border-violet-500/30 rounded-xl">
-              <summary class="cursor-pointer select-none px-4 py-2.5 text-xs font-bold text-violet-300">➕ Daftar Walk-in di Kaunter (jika pengunjung tidak dapat imbas QR)</summary>
-              <form onsubmit="handleAdminWalkinSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-2 px-4 pb-4 pt-1">
-                <select id="awTitle" required class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white"></select>
-                <input id="awName" type="text" required placeholder="Nama penuh" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                <input id="awEmail" type="email" required placeholder="Emel" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono">
-                <input id="awPhone" type="tel" required inputmode="numeric" maxlength="11" pattern="0[0-9]{8,10}"
-                  oninput="this.value = this.value.replace(/\D/g, '')" placeholder="No telefon (cth 0123456789)"
-                  class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono">
-                <select id="awAgency" required onchange="toggleAgencyOther('aw')" class="sm:col-span-2 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white"></select>
-                <input id="awAgencyOther" type="text" placeholder="Nyatakan bahagian / agensi / organisasi" class="hidden sm:col-span-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                <button id="awSubmitBtn" type="submit" class="sm:col-span-2 py-2.5 bg-violet-500 hover:bg-violet-400 text-white font-black rounded-lg text-xs disabled:opacity-60 disabled:cursor-wait">
-                  Simpan Pengunjung Walk-in
-                </button>
-              </form>
-            </details>
-            <input type="text" id="walkinSearchInput" oninput="renderWalkinPanel()" autocomplete="off"
-              placeholder="Cari nama, emel atau bahagian pengunjung walk-in..."
-              class="w-full bg-slate-950/80 border border-violet-500/40 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-violet-400 font-mono">
-            <div id="walkinList" class="mt-3 space-y-2 max-h-[320px] overflow-y-auto"></div>
           </div>
 
           <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -952,6 +920,54 @@
           </div>
         </div>
 
+        <!-- SUB-TAB: PENGUNJUNG WALK-IN (daftar & senarai pengunjung) -->
+        <div id="adminWalkinSection" class="hidden space-y-6">
+          <!-- PENGUNJUNG WALK-IN: jumlah kehadiran program sahaja; boleh dijadikan peserta jika ada kekosongan -->
+          <div class="glass-card rounded-2xl p-5 border border-violet-500/40">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+              <div>
+                <h3 class="text-sm font-bold text-white flex items-center gap-2"><span>🚶</span> Pengunjung Walk-in</h3>
+                <p class="text-[11px] text-slate-400">Tidak kumpul cop &amp; tidak layak cabutan. Tekan "Jadikan Peserta" jika ada peserta tidak hadir.</p>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-1.5">
+                  <p id="walkinActiveCount" class="text-lg font-black text-violet-300">0</p>
+                  <p class="text-[9px] text-slate-400 uppercase">Walk-in</p>
+                </div>
+                <div class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-1.5">
+                  <p id="walkinVacancyCount" class="text-lg font-black text-rose-300">0</p>
+                  <p class="text-[9px] text-slate-400 uppercase">Peserta Tak Hadir</p>
+                </div>
+                <div class="bg-slate-950/70 border border-emerald-500/40 rounded-xl px-3 py-1.5">
+                  <p id="programAttendanceTotal" class="text-lg font-black text-emerald-300">0</p>
+                  <p class="text-[9px] text-slate-400 uppercase">Jumlah Kehadiran</p>
+                </div>
+              </div>
+            </div>
+            <!-- Sandaran jika pengunjung tidak dapat imbas QR: admin daftarkan terus di kaunter -->
+            <details id="adminWalkinBox" class="mb-3 bg-slate-950/60 border border-violet-500/30 rounded-xl">
+              <summary class="cursor-pointer select-none px-4 py-2.5 text-xs font-bold text-violet-300">➕ Daftar Walk-in di Kaunter (jika pengunjung tidak dapat imbas QR)</summary>
+              <form onsubmit="handleAdminWalkinSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-2 px-4 pb-4 pt-1">
+                <select id="awTitle" required class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white"></select>
+                <input id="awName" type="text" required placeholder="Nama penuh" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                <input id="awEmail" type="email" required placeholder="Emel" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono">
+                <input id="awPhone" type="tel" required inputmode="numeric" maxlength="11" pattern="0[0-9]{8,10}"
+                  oninput="this.value = this.value.replace(/\D/g, '')" placeholder="No telefon (cth 0123456789)"
+                  class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono">
+                <select id="awAgency" required onchange="toggleAgencyOther('aw')" class="sm:col-span-2 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white"></select>
+                <input id="awAgencyOther" type="text" placeholder="Nyatakan bahagian / agensi / organisasi" class="hidden sm:col-span-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                <button id="awSubmitBtn" type="submit" class="sm:col-span-2 py-2.5 bg-violet-500 hover:bg-violet-400 text-white font-black rounded-lg text-xs disabled:opacity-60 disabled:cursor-wait">
+                  Simpan Pengunjung Walk-in
+                </button>
+              </form>
+            </details>
+            <input type="text" id="walkinSearchInput" oninput="renderWalkinPanel()" autocomplete="off"
+              placeholder="Cari nama, emel atau bahagian pengunjung walk-in..."
+              class="w-full bg-slate-950/80 border border-violet-500/40 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-violet-400 font-mono">
+            <div id="walkinList" class="mt-3 space-y-2 max-h-[65vh] overflow-y-auto"></div>
+          </div>
+        </div>
+
         <!-- SUB-TAB 2: PELAPORAN, STATISTIK & ANALITIK -->
         <div id="adminReportsSection" class="hidden space-y-6">
           <div class="glass-card rounded-3xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-cyan-500/40">
@@ -1073,12 +1089,45 @@
         <!-- SUB-TAB 4: URUS AKAUN ADMIN -->
         <div id="adminAccountsSection" class="hidden space-y-6">
           <div class="glass-card rounded-2xl p-5">
-            <h3 class="text-sm font-bold text-white mb-2">Akaun Urus Setia Berdaftar</h3>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <h3 class="text-sm font-bold text-white">Akaun Admin Berdaftar</h3>
+                <p class="text-[11px] text-slate-400">Super Admin boleh urus semua akaun. Urus Setia boleh kemaskini akaun sendiri sahaja.</p>
+              </div>
+              <button id="adminAddAccountBtn" onclick="openAdminAccountForm('')" class="hidden px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg text-xs">+ Tambah Akaun</button>
+            </div>
+
+            <!-- Borang tambah / kemaskini akaun -->
+            <form id="adminAccountForm" onsubmit="handleAdminAccountSubmit(event)" class="hidden mb-4 p-4 rounded-xl bg-slate-950/70 border border-amber-500/40 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <input type="hidden" id="aaOriginalUser">
+              <h4 id="aaTitle" class="sm:col-span-2 font-bold text-amber-300 text-sm"></h4>
+              <label class="block"><span class="block text-slate-300 mb-1">Nama</span>
+                <input id="aaName" type="text" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white"></label>
+              <label class="block"><span class="block text-slate-300 mb-1">Nama Pengguna</span>
+                <input id="aaUser" type="text" required autocomplete="off" pattern="[a-zA-Z0-9._\-]{3,30}" title="3-30 aksara: huruf, nombor, titik atau sengkang"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono"></label>
+              <label class="block"><span class="block text-slate-300 mb-1">Peranan</span>
+                <select id="aaRole" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white disabled:opacity-60">
+                  <option value="urusetia">Urus Setia</option>
+                  <option value="superadmin">Super Admin</option>
+                </select></label>
+              <div class="hidden sm:block"></div>
+              <label class="block"><span class="block text-slate-300 mb-1">Kata Laluan Baharu <span id="aaPassHint" class="text-slate-500"></span></span>
+                <input id="aaPass" type="password" autocomplete="new-password" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white"></label>
+              <label class="block"><span class="block text-slate-300 mb-1">Sahkan Kata Laluan</span>
+                <input id="aaPass2" type="password" autocomplete="new-password" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white"></label>
+              <div class="sm:col-span-2 flex gap-2">
+                <button id="aaSubmitBtn" type="submit" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg disabled:opacity-60 disabled:cursor-wait">Simpan Akaun</button>
+                <button type="button" onclick="closeAdminAccountForm()" class="px-4 py-2.5 bg-slate-800 text-slate-300 rounded-lg">Batal</button>
+              </div>
+            </form>
+
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-950/80 border-b border-slate-800 text-slate-300 uppercase">
                 <tr>
-                  <th class="py-2.5 px-3">Nama Urus Setia</th>
+                  <th class="py-2.5 px-3">Nama</th>
                   <th class="py-2.5 px-3">Username</th>
+                  <th class="py-2.5 px-3">Peranan</th>
                   <th class="py-2.5 px-3 text-right">Tindakan</th>
                 </tr>
               </thead>
@@ -1479,10 +1528,9 @@
       { name: "Mohd Danish Haikal", email: "danish@kraftangan.gov.my", agency: "Perbadanan Kemajuan Kraftangan", stamps: [1, 2, 3, 4, 5], feedbackDone: false, certDownloaded: false, goodiesClaimed: false }
     ]; 
 
-    const defaultAdmins = [
-      { name: "Super Admin", user: "superadmin", pass: "Motac@1234" },
-      { name: "Urus Setia BPM", user: "urusetia.bpm", pass: "Motac@1234" }
-    ];
+    // Akaun admin kini disimpan dalam tab "Admin" Google Sheet (kata laluan di-hash di pelayan),
+    // bukan dalam fail ini yang boleh dibaca umum di GitHub
+    const defaultAdmins = [];
 
     let participants = JSON.parse(localStorage.getItem('motac_p_v28')) || defaultParticipants;
     // Akaun admin sentiasa dari kod (bukan simpanan pelayar), supaya akaun lama tidak boleh digunakan lagi
@@ -1491,7 +1539,10 @@
     let winnersList = JSON.parse(localStorage.getItem('motac_winners_v28')) || [];
     let feedbackResponses = JSON.parse(localStorage.getItem('motac_feedbacks_v28')) || [];
     let currentParticipantEmail = localStorage.getItem('motac_logged_email') || null;
-    let activeAdminUser = sessionStorage.getItem('motac_active_admin') || null;
+    let adminToken = sessionStorage.getItem('motac_admin_token') || null;
+    let activeAdminProfile = JSON.parse(sessionStorage.getItem('motac_admin_profile') || 'null');
+    // Sesi versi lama (tanpa token pelayan) tidak lagi sah
+    let activeAdminUser = adminToken && activeAdminProfile ? activeAdminProfile.user : null;
     let html5ScannerInstance = null;
     let databaseWebAppUrl = localStorage.getItem('motac_apps_script_url_v4') || 'https://script.google.com/macros/s/AKfycbwdkeZFSclUzx6S17Am13EZG_UTOpXWbvq8J1XxjSdkHJpRN3jBJpqvTQxNLTp3C39y/exec';
 
@@ -1790,6 +1841,8 @@
       ['viewUser', 'viewAdmin'].forEach(id => document.getElementById(id).classList.add('hidden'));
       document.getElementById('navUser').parentElement.classList.add('hidden'); // sembunyi menu navigasi
       document.querySelectorAll('.admin-draw-only').forEach(el => el.remove());
+      // Senarai pemenang tidak dipaparkan kepada umum (disorok, bukan dibuang: renderStageView masih mengisinya)
+      document.getElementById('stageWinnersCard').classList.add('hidden');
       document.getElementById('viewStage').classList.remove('hidden');
     }
 
@@ -2311,7 +2364,7 @@
       }
       const list = attendanceMatches();
       if (!list.length) {
-        box.innerHTML = `<p class="text-xs text-amber-400">Tiada peserta sepadan. Jika belum berdaftar, daftarkan sebagai Pengunjung Walk-in di bawah, kemudian tekan \"Jadikan Peserta\".</p>`;
+        box.innerHTML = `<p class="text-xs text-amber-400">Tiada peserta sepadan. Jika belum berdaftar, daftarkan di tab \"Pengunjung Walk-in\", kemudian tekan \"Jadikan Peserta\".</p>`;
         return;
       }
       box.innerHTML = list.slice(0, 8).map(p => `
@@ -4130,7 +4183,7 @@
                 ${slot ? `<p class="qr-slot">${escapeHtml(slot)}</p>` : ''}
               </div>
               <p class="qr-instr">${instr}</p>
-              <p class="qr-token">${footer}</p>
+              ${footer ? `<p class="qr-token">${footer}</p>` : ''}
             </div>
             <div class="qr-code"></div>
           </div>
@@ -4151,16 +4204,28 @@
       const walkinUrl = `${location.origin}${location.pathname}?daftar=walkin`;
       const isLocal = location.protocol === 'file:' || /^(localhost|127\.|192\.168\.)/.test(location.hostname);
       if (isLocal) {
-        container.insertAdjacentHTML('beforeend', `<p class="no-print w-full text-center text-xs font-bold text-rose-400">⚠️ QR walk-in menghala ke ${escapeHtml(walkinUrl)} yang hanya berfungsi di komputer ini. Buka Panel Admin dari laman yang dihoskan sebelum mencetak.</p>`);
+        container.insertAdjacentHTML('beforeend', `<p class="no-print w-full text-center text-xs font-bold text-rose-400">⚠️ QR peserta & walk-in menghala ke ${escapeHtml(location.origin + location.pathname)} yang hanya berfungsi di komputer ini. Buka Panel Admin dari laman yang dihoskan sebelum mencetak.</p>`);
       }
+
+      // Kad QR peserta pra-daftar: terus ke halaman log masuk Cop Digital Peserta
+      const pesertaUrl = `${location.origin}${location.pathname}`;
+      const pesertaSheet = buildQRSheet({
+        lot: 'PESERTA PRA-DAFTAR', name: 'Log Masuk Cop Digital',
+        instr: 'Khas untuk peserta yang telah membuat <b>pendaftaran awal</b> dan <b>berdaftar sebagai peserta</b> sahaja. Imbas kod QR ini, kemudian masukkan emel yang didaftarkan. ' +
+          '<span style="color:#b91c1c">Bukan untuk pengunjung walk-in.</span>',
+        footer: '', qrText: pesertaUrl, level: QRCode.CorrectLevel.M
+      });
+      pesertaSheet.classList.add('peserta');
+      container.appendChild(pesertaSheet);
+
       container.appendChild(buildQRSheet({
         walkin: true, lot: 'PENGUNJUNG WALK-IN', name: 'Rekod Kehadiran',
         instr: 'Imbas kod QR ini dengan kamera telefon untuk merekodkan kehadiran anda.',
-        footer: escapeHtml(walkinUrl), qrText: walkinUrl, level: QRCode.CorrectLevel.M
+        footer: '', qrText: walkinUrl, level: QRCode.CorrectLevel.M
       }));
 
       MOTAC_BOOTHS.forEach(b => container.appendChild(buildQRSheet({
-        lot: b.lot, name: b.name, slot: b.slot,
+        lot: b.lot, name: b.name,
         instr: 'Imbas kod QR ini melalui <b>Cop Digital Peserta</b> untuk mendapatkan cop reruai.',
         footer: `Kod manual (jika kamera bermasalah):<strong>${escapeHtml(b.token)}</strong>`,
         qrText: `MOTAC_STAMP:${b.id}:${b.token}`, level: QRCode.CorrectLevel.H
@@ -4203,14 +4268,28 @@
       });
     }
 
-    function handleAdminLogin(e) {
+    async function handleAdminLogin(e) {
       e.preventDefault();
-      const u = document.getElementById('adminUser').value.trim();
-      const p = document.getElementById('adminPass').value.trim();
-      const match = adminAccounts.find(a => a.user === u && a.pass === p);
-      if (!match) { alert("Nama pengguna atau kata laluan salah!"); return; }
-      activeAdminUser = match.user;
-      sessionStorage.setItem('motac_active_admin', activeAdminUser);
+      const u = document.getElementById('adminUser').value.trim().toLowerCase();
+      const p = document.getElementById('adminPass').value;
+      const btn = e.submitter || e.target.querySelector('button[type=submit]');
+      if (btn) { btn.disabled = true; btn.dataset.label = btn.innerText; btn.innerText = 'Menyemak...'; }
+      let res;
+      try {
+        res = await sendToDatabase({ action: 'ADMIN_LOGIN', user: u, pass: p });
+      } catch (err) {
+        alert(err.message || 'Log masuk gagal.');
+        return;
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = btn.dataset.label; }
+      }
+      if (!res || !res.token) {
+        alert('Pelayan tidak memulangkan sesi. Pastikan Code.gs terkini telah di-Deploy (New version).');
+        return;
+      }
+      setAdminSession(res.token, res.admin);
+      document.getElementById('adminPass').value = '';
+      document.getElementById('adminPass').type = 'password';
       renderAdminView();
       // Admin cuba buka Skrin Pentas sebelum log masuk: terus ke skrin pentas
       if (pendingStageAfterLogin) {
@@ -4219,9 +4298,48 @@
       }
     }
 
+    // Butang mata: tukar ruang kata laluan antara tersembunyi (●●●) dan teks biasa
+    function togglePasswordView(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.querySelector('.eye-open').classList.toggle('hidden', show);
+      btn.querySelector('.eye-closed').classList.toggle('hidden', !show);
+      btn.title = btn.ariaLabel = show ? 'Sembunyi kata laluan' : 'Tunjuk kata laluan';
+      input.focus();
+    }
+
+    function setAdminSession(token, profile) {
+      adminToken = token;
+      activeAdminProfile = profile;
+      activeAdminUser = profile ? profile.user : null;
+      if (token) {
+        sessionStorage.setItem('motac_admin_token', token);
+        sessionStorage.setItem('motac_admin_profile', JSON.stringify(profile));
+      } else {
+        sessionStorage.removeItem('motac_admin_token');
+        sessionStorage.removeItem('motac_admin_profile');
+      }
+      sessionStorage.removeItem('motac_active_admin'); // kunci versi lama
+    }
+
+    function isSuperAdmin() { return !!activeAdminProfile && activeAdminProfile.role === 'superadmin'; }
+
+    // Panggil tindakan akaun admin; sesi tamat = log keluar
+    async function adminApi(action, data = {}) {
+      try {
+        return await sendToDatabase({ action, token: adminToken, ...data });
+      } catch (err) {
+        if (String(err.message).startsWith('SESI_TAMAT')) {
+          alert('Sesi admin telah tamat. Sila log masuk semula.');
+          handleAdminLogout();
+        }
+        throw err;
+      }
+    }
+
     function handleAdminLogout() {
-      activeAdminUser = null;
-      sessionStorage.removeItem('motac_active_admin');
+      setAdminSession(null, null);
       renderAdminView();
       if (!document.getElementById('viewStage').classList.contains('hidden')) switchTab('user');
     }
@@ -4243,7 +4361,9 @@
       }
       loginBox.classList.add('hidden');
       dashBox.classList.remove('hidden');
-      document.getElementById('currentAdminName').innerText = activeAdminUser;
+      document.getElementById('currentAdminName').innerText = activeAdminProfile
+        ? `${activeAdminProfile.name} (${activeAdminProfile.role === 'superadmin' ? 'Super Admin' : 'Urus Setia'})`
+        : activeAdminUser;
 
       renderIntegratedParticipantsTable();
       renderBoothAnalytics();
@@ -4252,20 +4372,107 @@
       renderStageView();
     }
 
+    // Tab Urus Akaun Admin: senarai dimuat dari pelayan (tab "Admin" dalam Sheet)
+    async function loadAdminAccounts() {
+      if (!adminToken) return;
+      try {
+        const res = await adminApi('LIST_ADMINS');
+        adminAccounts = res.admins || [];
+      } catch (err) {
+        document.getElementById('adminAccountsTable').innerHTML =
+          `<tr><td colspan="4" class="py-4 text-center text-rose-400">Gagal memuat akaun: ${escapeHtml(err.message)}</td></tr>`;
+        return;
+      }
+      renderAdminAccounts();
+    }
+
     function renderAdminAccounts() {
       const tbody = document.getElementById('adminAccountsTable');
       if (!tbody) return;
-      tbody.innerHTML = '';
-      adminAccounts.forEach(a => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-800/40";
-        tr.innerHTML = `
-          <td class="py-2.5 px-3 font-semibold text-white">${a.name}</td>
-          <td class="py-2.5 px-3 font-mono text-cyan-300">${a.user}</td>
-          <td class="py-2.5 px-3 text-right"><span class="text-xs text-slate-400 font-mono">Aktif</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
+      document.getElementById('adminAddAccountBtn').classList.toggle('hidden', !isSuperAdmin());
+      if (!adminAccounts.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-slate-500">Memuat akaun...</td></tr>';
+        return;
+      }
+      tbody.innerHTML = adminAccounts.map(a => {
+        const me = activeAdminProfile && a.user === activeAdminProfile.user;
+        const canEdit = isSuperAdmin() || me;
+        return `<tr class="hover:bg-slate-800/40">
+          <td class="py-2.5 px-3 font-semibold text-white">${escapeHtml(a.name)}${me ? ' <span class="text-[10px] text-emerald-400">(anda)</span>' : ''}</td>
+          <td class="py-2.5 px-3 font-mono text-cyan-300">${escapeHtml(a.user)}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.role === 'superadmin' ? 'bg-amber-500/20 text-amber-300' : 'bg-cyan-500/20 text-cyan-300'}">${a.role === 'superadmin' ? 'Super Admin' : 'Urus Setia'}</span></td>
+          <td class="py-2.5 px-3 text-right whitespace-nowrap">
+            ${canEdit ? `<button onclick="openAdminAccountForm('${escapeHtml(a.user)}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-amber-300 font-bold rounded-lg text-[11px]">✏️ Kemaskini</button>` : ''}
+            ${isSuperAdmin() && !me ? `<button onclick="deleteAdminAccount('${escapeHtml(a.user)}')" class="ml-1 px-2 py-1 text-rose-400 hover:text-rose-300 text-[11px]">Padam</button>` : ''}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // user kosong = akaun baharu (Super Admin sahaja)
+    function openAdminAccountForm(user) {
+      const a = user ? adminAccounts.find(x => x.user === user) : null;
+      document.getElementById('aaOriginalUser').value = a ? a.user : '';
+      document.getElementById('aaTitle').innerText = a ? `Kemaskini Akaun: ${a.user}` : 'Tambah Akaun Admin';
+      document.getElementById('aaName').value = a ? a.name : '';
+      document.getElementById('aaUser').value = a ? a.user : '';
+      document.getElementById('aaRole').value = a ? a.role : 'urusetia';
+      document.getElementById('aaRole').disabled = !isSuperAdmin();
+      document.getElementById('aaPass').value = '';
+      document.getElementById('aaPass2').value = '';
+      document.getElementById('aaPassHint').innerText = a ? '(kosongkan untuk kekalkan kata laluan sedia ada)' : '(wajib, minimum 8 aksara)';
+      document.getElementById('adminAccountForm').classList.remove('hidden');
+      document.getElementById('aaName').focus();
+    }
+
+    function closeAdminAccountForm() {
+      document.getElementById('adminAccountForm').classList.add('hidden');
+    }
+
+    async function handleAdminAccountSubmit(e) {
+      e.preventDefault();
+      const v = id => document.getElementById(id).value;
+      const originalUser = v('aaOriginalUser');
+      const pass = v('aaPass');
+      if (pass !== v('aaPass2')) { alert('Pengesahan kata laluan tidak sama.'); return; }
+      if (!originalUser && !pass) { alert('Kata laluan wajib diisi untuk akaun baharu.'); return; }
+      if (pass && pass.length < 8) { alert('Kata laluan mesti sekurang-kurangnya 8 aksara.'); return; }
+      const btn = document.getElementById('aaSubmitBtn');
+      btn.disabled = true;
+      btn.innerText = 'Menyimpan...';
+      let res;
+      try {
+        res = await adminApi('SAVE_ADMIN', {
+          originalUser,
+          admin: { name: v('aaName').trim(), user: v('aaUser').trim().toLowerCase(), role: v('aaRole'), pass }
+        });
+      } catch (err) {
+        alert(`❌ ${err.message}`);
+        return;
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Simpan Akaun';
+      }
+      // Akaun sendiri dikemas kini: kemas kini nama dalam sesi
+      if (activeAdminProfile && originalUser === activeAdminProfile.user) {
+        setAdminSession(adminToken, res.admin);
+        document.getElementById('currentAdminName').innerText =
+          `${res.admin.name} (${res.admin.role === 'superadmin' ? 'Super Admin' : 'Urus Setia'})`;
+      }
+      closeAdminAccountForm();
+      await loadAdminAccounts();
+      alert(`✅ Akaun ${res.admin.user} disimpan.${pass ? ' Kata laluan baharu berkuat kuasa pada log masuk seterusnya.' : ''}`);
+    }
+
+    async function deleteAdminAccount(user) {
+      if (!confirm(`Padam akaun admin ${user}? Akaun ini tidak boleh log masuk lagi.`)) return;
+      try {
+        await adminApi('DELETE_ADMIN', { user });
+      } catch (err) {
+        alert(`❌ ${err.message}`);
+        return;
+      }
+      await loadAdminAccounts();
     }
 
     // Switch Tab Navigasi
@@ -4275,6 +4482,7 @@
         pendingStageAfterLogin = true;
         tab = 'admin';
       }
+      sessionStorage.setItem('motac_last_tab', tab); // dipulihkan bila halaman di-refresh
       ['viewUser', 'viewStage', 'viewAdmin'].forEach(id => document.getElementById(id).classList.add('hidden'));
       ['navUser', 'navStage', 'navAdmin'].forEach(id => document.getElementById(id).className = "px-3.5 py-1.5 rounded-xl font-bold text-slate-300 hover:text-white transition-all");
 
@@ -4295,11 +4503,12 @@
     }
 
     function switchAdminSub(sub) {
-      ['adminDrawSection', 'adminParticipantsHubSection', 'adminReportsSection', 'adminQRSection', 'adminAccountsSection'].forEach(id => {
+      sessionStorage.setItem('motac_last_admin_sub', sub);
+      ['adminDrawSection', 'adminParticipantsHubSection', 'adminReportsSection', 'adminQRSection', 'adminAccountsSection', 'adminWalkinSection'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
       });
-      ['subBtnDraw', 'subBtnHub', 'subBtnReports', 'subBtnQR', 'subBtnAccounts'].forEach(id => {
+      ['subBtnDraw', 'subBtnHub', 'subBtnWalkin', 'subBtnReports', 'subBtnQR', 'subBtnAccounts'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.className = "px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white";
       });
@@ -4311,6 +4520,10 @@
         document.getElementById('adminParticipantsHubSection').classList.remove('hidden');
         document.getElementById('subBtnHub').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-cyan-300";
         renderIntegratedParticipantsTable();
+      } else if (sub === 'walkin') {
+        document.getElementById('adminWalkinSection').classList.remove('hidden');
+        document.getElementById('subBtnWalkin').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-violet-300";
+        renderWalkinPanel();
       } else if (sub === 'reports') {
         document.getElementById('adminReportsSection').classList.remove('hidden');
         document.getElementById('subBtnReports').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-cyan-300";
@@ -4323,6 +4536,7 @@
         document.getElementById('adminAccountsSection').classList.remove('hidden');
         document.getElementById('subBtnAccounts').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-cyan-300";
         renderAdminAccounts();
+        loadAdminAccounts();
       }
     }
 
@@ -4336,6 +4550,13 @@
       renderStageView();
       updateAdminNav();
       if (activeAdminUser) renderAdminView();
+      // Refresh: kekal di tab terakhir (Skrin Pentas hanya jika admin masih log masuk)
+      const lastTab = sessionStorage.getItem('motac_last_tab');
+      if (lastTab === 'admin' || (lastTab === 'stage' && activeAdminUser)) {
+        switchTab(lastTab);
+        const lastSub = sessionStorage.getItem('motac_last_admin_sub');
+        if (lastTab === 'admin' && activeAdminUser && lastSub) switchAdminSub(lastSub);
+      }
       initializeDatabase(true);
     };
   </script>
