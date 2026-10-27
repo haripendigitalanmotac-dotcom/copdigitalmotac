@@ -116,6 +116,86 @@
     }
     .fb-light .fb-input::placeholder { color: #94a3b8; }
     .fb-light .fb-input:focus { outline: none; border-color: #0891b2; box-shadow: 0 0 0 3px rgba(8,145,178,.2); }
+    /* ---------- KOTAK CABUTAN BERTUAH ---------- */
+    .draw-card { background: radial-gradient(ellipse at 50% 0%, rgba(251,191,36,.12), transparent 60%), rgba(15,23,42,.78); }
+    .draw-rays {
+      position: absolute; left: 50%; top: 50%; width: 220%; aspect-ratio: 1; transform: translate(-50%, -50%);
+      background: repeating-conic-gradient(from 0deg, rgba(251,191,36,.07) 0 8deg, transparent 8deg 16deg);
+      -webkit-mask-image: radial-gradient(circle, #000 0, transparent 55%); mask-image: radial-gradient(circle, #000 0, transparent 55%);
+      animation: drawRays 80s linear infinite; pointer-events: none;
+    }
+    @keyframes drawRays { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    .draw-ribbon {
+      display: inline-block; padding: 4px 16px; border-radius: 999px; font-size: 11px; font-weight: 900;
+      letter-spacing: .3em; text-transform: uppercase; color: #fcd34d;
+      background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.5);
+    }
+    .draw-title {
+      margin-top: 12px; font-size: clamp(2rem, 6vw, 3.75rem); font-weight: 900; letter-spacing: .06em; line-height: 1.05;
+      background: linear-gradient(90deg, #fde68a, #fff7d6, #fbbf24, #fde68a); background-size: 200% auto;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: drawShine 6s linear infinite; filter: drop-shadow(0 0 18px rgba(251,191,36,.35));
+    }
+    @keyframes drawShine { to { background-position: 200% center; } }
+    .draw-theme { margin-top: 6px; font-size: 13px; color: rgba(165,243,252,.8); }
+    .draw-box {
+      border-radius: 1.5rem; transition: box-shadow .3s;
+      background: radial-gradient(ellipse at center, rgba(30,41,59,.95), rgba(2,6,23,.98));
+      box-shadow: 0 0 0 2px rgba(34,211,238,.35), 0 20px 50px rgba(0,0,0,.5);
+    }
+    .draw-box.is-spin { animation: drawPulse .45s ease-in-out infinite alternate; }
+    .draw-box.is-spin #stageWinnerName { color: #e0f2fe; }
+    @keyframes drawPulse {
+      from { box-shadow: 0 0 0 2px rgba(251,191,36,.5), 0 0 25px rgba(251,191,36,.25); }
+      to   { box-shadow: 0 0 0 3px rgba(251,191,36,.9), 0 0 55px rgba(251,191,36,.5); }
+    }
+    .draw-box.is-win {
+      box-shadow: 0 0 0 3px #fbbf24, 0 0 70px rgba(251,191,36,.55), inset 0 0 45px rgba(251,191,36,.15);
+      animation: drawWin .7s cubic-bezier(.2,1.6,.4,1);
+    }
+    .draw-box.is-win #stageWinnerName { color: #fcd34d; text-shadow: 0 0 28px rgba(251,191,36,.65); }
+    @keyframes drawWin { 0% { transform: scale(.92); } 100% { transform: scale(1); } }
+    .draw-chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px;
+      background: rgba(2,6,23,.6); border: 1px solid rgba(148,163,184,.3); color: #cbd5e1; font-weight: 600;
+    }
+    .draw-chip strong { font-size: 1.15em; font-weight: 900; }
+
+    /* ---------- MOD LED (16:9): cabutan besar di kiri, senarai layak di kanan, tiada menu ---------- */
+    body.led-mode header, body.led-mode footer, body.led-mode #stageStatsGrid,
+    body.led-mode #stageWinnersCard, body.led-mode .led-hide,
+    body.led-mode #stageDrawCard span.admin-draw-only { display: none !important; }
+    /* Butang PUTAR CABUTAN kekal dalam Mod LED (lebih besar); hanya petunjuk "Tekan Space" disorok */
+    body.led-mode #btnStageTriggerDraw { width: 60%; font-size: 2vw; padding: 2.2vh 0; border-radius: 1.2vw; }
+    body.led-mode main { max-width: none !important; height: 100vh; padding: 2vh 1.6vw !important; }
+    body.led-mode #viewStage {
+      display: grid !important; grid-template-columns: 1.75fr 1fr; gap: 1.6vw; height: 96vh;
+    }
+    body.led-mode #viewStage > * { margin: 0 !important; min-height: 0; }
+    body.led-mode #stageDrawCard {
+      order: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 3vh 2.5vw !important;
+    }
+    body.led-mode .draw-ribbon { font-size: 1vw; padding: .6vh 1.4vw; }
+    body.led-mode .draw-title { font-size: 5vw; margin-top: 1.5vh; }
+    body.led-mode .draw-theme { font-size: 1.2vw; }
+    body.led-mode #stageDrawBox { max-width: none; width: 100%; margin: 4vh 0; padding: 5vh 2vw; }
+    body.led-mode #stageWinnerBadge { font-size: 1.3vw; }
+    body.led-mode #stageWinnerName { font-size: 5vw; margin: 2.5vh 0; line-height: 1.15; }
+    body.led-mode #stageWinnerAgency { font-size: 1.7vw; }
+    body.led-mode #stageDrawControls { max-width: none; }
+    body.led-mode .draw-chip { font-size: 1.2vw; padding: .8vh 1.2vw; }
+    body.led-mode #stageListCard { order: 2; height: 100%; display: flex; flex-direction: column; }
+    body.led-mode #stageListCard > .glass-card:first-child { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    body.led-mode #stageLoginCard { margin-top: 1.6vw !important; padding: 1.5vh 1.2vw; gap: 1.4vw; }
+    body.led-mode #stageLoginQr canvas, body.led-mode #stageLoginQr img { width: 13vw !important; height: 13vw !important; }
+    body.led-mode #stageLoginCard .stage-login-title { font-size: 1.45vw; }
+    body.led-mode #stageLoginCard .stage-login-note { font-size: 0.95vw; }
+    body.led-mode #stageListCard h3 { font-size: 1.5vw; }
+    body.led-mode #stageWallCount { font-size: 2.6vw; }
+    body.led-mode #stageQualifiedWall { flex: 1; max-height: none !important; min-height: 0; }
+    body.led-mode #stageQualifiedWall > .grid { grid-template-columns: 1fr !important; row-gap: 0.8vh; }
+    body.led-mode #stageQualifiedWall p.text-sm { font-size: 1.15vw; }
+    body.led-mode #stageQualifiedWall p.text-\[10px\] { font-size: 0.8vw; }
     .no-scrollbar { scrollbar-width: none; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
 
@@ -574,7 +654,7 @@
     <!-- 2. MODUL SKRIN PENTAS LIVE                                     -->
     <!-- ============================================================== -->
     <section id="viewStage" class="hidden space-y-6">
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div id="stageStatsGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div class="glass-card rounded-2xl p-4 text-center">
           <span class="text-[10px] text-slate-300 uppercase font-semibold">Jumlah Pendaftaran</span>
           <p id="statTotal" class="text-2xl sm:text-3xl font-black text-white mt-1">0</p>
@@ -602,7 +682,7 @@
       </div>
 
       <!-- PERLUMBAAN COP: senarai nama layak cabutan (dikemas kini sendiri setiap 15 saat) -->
-      <div>
+      <div id="stageListCard">
         <div class="glass-card rounded-2xl p-5 border border-emerald-500/40">
           <div class="flex items-end justify-between gap-3 mb-3">
             <div>
@@ -617,28 +697,51 @@
           <!-- Senarai bergerak ke atas tanpa henti; kandungan digandakan supaya pusingan bersambung -->
           <div id="stageQualifiedWall" class="wall-fade no-scrollbar max-h-[420px] overflow-hidden"></div>
         </div>
+        <!-- QR log masuk Cop Digital Peserta (memudahkan peserta mula kumpul cop) -->
+        <div id="stageLoginCard" class="mt-4 glass-card rounded-2xl p-4 border border-cyan-500/40 flex items-center gap-4">
+          <div id="stageLoginQr" class="shrink-0 bg-white p-3 rounded-xl"></div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-black uppercase tracking-widest text-cyan-300">📱 Log Masuk Cop Digital</p>
+            <p class="stage-login-title text-base font-black text-white leading-snug mt-1">Imbas QR untuk mula mengumpul cop reruai</p>
+            <p class="stage-login-note text-[11px] text-slate-300 mt-1">Khas peserta berdaftar. Masukkan emel yang didaftarkan, kemudian sahkan kehadiran di Kaunter Urus Setia.</p>
+          </div>
+        </div>
       </div>
 
       <!-- Kotak Visual Cabutan Semasa -->
-      <div class="glass-card rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden shadow-2xl">
-        <h2 class="text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-100 to-indigo-300">
-          CABUTAN BERTUAH HARI PENDIGITALAN MOTAC
-        </h2>
-        <div class="bg-slate-950/90 border border-cyan-500/30 rounded-3xl p-6 sm:p-8 max-w-xl mx-auto my-6 shadow-2xl">
+      <div id="stageDrawCard" class="draw-card glass-card rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden shadow-2xl">
+        <!-- Lapisan video pentas: menutup kotak cabutan sahaja (senarai layak kekal kelihatan) sehingga admin tekan Mula Sesi Cabutan -->
+        <div id="stageVideoLayer" class="hidden absolute inset-0 z-30 bg-black" onmousemove="showVideoControls()">
+          <div id="stageVideoHost" class="absolute inset-0"></div>
+          <div id="stageVideoControls" class="absolute bottom-6 right-6 flex gap-2 transition-opacity duration-500">
+            <button onclick="toggleStageFullscreen()" class="px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-600 text-white font-bold text-sm">⛶ Skrin Penuh</button>
+            <button onclick="stopStageVideo()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black text-base shadow-2xl">Mula Sesi Cabutan ➔</button>
+          </div>
+        </div>
+        <div class="draw-rays" aria-hidden="true"></div>
+        <div id="stageDrawHead" class="relative z-10">
+          <span class="draw-ribbon">✦ Hari Pendigitalan MOTAC Tahun 2026 ✦</span>
+          <h2 class="draw-title">CABUTAN BERTUAH</h2>
+          <p class="draw-theme">"Memacu Transformasi Digital MOTAC"</p>
+        </div>
+        <div id="stageDrawBox" class="draw-box relative z-10 p-6 sm:p-8 max-w-2xl mx-auto my-6">
           <span id="stageWinnerBadge" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Menunggu Giliran Cabutan oleh Urus Setia...</span>
           <h3 id="stageWinnerName" class="text-3xl sm:text-5xl whitespace-nowrap overflow-hidden font-black text-amber-300 my-3">---</h3>
           <p id="stageWinnerAgency" class="text-xs sm:text-sm text-cyan-200 font-mono">---</p>
         </div>
 
         <!-- Kawalan cabutan live (skrin pentas hanya boleh dibuka oleh admin) -->
-        <div class="max-w-xl mx-auto flex flex-col items-center gap-3">
+        <div id="stageDrawControls" class="relative z-10 max-w-xl mx-auto flex flex-col items-center gap-3">
           <button id="btnStageTriggerDraw" onclick="triggerLuckyDraw()" class="admin-draw-only w-full py-5 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black rounded-2xl text-xl sm:text-2xl tracking-wide shadow-2xl shadow-amber-500/30 active:scale-95 transition flex items-center justify-center gap-3">
             PUTAR CABUTAN
           </button>
           <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-300">
-            <span>Baki dalam balang: <strong id="stageRemainingCount" class="text-emerald-400 font-mono">0</strong> orang</span>
+            <span class="draw-chip">🎟️ Baki dalam balang: <strong id="stageRemainingCount" class="text-emerald-300">0</strong> orang</span>
+            <span class="draw-chip">🏆 Pemenang: <strong id="stageDrawWinnerCount" class="text-amber-300">0</strong></span>
             <span class="admin-draw-only hidden sm:inline text-slate-500">Tekan <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-600 font-mono text-[10px]">Space</kbd> untuk putar</span>
-            <button onclick="toggleStageFullscreen()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold">⛶ Skrin Penuh</button>
+            <button onclick="toggleStageFullscreen()" class="led-hide px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold">⛶ Skrin Penuh</button>
+            <button onclick="startStageVideo()" class="admin-draw-only px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold">▶ Paparan Video</button>
+            <button onclick="setLedMode(true)" class="led-hide px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold">📺 Mod LED</button>
           </div>
         </div>
       </div>
@@ -762,6 +865,31 @@
                 <span>Baki layak belum menang: <strong id="adminRemainingCount" class="text-emerald-400 font-mono">0</strong> orang</span>
                 <span>Telah menang: <strong id="adminWonCount" class="text-amber-400 font-mono">0</strong> orang</span>
               </div>
+            </div>
+          </div>
+
+          <!-- VIDEO PENTAS: dimainkan di Skrin Pentas / LED sebelum sesi cabutan -->
+          <div class="glass-card rounded-2xl p-5 border border-cyan-500/40">
+            <h4 class="font-bold text-cyan-300 text-sm">🎬 Video Pentas (sebelum sesi cabutan)</h4>
+            <p class="text-[11px] text-slate-400 mt-1">Video berulang tanpa henti di Skrin Pentas / Mod LED. Tekan <b>Mula Sesi Cabutan</b> untuk tukar ke cabutan, dan <b>Paparan Video</b> untuk kembali.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 text-xs">
+              <div>
+                <label class="block font-semibold text-slate-300 mb-1">Pautan YouTube (playlist atau video; satu pautan setiap baris)</label>
+                <textarea id="stageVideoUrls" rows="4" placeholder="https://www.youtube.com/playlist?list=...&#10;https://youtu.be/...&#10;atau pautan fail MP4 (https://.../video.mp4)"
+                  class="w-full bg-slate-950/80 border border-slate-700 rounded-lg p-2.5 text-white font-mono"></textarea>
+                <button onclick="saveStageVideoUrls()" class="mt-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg">Simpan Pautan</button>
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-300 mb-1">Atau pilih fail MP4 dari komputer ini</label>
+                <input type="file" id="stageVideoFiles" accept="video/*" multiple onchange="pickStageVideoFiles(event)"
+                  class="w-full text-slate-300 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-slate-800 file:text-white file:font-bold">
+                <p class="text-[10px] text-slate-500 mt-1">Fail dimainkan terus dari komputer ini (tidak dimuat naik). Perlu dipilih semula selepas halaman di-refresh.</p>
+                <p id="stageVideoStatus" class="mt-2 text-[11px] font-bold text-emerald-400"></p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <button onclick="startStageVideo()" class="px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-black rounded-xl text-xs">▶ Paparan Video di Skrin Pentas</button>
+              <button onclick="startStageVideo(true)" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-cyan-500/40 text-cyan-200 font-bold rounded-xl text-xs">📺 Paparan Video dalam Mod LED</button>
             </div>
           </div>
 
@@ -1844,6 +1972,7 @@
       const badge = document.getElementById('stageWinnerBadge');
       badge.innerText = `🎉 TAHNIAH PEMENANG CABUTAN #${n} 🎉`;
       badge.className = "text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest animate-bounce";
+      setDrawBoxState('win');
       document.getElementById('stageWinnerName').innerText = w.name;
       fitCertName(document.getElementById('stageWinnerName'));
       document.getElementById('stageWinnerAgency').innerText = w.agency || '';
@@ -3473,87 +3602,129 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       [523.25, 659.25, 783.99, 1046.5].forEach(fq => playTone(fq, 0.5, 1.2, 'triangle', 0.18));
     }
 
-    function triggerLuckyDraw() {
+    // Rupa kotak cabutan: '' = menunggu, 'spin' = sedang berputar, 'win' = pemenang diumumkan
+    function setDrawBoxState(state) {
+      const box = document.getElementById('stageDrawBox');
+      if (!box) return;
+      box.classList.remove('is-spin', 'is-win');
+      void box.offsetWidth; // mulakan semula animasi
+      if (state) box.classList.add('is-' + state);
+    }
+
+    // Nombor rawak adil (kriptografi) 0..n-1, tanpa bias modulo: setiap peserta peluang sama
+    function fairRandomIndex(n) {
+      const buf = new Uint32Array(1);
+      const limit = Math.floor(0x100000000 / n) * n;
+      do { crypto.getRandomValues(buf); } while (buf[0] >= limit);
+      return buf[0] % n;
+    }
+
+    // Senarai terkini dari Sheet sebelum mencabut (pemenang dari laptop lain turut dikecualikan).
+    // Jika Google lambat (> 8 saat), guna senarai semasa; pelayan tetap menolak pemenang berganda.
+    function refreshBeforeDraw() {
+      if (!databaseWebAppUrl) return Promise.resolve();
+      return Promise.race([initializeDatabase(false), new Promise(r => setTimeout(r, 8000))]);
+    }
+
+    async function triggerLuckyDraw() {
       if (PUBLIC_STAGE) return;
       if (!activeAdminUser) {
         alert("Akses dinafikan. Hanya admin urus setia yang sah boleh memulakan cabutan bertuah!");
         return;
       }
-
-      // Hanya peserta yang disahkan hadir dan lengkap 11 cop masuk balang cabutan
-      const allQualified = participants.filter(p => isAttended(p) && p.stamps.length === 11);
-      const remainingPool = allQualified.filter(p => !winnersList.some(w => w.email.toLowerCase() === p.email.toLowerCase()));
-
-      const adminName = document.getElementById('adminWinnerName');
-      const adminAgency = document.getElementById('adminWinnerAgency');
-      const adminBadge = document.getElementById('adminWinnerBadge');
-
-      const stageName = document.getElementById('stageWinnerName');
-      const stageAgency = document.getElementById('stageWinnerAgency');
-      const stageBadge = document.getElementById('stageWinnerBadge');
-
-      if (remainingPool.length === 0) {
-        alert("Tiada lagi baki peserta layak di dalam balang. Semua peserta lengkap 11 cop telah pun memenangi cabutan bertuah!");
-        return;
-      }
-
       if (isDrawing) return;
       setDrawButtonsBusy(true);
       drawAudio(); // dibuka semasa klik supaya pelayar membenarkan bunyi
 
+      const adminName = document.getElementById('adminWinnerName');
+      const adminAgency = document.getElementById('adminWinnerAgency');
+      const adminBadge = document.getElementById('adminWinnerBadge');
+      const stageName = document.getElementById('stageWinnerName');
+      const stageAgency = document.getElementById('stageWinnerAgency');
+      const stageBadge = document.getElementById('stageWinnerBadge');
+
+      adminBadge.innerText = stageBadge.innerText = 'MENYEMAK SENARAI TERKINI...';
+      stageBadge.className = "text-xs font-bold text-amber-400 uppercase tracking-widest animate-pulse";
+      await refreshBeforeDraw();
+
+      // Balang: peserta disahkan hadir + lengkap 11 cop + belum pernah menang
+      const won = new Set(winnersList.map(w => String(w.email).toLowerCase()));
+      const remainingPool = participants.filter(p => isAttended(p) && p.stamps.length === 11 && !won.has(p.email.toLowerCase()));
+      if (remainingPool.length === 0) {
+        setDrawButtonsBusy(false);
+        adminBadge.innerText = stageBadge.innerText = 'Menunggu Giliran Cabutan oleh Urus Setia...';
+        stageBadge.className = "text-xs font-bold text-slate-400 uppercase tracking-widest";
+        alert("Tiada lagi baki peserta layak di dalam balang. Semua peserta lengkap 11 cop telah pun memenangi cabutan bertuah!");
+        return;
+      }
+
+      // Pemenang dipilih SEKALI secara rawak adil SEBELUM animasi; putaran hanya paparan
+      const finalWinner = remainingPool[fairRandomIndex(remainingPool.length)];
+      const winner = { name: finalWinner.name, email: finalWinner.email, agency: finalWinner.agency, wonAt: new Date().toLocaleTimeString('ms-MY') };
+
       const msgRunning = `SEDANG MENCABUT PEMENANG #${winnersList.length + 1}...`;
       adminBadge.innerText = msgRunning;
       stageBadge.innerText = msgRunning;
-      stageBadge.className = "text-xs font-bold text-amber-400 uppercase tracking-widest animate-pulse";
+      setDrawBoxState('spin');
+
+      // Simpan ke Sheet serentak dengan animasi. Pelayan menyemak semula (kelayakan & tiada menang dua kali)
+      const save = postDatabase('ADD_WINNER', { winner }, true).then(
+        res => (res && res.duplicate ? { dup: true } : { ok: true }),
+        err => (err.permanent ? { error: err.message } : { queued: true, error: err.message }));
 
       let rollCount = 0;
-      const interval = setInterval(() => {
-        const randomItem = remainingPool[Math.floor(Math.random() * remainingPool.length)];
-        
+      const interval = setInterval(async () => {
+        const randomItem = remainingPool[fairRandomIndex(remainingPool.length)];
         adminName.innerText = randomItem.name;
         adminAgency.innerText = `${randomItem.agency} (${randomItem.email})`;
-
         stageName.innerText = randomItem.name;
         fitCertName(stageName); fitCertName(adminName); // satu baris: kecilkan huruf jika nama panjang
         stageAgency.innerText = randomItem.agency;
 
         rollCount++;
         playDrawTick(rollCount);
+        if (rollCount <= 25) return;
+        clearInterval(interval);
 
-        if (rollCount > 25) {
-          clearInterval(interval);
-          
-          const finalWinner = remainingPool[Math.floor(Math.random() * remainingPool.length)];
-          
-          winnersList.push({
-            name: finalWinner.name,
-            email: finalWinner.email,
-            agency: finalWinner.agency,
-            wonAt: new Date().toLocaleTimeString('ms-MY')
-          });
-          saveState();
-          postDatabase('ADD_WINNER', { winner: winnersList[winnersList.length - 1] });
-
-          const winTitle = `🎉 TAHNIAH PEMENANG CABUTAN #${winnersList.length} 🎉`;
-          
-          adminBadge.innerText = winTitle;
-          adminName.innerText = finalWinner.name;
-          adminAgency.innerText = `${finalWinner.agency} • ${finalWinner.email}`;
-
-          stageBadge.innerText = winTitle;
-          stageBadge.className = "text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest animate-bounce";
-          stageName.innerText = finalWinner.name;
-          stageName.className = "text-3xl sm:text-5xl whitespace-nowrap overflow-hidden font-black text-amber-300 my-3 drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]";
-          fitCertName(stageName); fitCertName(adminName); // nama pemenang sentiasa satu baris
-          stageAgency.innerText = finalWinner.agency;
-
-          confetti({ particleCount: 170, spread: 90, origin: { y: 0.6 } });
-          playWinFanfare();
-
+        const result = await save;
+        if (result.dup || (result.error && !result.queued)) {
+          // Ditolak pelayan (cth sudah menang dari laptop lain): tiada pemenang, cabut semula
+          setDrawBoxState('');
+          adminBadge.innerText = stageBadge.innerText = 'Menunggu Giliran Cabutan oleh Urus Setia...';
+          stageBadge.className = "text-xs font-bold text-slate-400 uppercase tracking-widest";
+          stageName.innerText = adminName.innerText = '---';
+          stageAgency.innerText = adminAgency.innerText = '---';
           setDrawButtonsBusy(false);
-
+          await refreshBeforeDraw();
           renderStageView();
+          alert(`Cabutan dibatalkan: ${result.dup ? finalWinner.name + ' sudah menang sebelum ini' : result.error}.\n\nSila tekan PUTAR CABUTAN sekali lagi.`);
+          return;
         }
+        if (result.queued) {
+          // Tiada internet: pemenang disimpan dalam baris gilir & dihantar semula secara automatik
+          queueOutbox({ action: 'ADD_WINNER', winner });
+          updateDatabaseStatus(`Pemenang belum dihantar ke Google Sheet (${result.error}). Akan dicuba semula secara automatik.`);
+        }
+
+        winnersList.push(winner);
+        saveState();
+
+        const winTitle = `🎉 TAHNIAH PEMENANG CABUTAN #${winnersList.length} 🎉`;
+        adminBadge.innerText = winTitle;
+        adminName.innerText = finalWinner.name;
+        adminAgency.innerText = `${finalWinner.agency} • ${finalWinner.email}`;
+        stageBadge.innerText = winTitle;
+        stageBadge.className = "text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest animate-bounce";
+        stageName.innerText = finalWinner.name;
+        stageName.className = "text-3xl sm:text-5xl whitespace-nowrap overflow-hidden font-black text-amber-300 my-3";
+        setDrawBoxState('win');
+        fitCertName(stageName); fitCertName(adminName); // nama pemenang sentiasa satu baris
+        stageAgency.innerText = finalWinner.agency;
+
+        confetti({ particleCount: 170, spread: 90, origin: { y: 0.6 } });
+        playWinFanfare();
+        setDrawButtonsBusy(false);
+        renderStageView();
       }, 90);
     }
 
@@ -3570,6 +3741,139 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       });
     }
 
+    // ==============================================================
+    // VIDEO PENTAS: YouTube (playlist / video) atau MP4, berulang sehingga sesi cabutan
+    // ==============================================================
+    const STAGE_VIDEO_KEY = 'motac_stage_video_urls';
+    // Video lalai yang dimuat naik bersama index.html ke GitHub (folder "video").
+    // Digunakan jika admin belum menyimpan pautan lain di Panel Admin. Tambah / buang nama fail di sini.
+    const DEFAULT_STAGE_VIDEOS = ['video/video-pentas.mp4'];
+    let stageVideoFiles = [];   // fail MP4 pilihan dari komputer ini (object URL)
+    let stageVideoIndex = 0;
+    let videoControlsTimer = null;
+
+    function saveStageVideoUrls() {
+      localStorage.setItem(STAGE_VIDEO_KEY, document.getElementById('stageVideoUrls').value.trim());
+      stageVideoFiles.forEach(u => URL.revokeObjectURL(u));
+      stageVideoFiles = [];
+      document.getElementById('stageVideoFiles').value = '';
+      updateStageVideoStatus();
+    }
+
+    function pickStageVideoFiles(e) {
+      stageVideoFiles.forEach(u => URL.revokeObjectURL(u));
+      stageVideoFiles = [...e.target.files].map(file => URL.createObjectURL(file));
+      updateStageVideoStatus(e.target.files.length);
+    }
+
+    function updateStageVideoStatus(fileCount) {
+      const el = document.getElementById('stageVideoStatus');
+      if (!el) return;
+      const urls = stageVideoUrlList();
+      el.innerText = stageVideoFiles.length ? `✅ ${fileCount || stageVideoFiles.length} fail video dipilih (diutamakan).`
+        : localStorage.getItem(STAGE_VIDEO_KEY) ? `✅ ${urls.length} pautan video disimpan.`
+        : `✅ Video lalai GitHub: ${DEFAULT_STAGE_VIDEOS.join(', ')}`;
+    }
+
+    function stageVideoUrlList() {
+      // Satu pautan setiap baris (nama fail boleh ada ruang); kosong = video lalai di GitHub
+      const saved = (localStorage.getItem(STAGE_VIDEO_KEY) || '').split(/\r?\n/).map(u => u.trim()).filter(Boolean);
+      return (saved.length ? saved : DEFAULT_STAGE_VIDEOS).map(u => /^(https?:|blob:)/i.test(u) ? u : encodeURI(u));
+    }
+
+    // Tukar senarai pautan YouTube kepada satu URL embed yang berulang
+    function youtubeEmbedUrl(urls) {
+      const ids = [];
+      let list = '';
+      urls.forEach(u => {
+        const pl = u.match(/[?&]list=([\w-]+)/);
+        if (pl && !list) list = pl[1];
+        const id = u.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/);
+        if (id) ids.push(id[1]);
+      });
+      // loop=1 + playlist = berulang tanpa henti; vq=hd1080 minta kualiti tertinggi (YouTube tetap ikut kelajuan internet)
+      const base = 'autoplay=1&loop=1&rel=0&modestbranding=1&playsinline=1&controls=0&iv_load_policy=3&vq=hd1080';
+      if (list && !ids.length) return `https://www.youtube.com/embed/videoseries?list=${list}&${base}`;
+      if (!ids.length) return '';
+      return `https://www.youtube.com/embed/${ids[0]}?playlist=${ids.join(',')}${list ? '&list=' + list : ''}&${base}`;
+    }
+
+    // MP4: mainkan satu per satu, kemudian ulang dari awal
+    function playMp4List(host, list) {
+      const v = document.createElement('video');
+      v.className = 'w-full h-full object-contain bg-black';
+      v.autoplay = true;
+      v.playsInline = true;
+      v.preload = 'auto';
+      v.loop = list.length === 1; // satu video: berulang terus tanpa jeda
+      const playAt = i => { stageVideoIndex = i % list.length; v.src = list[stageVideoIndex]; v.play().catch(() => {}); };
+      v.onended = () => playAt(stageVideoIndex + 1);
+      v.onerror = () => { setTimeout(() => playAt(stageVideoIndex + 1), 2000); }; // ralat: cuba video seterusnya / semula
+      v.onpause = () => { if (!v.ended && isStageVideoOn()) v.play().catch(() => {}); }; // jangan berhenti sendiri
+      host.appendChild(v);
+      playAt(0);
+    }
+
+    function startStageVideo(led = false) {
+      const urls = stageVideoUrlList();
+      const mp4Urls = urls.filter(u => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u));
+      const host = document.getElementById('stageVideoHost');
+      host.innerHTML = '';
+      if (stageVideoFiles.length || mp4Urls.length) {
+        playMp4List(host, stageVideoFiles.length ? stageVideoFiles : mp4Urls);
+      } else {
+        const src = youtubeEmbedUrl(urls);
+        if (!src) {
+          alert('Belum ada video. Masukkan pautan YouTube / MP4 atau pilih fail video di Panel Admin → Kawalan Cabutan → Video Pentas.');
+          return;
+        }
+        host.innerHTML = `<iframe src="${src}" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+      }
+      if (document.getElementById('viewStage').classList.contains('hidden')) switchTab('stage');
+      if (led && !document.body.classList.contains('led-mode')) setLedMode(true);
+      document.getElementById('stageVideoLayer').classList.remove('hidden');
+      showVideoControls();
+    }
+
+    // Tamatkan video dan papar sesi cabutan
+    function stopStageVideo() {
+      document.getElementById('stageVideoHost').innerHTML = ''; // hentikan bunyi video
+      document.getElementById('stageVideoLayer').classList.add('hidden');
+      requestAnimationFrame(() => { renderStageWall(); fitCertName(document.getElementById('stageWinnerName')); });
+    }
+
+    function isStageVideoOn() {
+      return !document.getElementById('stageVideoLayer').classList.contains('hidden');
+    }
+
+    // Butang di atas video muncul bila tetikus digerakkan, hilang selepas 3 saat (skrin LED kekal bersih)
+    function showVideoControls() {
+      const c = document.getElementById('stageVideoControls');
+      c.style.opacity = '1';
+      document.getElementById('stageVideoLayer').style.cursor = '';
+      clearTimeout(videoControlsTimer);
+      videoControlsTimer = setTimeout(() => {
+        c.style.opacity = '0';
+        document.getElementById('stageVideoLayer').style.cursor = 'none';
+      }, 3000);
+    }
+
+    // Mod LED: susun atur skrin penuh untuk LED 16:9. Esc / keluar skrin penuh = keluar Mod LED.
+    function setLedMode(on) {
+      document.body.classList.toggle('led-mode', on);
+      sessionStorage.setItem('motac_led', on ? '1' : '');
+      if (on && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      // Saiz kotak berubah: kira semula senarai bergerak & saiz nama pemenang
+      requestAnimationFrame(() => {
+        renderStageWall();
+        fitCertName(document.getElementById('stageWinnerName'));
+      });
+    }
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement && document.body.classList.contains('led-mode')) setLedMode(false);
+    });
+
     function toggleStageFullscreen() {
       if (document.fullscreenElement) document.exitFullscreen();
       else document.documentElement.requestFullscreen().catch(() => {});
@@ -3577,7 +3881,7 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
 
     // Spacebar di Skrin Pentas = Putar Cabutan (diabaikan jika sedang menaip dalam kotak input)
     document.addEventListener('keydown', e => {
-      if (e.code !== 'Space' || e.repeat || PUBLIC_STAGE) return;
+      if (e.code !== 'Space' || e.repeat || PUBLIC_STAGE || isStageVideoOn()) return;
       if (document.getElementById('viewStage').classList.contains('hidden')) return;
       if (/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(document.activeElement?.tagName || '')) return;
       e.preventDefault();
@@ -3707,7 +4011,19 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       }
     }
 
+    // QR alamat laman ini (halaman log masuk Cop Digital Peserta)
+    let stageLoginQrDone = false;
+    function renderStageLoginQr() {
+      const el = document.getElementById('stageLoginQr');
+      if (!el || stageLoginQrDone || !window.QRCode) return;
+      stageLoginQrDone = true;
+      new QRCode(el, { text: location.origin + location.pathname, width: 512, height: 512,
+        colorDark: '#0f172a', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+      el.querySelectorAll('canvas, img').forEach(x => { x.style.width = '160px'; x.style.height = '160px'; });
+    }
+
     function renderStageView() {
+      renderStageLoginQr();
       const total = participants.length;
       const zero = participants.filter(p => p.stamps.length === 0).length;
       const active = participants.filter(p => p.stamps.length >= 1 && p.stamps.length < 11).length;
@@ -3723,6 +4039,9 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
 
       const adminRemainingEl = document.getElementById('adminRemainingCount');
       if (adminRemainingEl) adminRemainingEl.innerText = remainingPool.length;
+
+      const drawWinnerEl = document.getElementById('stageDrawWinnerCount');
+      if (drawWinnerEl) drawWinnerEl.innerText = winnersList.length;
 
       const stageRemainingEl = document.getElementById('stageRemainingCount');
       if (stageRemainingEl) stageRemainingEl.innerText = remainingPool.length;
@@ -4549,6 +4868,8 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
         tab = 'admin';
       }
       sessionStorage.setItem('motac_last_tab', tab); // dipulihkan bila halaman di-refresh
+      if (tab !== 'stage' && document.body.classList.contains('led-mode')) setLedMode(false);
+      if (tab !== 'stage' && isStageVideoOn()) stopStageVideo();
       ['viewUser', 'viewStage', 'viewAdmin'].forEach(id => document.getElementById(id).classList.add('hidden'));
       ['navUser', 'navStage', 'navAdmin'].forEach(id => document.getElementById(id).className = "px-3.5 py-1.5 rounded-xl font-bold text-slate-300 hover:text-white transition-all");
 
@@ -4580,6 +4901,8 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       });
 
       if (sub === 'drawControl') {
+        document.getElementById('stageVideoUrls').value = localStorage.getItem(STAGE_VIDEO_KEY) || '';
+        updateStageVideoStatus();
         document.getElementById('adminDrawSection').classList.remove('hidden');
         document.getElementById('subBtnDraw').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-amber-400";
       } else if (sub === 'participantsHub') {
@@ -4612,6 +4935,8 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       // Paparan awam: hanya baca dari Sheet (false = tidak sesekali menghantar data pelayar ini)
       if (PUBLIC_STAGE) { showPublicStage(); renderStageView(); initializeDatabase(false); return; }
       preConvertCertImages();
+      document.getElementById('stageVideoUrls').value = localStorage.getItem(STAGE_VIDEO_KEY) || '';
+      updateStageVideoStatus();
       renderUserView();
       renderStageView();
       updateAdminNav();
