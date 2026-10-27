@@ -626,7 +626,7 @@
         </h2>
         <div class="bg-slate-950/90 border border-cyan-500/30 rounded-3xl p-6 sm:p-8 max-w-xl mx-auto my-6 shadow-2xl">
           <span id="stageWinnerBadge" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Menunggu Giliran Cabutan oleh Urus Setia...</span>
-          <h3 id="stageWinnerName" class="text-3xl sm:text-5xl font-black text-amber-300 my-3">---</h3>
+          <h3 id="stageWinnerName" class="text-3xl sm:text-5xl whitespace-nowrap overflow-hidden font-black text-amber-300 my-3">---</h3>
           <p id="stageWinnerAgency" class="text-xs sm:text-sm text-cyan-200 font-mono">---</p>
         </div>
 
@@ -745,7 +745,7 @@
               
               <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-5 my-5 shadow-inner">
                 <span id="adminWinnerBadge" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sedia Memilih</span>
-                <h4 id="adminWinnerName" class="text-2xl sm:text-3xl font-black text-amber-400 my-1">---</h4>
+                <h4 id="adminWinnerName" class="text-2xl sm:text-3xl whitespace-nowrap overflow-hidden font-black text-amber-400 my-1">---</h4>
                 <p id="adminWinnerAgency" class="text-xs text-slate-400 font-mono">---</p>
               </div>
 
@@ -1845,8 +1845,10 @@
       badge.innerText = `🎉 TAHNIAH PEMENANG CABUTAN #${n} 🎉`;
       badge.className = "text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest animate-bounce";
       document.getElementById('stageWinnerName').innerText = w.name;
+      fitCertName(document.getElementById('stageWinnerName'));
       document.getElementById('stageWinnerAgency').innerText = w.agency || '';
       confetti({ particleCount: 170, spread: 90, origin: { y: 0.6 } });
+      playWinFanfare();
     }
     const WALKIN_TITLES = ['Encik', 'Puan', 'Cik', 'Tuan', 'Dr.', 'Ir.', 'Ts.', 'Haji', 'Hajah',
       'Prof.', 'Prof. Madya', "Dato'", 'Datuk', 'Datin', "Dato' Sri", 'Tan Sri', 'Puan Sri'];
@@ -3432,6 +3434,45 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
     // ==============================================================
     // 6. KAWALAN CABUTAN PENTAS & STATISTIK ANALITIK
     // ==============================================================
+    // ==============================================================
+    // BUNYI CABUTAN: dijana oleh pelayar (Web Audio), tiada fail audio perlu dimuat naik
+    // ==============================================================
+    let drawAudioCtx = null;
+    function drawAudio() {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!drawAudioCtx) drawAudioCtx = new AC();
+      if (drawAudioCtx.state === 'suspended') drawAudioCtx.resume();
+      return drawAudioCtx;
+    }
+
+    function playTone(freq, start, dur, type = 'sine', vol = 0.25) {
+      const ctx = drawAudio();
+      if (!ctx) return;
+      const t = ctx.currentTime + start;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + dur + 0.05);
+    }
+
+    // "Tik" setiap kali nama bertukar; nada naik sedikit demi sedikit untuk membina debaran
+    function playDrawTick(step) {
+      playTone(600 + step * 25, 0, 0.05, 'square', 0.12);
+    }
+
+    // Fanfara pemenang: arpeggio C-E-G-C diikuti kord panjang
+    function playWinFanfare() {
+      [523.25, 659.25, 783.99, 1046.5].forEach((fq, i) => playTone(fq, i * 0.12, 0.25, 'triangle', 0.3));
+      [523.25, 659.25, 783.99, 1046.5].forEach(fq => playTone(fq, 0.5, 1.2, 'triangle', 0.18));
+    }
+
     function triggerLuckyDraw() {
       if (PUBLIC_STAGE) return;
       if (!activeAdminUser) {
@@ -3458,6 +3499,7 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
 
       if (isDrawing) return;
       setDrawButtonsBusy(true);
+      drawAudio(); // dibuka semasa klik supaya pelayar membenarkan bunyi
 
       const msgRunning = `SEDANG MENCABUT PEMENANG #${winnersList.length + 1}...`;
       adminBadge.innerText = msgRunning;
@@ -3472,9 +3514,11 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
         adminAgency.innerText = `${randomItem.agency} (${randomItem.email})`;
 
         stageName.innerText = randomItem.name;
+        fitCertName(stageName); fitCertName(adminName); // satu baris: kecilkan huruf jika nama panjang
         stageAgency.innerText = randomItem.agency;
 
         rollCount++;
+        playDrawTick(rollCount);
 
         if (rollCount > 25) {
           clearInterval(interval);
@@ -3499,10 +3543,12 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
           stageBadge.innerText = winTitle;
           stageBadge.className = "text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-widest animate-bounce";
           stageName.innerText = finalWinner.name;
-          stageName.className = "text-3xl sm:text-5xl font-black text-amber-300 my-3 drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]";
+          stageName.className = "text-3xl sm:text-5xl whitespace-nowrap overflow-hidden font-black text-amber-300 my-3 drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]";
+          fitCertName(stageName); fitCertName(adminName); // nama pemenang sentiasa satu baris
           stageAgency.innerText = finalWinner.agency;
 
           confetti({ particleCount: 170, spread: 90, origin: { y: 0.6 } });
+          playWinFanfare();
 
           setDrawButtonsBusy(false);
 
