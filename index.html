@@ -936,7 +936,7 @@
                 </div>
                 <div class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-1.5">
                   <p id="walkinVacancyCount" class="text-lg font-black text-rose-300">0</p>
-                  <p class="text-[9px] text-slate-400 uppercase">Peserta Tak Hadir</p>
+                  <p class="text-[9px] text-slate-400 uppercase">Kekosongan Peserta</p>
                 </div>
                 <div class="bg-slate-950/70 border border-emerald-500/40 rounded-xl px-3 py-1.5">
                   <p id="programAttendanceTotal" class="text-lg font-black text-emerald-300">0</p>
@@ -2058,7 +2058,7 @@
       const active = walkinList.filter(isWalkinActive);
       const absent = participants.filter(p => !isAttended(p)).length;
       document.getElementById('walkinActiveCount').innerText = active.length;
-      document.getElementById('walkinVacancyCount').innerText = absent;
+      document.getElementById('walkinVacancyCount').innerText = attendQuotaLeft();
       // Walk-in yang sudah dijadikan peserta dikira sekali sahaja (sebagai peserta hadir)
       document.getElementById('programAttendanceTotal').innerText = participants.filter(isAttended).length + active.length;
 
@@ -2102,13 +2102,14 @@
       const w = walkinList.find(x => x.email === email);
       if (!w) return;
       const absent = participants.filter(p => !isAttended(p)).length;
-      if (!quotaLeft()) {
-        alert(`Kuota peserta sudah penuh (${participants.length} / ${MAX_PESERTA}).\n\n` +
+      const hadir = participants.filter(isAttended).length;
+      if (!attendQuotaLeft()) {
+        alert(`Kuota peserta hadir sudah penuh (${hadir} / ${MAX_PESERTA}).\n\n` +
           `${w.name} tidak boleh dijadikan peserta dan kekal sebagai pengunjung walk-in.`);
         return;
       }
       if (!confirm(`⚠️ PASTIKAN PENGUNJUNG BERSETUJU menjadi peserta sebelum meneruskan.\n\n` +
-        `Jadikan ${w.name} sebagai PESERTA?\n\nKuota peserta: ${participants.length} / ${MAX_PESERTA} (baki ${quotaLeft()}).\nPeserta tidak hadir sekarang: ${absent} orang.\n` +
+        `Jadikan ${w.name} sebagai PESERTA?\n\nPeserta disahkan hadir: ${hadir} / ${MAX_PESERTA} (kekosongan ${attendQuotaLeft()}).\nPeserta pra-daftar belum hadir: ${absent} orang.\n` +
         `Selepas ini, ${w.name} terus disahkan hadir dan boleh kumpul cop & masuk cabutan dengan log masuk menggunakan emel ${w.email}.\n\n` +
         `Jika tersilap, boleh dibatalkan selagi belum kumpul sebarang cop.`)) return;
       try {
@@ -2303,6 +2304,13 @@
       const user = findParticipant(email);
       if (!user) return;
       if (!attended && !confirm(`Batalkan pengesahan kehadiran ${user.name}?`)) return;
+      // Kuota 160 peserta hadir (termasuk walk-in yang dijadikan peserta)
+      if (attended && !isAttended(user) && !attendQuotaLeft()) {
+        alert(`❌ Kuota peserta hadir sudah penuh (${participants.filter(isAttended).length} / ${MAX_PESERTA}).
+
+Kehadiran ${user.name} tidak boleh disahkan.`);
+        return false;
+      }
       const before = { attended: user.attended, attendedAt: user.attendedAt };
       user.attended = attended;
       user.attendedAt = attended ? new Date().toLocaleString('ms-MY') : '';
@@ -2323,10 +2331,15 @@
         Object.assign(user, before);
         saveState();
         rerenderAttendanceViews();
+        if (String(error.message).startsWith('KUOTA_PENUH')) {
+          alert(`❌ ${error.message.replace('KUOTA_PENUH: ', '')}\n\n${user.name} belum disahkan hadir.`);
+          return;
+        }
         alert(`❌ Kehadiran ${user.name} TIDAK tersimpan dalam Google Sheet.\n\n${error.message}\n\n` +
           `Jika mesej menyebut "Tindakan tidak dikenali", Apps Script yang disambung masih versi lama. ` +
           `Deploy Code.gs baharu dan kemas kini URL Web App dalam sistem.`);
       });
+      return true;
     }
 
     function rerenderAttendanceViews() {
@@ -2339,7 +2352,7 @@
     function confirmAttendanceFromCounter(email) {
       const user = findParticipant(email);
       if (!user) return;
-      setAttendance(user.email, true);
+      if (setAttendance(user.email, true) === false) return; // kuota penuh
       const input = document.getElementById('attendSearchInput');
       input.value = '';
       renderAttendanceCounter(`✅ ${user.name} disahkan hadir.`);
@@ -4000,6 +4013,8 @@
     // baharu bila penuh, jadi had ini tidak boleh dipintas dari pelayar.
     const MAX_PESERTA = 160;
     function quotaLeft() { return Math.max(0, MAX_PESERTA - participants.length); }
+    // Kekosongan untuk walk-in = 160 tolak peserta yang disahkan hadir
+    function attendQuotaLeft() { return Math.max(0, MAX_PESERTA - participants.filter(isAttended).length); }
 
     function handleExcelUpload(e) {
       const file = e.target.files[0];
