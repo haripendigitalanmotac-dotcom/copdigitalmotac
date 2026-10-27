@@ -574,10 +574,14 @@
     <!-- 2. MODUL SKRIN PENTAS LIVE                                     -->
     <!-- ============================================================== -->
     <section id="viewStage" class="hidden space-y-6">
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div class="glass-card rounded-2xl p-4 text-center">
-          <span class="text-[10px] text-slate-300 uppercase font-semibold">Jumlah Berdaftar</span>
+          <span class="text-[10px] text-slate-300 uppercase font-semibold">Jumlah Pendaftaran</span>
           <p id="statTotal" class="text-2xl sm:text-3xl font-black text-white mt-1">0</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center border-emerald-500/40">
+          <span class="text-[10px] text-emerald-300 uppercase font-semibold">Peserta Sah Hadir</span>
+          <p id="statAttended" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">0</p>
         </div>
         <div class="glass-card rounded-2xl p-4 text-center border-slate-700 bg-slate-950/40">
           <span class="text-[10px] text-slate-400 uppercase font-semibold">Belum Mula (0 Cop)</span>
@@ -591,7 +595,7 @@
           <span class="text-[10px] text-cyan-300 uppercase font-semibold">Layak 11/11 Cop</span>
           <p id="statQualified" class="text-2xl sm:text-3xl font-black text-cyan-400 mt-1">0</p>
         </div>
-        <div class="glass-card rounded-2xl p-4 text-center border-emerald-500/40 bg-emerald-950/30 col-span-2 sm:col-span-1">
+        <div class="glass-card rounded-2xl p-4 text-center border-emerald-500/40 bg-emerald-950/30">
           <span class="text-[10px] text-emerald-300 uppercase font-semibold">Pemenang Dicabut</span>
           <p id="statWinnersCount" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">0</p>
         </div>
@@ -788,7 +792,8 @@
               <h3 class="text-sm font-bold text-white flex items-center gap-2">
                 <span>✅</span> Kaunter Pengesahan Kehadiran
               </h3>
-              <span class="text-xs text-slate-300">Hadir: <strong id="attendCounterRatio" class="text-emerald-400 font-mono">0 / 0</strong></span>
+              <span class="text-xs text-slate-300">Pendaftaran: <strong id="attendCounterTotal" class="text-white font-mono">0</strong>
+                <span class="mx-1 text-slate-600">|</span> Sah Hadir: <strong id="attendCounterRatio" class="text-emerald-400 font-mono">0 / 160</strong></span>
             </div>
             <input type="text" id="attendSearchInput" autocomplete="off"
               oninput="renderAttendanceCounter()" onkeydown="handleAttendSearchKey(event)"
@@ -799,12 +804,14 @@
 
           <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
             <div class="glass-card p-4 rounded-2xl text-center border-slate-700">
-              <span class="text-[10px] text-slate-400 uppercase font-semibold">Jumlah Pendaftar</span>
+              <span class="text-[10px] text-slate-400 uppercase font-semibold">Jumlah Pendaftaran</span>
               <p id="hubTotalCount" class="text-2xl font-black text-white mt-1">0</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">pra-daftar + walk-in dijadikan peserta</p>
             </div>
             <div class="glass-card p-4 rounded-2xl text-center border-emerald-500/40">
-              <span class="text-[10px] text-emerald-300 uppercase font-semibold">Hadir Disahkan</span>
+              <span class="text-[10px] text-emerald-300 uppercase font-semibold">Peserta Sah Hadir</span>
               <p id="hubAttendedCount" class="text-2xl font-black text-emerald-400 mt-1">0</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">kuota maksimum 160</p>
             </div>
             <div class="glass-card p-4 rounded-2xl text-center border-cyan-500/40">
               <span class="text-[10px] text-cyan-300 uppercase font-semibold">Layak 11 Cop</span>
@@ -1304,7 +1311,7 @@
             <option value="LOT 02 - OrenG">LOT 02 - OrenG</option>
             <option value="LOT 03 - XOF">LOT 03 - XOF</option>
             <option value="LOT 04 - Canon">LOT 04 - Canon</option>
-            <option value="LOT 05 - Amazon">LOT 05 - Amazon</option>
+            <option value="LOT 05 - AWS">LOT 05 - AWS</option>
             <option value="LOT 06 - Hewlett–Packard (HP)">LOT 06 - Hewlett–Packard (HP)</option>
             <option value="LOT 07 - BPM">LOT 07 - BPM</option>
             <option value="LOT 08 - NGO (Robotik)">LOT 08 - NGO (Robotik)</option>
@@ -1508,7 +1515,7 @@
       { id: 2, lot: "LOT 02", name: "OrenG", desc: "Aplikasi inovatif dan perisian interaktif memperkasa pengurusan pengalaman digital pengunjung pelancongan.", slot: "Slot 7 • 3.30 Petang", token: "ORG707", icon: "📱" },
       { id: 3, lot: "LOT 03", name: "XOF", desc: "Solusi teknologi digital maju, platform automasi proses pintar serta perkhidmatan automasi moden.", slot: "Sesi Pameran Teknologi", token: "XOF303", icon: "⚙️" },
       { id: 4, lot: "LOT 04", name: "Canon", desc: "Penyelesaian pengimejan resolusi tinggi, arkib digital warisan dan teknologi imbasan dokumen pintar.", slot: "Slot 5 • 2.30 Petang", token: "CAN505", icon: "📷" },
-      { id: 5, lot: "LOT 05", name: "Amazon", desc: "Infrastruktur pengkomputeran awan (AWS), analitik data pelancongan dan keselamatan awan sektor awam.", slot: "Slot 3 • 11.40 Pagi", token: "AWS303", icon: "☁" },
+      { id: 5, lot: "LOT 05", name: "AWS", desc: "Infrastruktur pengkomputeran awan (AWS), analitik data pelancongan dan keselamatan awan sektor awam.", slot: "Slot 3 • 11.40 Pagi", token: "AWS303", icon: "☁" },
       { id: 6, lot: "LOT 06", name: "Hewlett–Packard (HP)", desc: "Perkakasan hibrid pejabat masa depan, sekuriti peranti endpoint dan teknologi AI PC.", slot: "Slot 4 • 12.10 Tgh Hari", token: "HPM404", icon: "💻" },
       { id: 7, lot: "LOT 07", name: "BPM", desc: "Klinik ICT BPM: Bantuan MyGovUC, DDMS 2.0, khidmat keselamatan kata laluan dan sokongan rangkaian.", slot: "Kaunter Terus BPM", token: "BPM110", icon: "🛡️" },
       { id: 8, lot: "LOT 08", name: "NGO (Robotik)", desc: "Inovasi robotik automasi, pemerkasaan STEM dan pendedahan teknologi robotik untuk kebudayaan moden.", slot: "Slot 8 • 4.00 Petang", token: "ROB808", icon: "🤖" },
@@ -1517,16 +1524,8 @@
       { id: 11, lot: "LOT 11", name: "MyDigitalID", desc: "Identiti Digital Nasional sektor awam, pengesahan tanpa kata laluan dan keselamatan transaksi rakyat.", slot: "Slot 1 • 9.00 Pagi", token: "DID101", icon: "🆔" }
     ];
 
-    const defaultParticipants = [
-      { name: "Nurfateenizati", email: "fatini@motac.gov.my", agency: "Bahagian Pengurusan Maklumat (BPM)", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
-      { name: "Ahmad Faris", email: "faris@tourism.gov.my", agency: "Tourism Malaysia", stamps: [1, 2, 3], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
-      { name: "Nurul Huda", email: "huda@heritage.gov.my", agency: "Jabatan Warisan Negara", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: true, certDownloaded: true, goodiesClaimed: true },
-      { name: "Mohd Khairul", email: "khairul@istanabudaya.gov.my", agency: "Istana Budaya", stamps: [], feedbackDone: false, certDownloaded: false, goodiesClaimed: false, attended: false, attendedAt: "" },
-      { name: "Siti Khadijah Binti Ismail", email: "khadijah@motac.gov.my", agency: "Bahagian Dasar Pelancongan", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: true, certDownloaded: true, goodiesClaimed: false },
-      { name: "Muhammad Zharif Bin Roslan", email: "zharif@motac.gov.my", agency: "Bahagian Pengurusan Maklumat (BPM)", stamps: [1, 2, 3, 4, 5, 6, 7, 8], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
-      { name: "Ainul Mardhiah Binti Yusof", email: "ainul@tourism.gov.my", agency: "Tourism Malaysia", stamps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], feedbackDone: false, certDownloaded: false, goodiesClaimed: false },
-      { name: "Mohd Danish Haikal", email: "danish@kraftangan.gov.my", agency: "Perbadanan Kemajuan Kraftangan", stamps: [1, 2, 3, 4, 5], feedbackDone: false, certDownloaded: false, goodiesClaimed: false }
-    ]; 
+    // Tiada data contoh: senarai peserta sentiasa dari Google Sheet (Import Excel / walk-in)
+    const defaultParticipants = [];
 
     // Akaun admin kini disimpan dalam tab "Admin" Google Sheet (kata laluan di-hash di pelayan),
     // bukan dalam fail ini yang boleh dibaca umum di GitHub
@@ -1583,25 +1582,6 @@
         localStorage.removeItem('motac_logged_email');
       }
       if (syncChannel) syncChannel.postMessage({ type: 'STATE_UPDATED' });
-    }
-
-    function readDatabaseState() {
-      return new Promise((resolve, reject) => {
-        const callbackName = `motacDatabaseCallback${Date.now()}${Math.floor(Math.random() * 1000)}`;
-        const script = document.createElement('script');
-        const timeoutId = setTimeout(() => finish(new Error('Sambungan database tamat masa.')), 15000);
-        const finish = (error, result) => {
-          clearTimeout(timeoutId);
-          delete window[callbackName];
-          script.remove();
-          if (error) reject(error);
-          else resolve(result);
-        };
-        window[callbackName] = result => finish(null, result);
-        script.onerror = () => finish(new Error('Tidak dapat membuka Web App. Semak URL dan akses deployment.'));
-        script.src = `${databaseWebAppUrl}?action=GET_STATE&callback=${callbackName}&t=${Date.now()}`;
-        document.head.appendChild(script);
-      });
     }
 
     // ---------- Penghantaran ke Google Sheet (dengan baris gilir & cuba semula) ----------
@@ -1794,8 +1774,15 @@
           saveState();
           refreshViews();
           databaseLoadedOnce = true;
-        } else if (seedWhenEmpty) {
-          await pushAllToDatabase(true);
+        } else {
+          // Sheet kosong ialah keadaan sebenar: kosongkan salinan pelayar (data lama / contoh)
+          // dan JANGAN hantar data pelayar ke Sheet secara automatik
+          participants = [];
+          feedbackResponses = state.feedbackResponses || [];
+          winnersList = state.winnersList || [];
+          saveState();
+          refreshViews();
+          databaseLoadedOnce = true;
         }
         const pending = getOutbox().length;
         updateDatabaseStatus(`Database disambungkan. ${participants.length} peserta dimuatkan.${pending ? ` ${pending} perubahan menunggu dihantar.` : ''}`);
@@ -2371,7 +2358,8 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       const box = document.getElementById('attendSearchResults');
       if (!box) return;
       const attendedCount = participants.filter(isAttended).length;
-      document.getElementById('attendCounterRatio').innerText = `${attendedCount} / ${participants.length}`;
+      document.getElementById('attendCounterRatio').innerText = `${attendedCount} / ${MAX_PESERTA}`;
+      document.getElementById('attendCounterTotal').innerText = participants.length;
 
       const q = document.getElementById('attendSearchInput').value.trim();
       if (!q) {
@@ -3349,11 +3337,11 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       const fbCount = participants.filter(p => p.feedbackDone).length;
       const claimed = participants.filter(p => p.goodiesClaimed).length;
 
-      document.getElementById('hubTotalCount').innerText = `${total} / ${MAX_PESERTA}`;
+      document.getElementById('hubTotalCount').innerText = total;
       document.getElementById('hubEligibleCount').innerText = eligible;
       document.getElementById('hubFeedbackCount').innerText = fbCount;
       document.getElementById('hubClaimedCount').innerText = claimed;
-      document.getElementById('hubAttendedCount').innerText = participants.filter(isAttended).length;
+      document.getElementById('hubAttendedCount').innerText = `${participants.filter(isAttended).length} / ${MAX_PESERTA}`;
       renderAttendanceCounter();
       renderWalkinPanel();
 
@@ -3681,6 +3669,7 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       const remainingPool = qualified.filter(p => isAttended(p)).filter(p => !winnersList.some(w => w.email.toLowerCase() === p.email.toLowerCase()));
 
       document.getElementById('statTotal').innerText = total;
+      document.getElementById('statAttended').innerText = `${participants.filter(isAttended).length} / ${MAX_PESERTA}`;
       document.getElementById('statZeroStamps').innerText = zero;
       document.getElementById('statActive').innerText = active;
       document.getElementById('statQualified').innerText = qualified.length;
