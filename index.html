@@ -3827,7 +3827,10 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
           alert('Belum ada video. Masukkan pautan YouTube / MP4 atau pilih fail video di Panel Admin → Kawalan Cabutan → Video Pentas.');
           return;
         }
-        host.innerHTML = `<iframe src="${src}" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+        // YouTube wajibkan referrer + origin (tanpa ini: "Error 153 Video player configuration error")
+        const origin = /^https?:/.test(location.protocol) ? `&origin=${encodeURIComponent(location.origin)}` : '';
+        host.innerHTML = `<iframe src="${src}${origin}" class="w-full h-full" frameborder="0" referrerpolicy="strict-origin-when-cross-origin"
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
       }
       if (document.getElementById('viewStage').classList.contains('hidden')) switchTab('stage');
       if (led && !document.body.classList.contains('led-mode')) setLedMode(true);
@@ -4365,7 +4368,7 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
 
     // Had kuota peserta (sama dengan MAX_PESERTA dalam Code.gs). Pelayan juga menolak peserta
     // baharu bila penuh, jadi had ini tidak boleh dipintas dari pelayar.
-    const MAX_PESERTA = 160;
+    const MAX_PESERTA = 180;
     function quotaLeft() { return Math.max(0, MAX_PESERTA - participants.length); }
     // Kekosongan untuk walk-in = 160 tolak peserta yang disahkan hadir
     function attendQuotaLeft() { return Math.max(0, MAX_PESERTA - participants.filter(isAttended).length); }
