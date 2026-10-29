@@ -3135,25 +3135,31 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
     }
 
     // Semakan automatik sebelum PDF dihantar: sijil mesti penuh (saiz betul dan tiada kawasan
-    // kosong). Halaman dibahagi 4x4 petak; setiap petak mesti ada kandungan selain warna latar.
+    // kosong). Gambar latar sijil mesti penuh hingga ke setiap tepi: jalur nipis (2%) di setiap
+    // tepi, dibahagi 4, mesti kebanyakannya bukan warna latar / putih / hitam rata.
     function checkCertCanvas(canvas) {
       if (!canvas || canvas.width < 2000 || canvas.height < 1400) {
         throw new Error(`Semakan sijil gagal: saiz imej tidak lengkap (${canvas ? canvas.width + 'x' + canvas.height : 'tiada'}).`);
       }
       const ctx = canvas.getContext('2d');
-      const N = 4, cw = Math.floor(canvas.width / N), ch = Math.floor(canvas.height / N);
-      for (let gy = 0; gy < N; gy++) {
-        for (let gx = 0; gx < N; gx++) {
-          const d = ctx.getImageData(gx * cw, gy * ch, cw, ch).data;
-          let filled = 0, total = 0;
-          for (let i = 0; i < d.length; i += 4 * 37) { // sampel setiap piksel ke-37
-            total++;
-            if (Math.abs(d[i] - 3) + Math.abs(d[i + 1] - 10) + Math.abs(d[i + 2] - 33) > 30) filled++;
-          }
-          if (filled / total < 0.01) {
-            throw new Error(`Semakan sijil gagal: kawasan ${gx >= N / 2 ? 'kanan' : 'kiri'} ${gy >= N / 2 ? 'bawah' : 'atas'} sijil kosong (terpotong).`);
-          }
+      const W = canvas.width, H = canvas.height;
+      const isBlank = (r, g, b) => Math.abs(r - 3) + Math.abs(g - 10) + Math.abs(b - 33) < 30 ||
+        (r > 240 && g > 240 && b > 240) || (r < 6 && g < 6 && b < 6);
+      const checkArea = (x, y, w, h, where) => {
+        const d = ctx.getImageData(Math.floor(x), Math.floor(y), Math.max(1, Math.floor(w)), Math.max(1, Math.floor(h))).data;
+        let filled = 0, total = 0;
+        for (let i = 0; i < d.length; i += 4 * 7) { // sampel setiap piksel ke-7
+          total++;
+          if (!isBlank(d[i], d[i + 1], d[i + 2])) filled++;
         }
+        if (filled / total < 0.5) throw new Error(`Semakan sijil gagal: bahagian ${where} sijil kosong (terpotong/teranjak).`);
+      };
+      const t = 0.02;
+      for (let k = 0; k < 4; k++) {
+        checkArea(0, H * k / 4, W * t, H / 4, 'kiri');
+        checkArea(W * (1 - t), H * k / 4, W * t, H / 4, 'kanan');
+        checkArea(W * k / 4, 0, W / 4, H * t, 'atas');
+        checkArea(W * k / 4, H * (1 - t), W / 4, H * t, 'bawah');
       }
     }
 
@@ -3213,9 +3219,7 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
         height: '635px',
         maxWidth: 'none',
         aspectRatio: 'auto',
-        borderRadius: '0',
-        transform: 'scale(1.25)',
-        transformOrigin: 'top left'
+        borderRadius: '0'
       });
 
       // Fix gradient text BEFORE rendering — html2canvas cannot render bg-clip:text
@@ -3252,12 +3256,7 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
         opacity: '0',
         pointerEvents: 'none'
       });
-      // Halaman A4 bersaiz tetap: html2pdf mengukur saiz elemen sebelum skala, jadi yang ditangkap
-      // ialah halaman ini (1122 x 794), bukan sijil berskala di dalamnya
-      const page = document.createElement('div');
-      Object.assign(page.style, { width: '1122px', height: '794px', overflow: 'hidden', backgroundColor: '#030a21' });
-      page.appendChild(certificate);
-      container.appendChild(page);
+      container.appendChild(certificate);
       document.body.appendChild(container);
       // Tailwind CDN menjana CSS untuk kelas baharu (cth text-6xl) secara tak segerak: tunggu sebentar
       await new Promise(r => setTimeout(r, 300));
@@ -3267,16 +3266,19 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
         margin: 0,
         image: { type: 'jpeg', quality: 0.96 },
         html2canvas: {
-          scale: 2,
+          scale: 2.5, // 898 x 635 x 2.5 = imej 2245 x 1588 (kualiti cetak A4)
           useCORS: true,
           allowTaint: false,
           backgroundColor: '#030a21',
           // Tangkap seolah-olah tetingkap selebar halaman A4. Tanpa ini, di telefon (lebar ~390px)
           // html2canvas memotong sijil mengikut lebar skrin: punca e-Sijil separuh dalam emel.
-          width: 1122,
-          height: 794,
-          windowWidth: 1122,
-          windowHeight: 794,
+          // Tangkap sijil sahaja (898 x 635) tanpa CSS transform: tiada jalur kosong di tepi
+          width: 898,
+          height: 635,
+          // Sekurang-kurangnya selebar A4 (telefon), tetapi tidak lebih kecil daripada tetingkap sebenar:
+          // html2pdf letak sijil di tengah tetingkap; lebar berbeza = sijil teranjak (jalur kosong di laptop)
+          windowWidth: Math.max(window.innerWidth, 1122),
+          windowHeight: Math.max(window.innerHeight, 794),
           scrollX: 0,
           scrollY: 0,
           onclone: clonedDocument => {
@@ -3290,8 +3292,7 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
               height: '635px',
               opacity: '1',
               visibility: 'visible',
-              transform: 'scale(1.25)',
-              transformOrigin: 'top left',
+              transform: 'none',
               backgroundColor: '#030a21'
             });
             const title = clonedCertificate.querySelector('h1');
@@ -3311,7 +3312,10 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
           }
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-      }).from(page).toCanvas().get('canvas').then(checkCertCanvas).toPdf().outputPdf('datauristring');
+      }).from(certificate).toCanvas().get('canvas').then(checkCertCanvas).toPdf().get('pdf').then(pdf => {
+        // Imej sijil lebih tinggi 1px daripada nisbah A4: html2pdf tambah muka surat kosong. Buang.
+        while (pdf.getNumberOfPages() > 1) pdf.deletePage(pdf.getNumberOfPages());
+      }).outputPdf('datauristring');
 
       try {
         const dataUri = await renderPdf();
