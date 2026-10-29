@@ -3143,8 +3143,10 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       }
       const ctx = canvas.getContext('2d');
       const W = canvas.width, H = canvas.height;
+      // Kosong = warna latar, putih, hitam, atau kelabu rata (lapisan gelap html2pdf bila sijil teranjak)
       const isBlank = (r, g, b) => Math.abs(r - 3) + Math.abs(g - 10) + Math.abs(b - 33) < 30 ||
-        (r > 240 && g > 240 && b > 240) || (r < 6 && g < 6 && b < 6);
+        (r > 240 && g > 240 && b > 240) || (r < 6 && g < 6 && b < 6) ||
+        (Math.max(r, g, b) - Math.min(r, g, b) < 10 && r < 120);
       const checkArea = (x, y, w, h, where) => {
         const d = ctx.getImageData(Math.floor(x), Math.floor(y), Math.max(1, Math.floor(w)), Math.max(1, Math.floor(h))).data;
         let filled = 0, total = 0;
@@ -3154,7 +3156,7 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
         }
         if (filled / total < 0.5) throw new Error(`Semakan sijil gagal: bahagian ${where} sijil kosong (terpotong/teranjak).`);
       };
-      const t = 0.02;
+      const t = 0.006; // ~13px: jalur teranjak sekecil 8px pun dikesan
       for (let k = 0; k < 4; k++) {
         checkArea(0, H * k / 4, W * t, H / 4, 'kiri');
         checkArea(W * (1 - t), H * k / 4, W * t, H / 4, 'kanan');
@@ -3276,12 +3278,21 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
           width: 898,
           height: 635,
           // Sekurang-kurangnya selebar A4 (telefon), tetapi tidak lebih kecil daripada tetingkap sebenar:
-          // html2pdf letak sijil di tengah tetingkap; lebar berbeza = sijil teranjak (jalur kosong di laptop)
-          windowWidth: Math.max(window.innerWidth, 1122),
+          // html2pdf letak sijil di tengah tetingkap; lebar berbeza = sijil teranjak (jalur kosong di laptop).
+          // clientWidth (bukan innerWidth): tidak termasuk bar skrol, jika tidak sijil teranjak ~8px
+          windowWidth: Math.max(document.documentElement.clientWidth, 1122),
           windowHeight: Math.max(window.innerHeight, 794),
           scrollX: 0,
           scrollY: 0,
           onclone: clonedDocument => {
+            // html2pdf letak sijil di tengah skrin. Jika lebar salinan berbeza walau sedikit (cth bar
+            // skrol), sijil teranjak dan lapisan gelap html2pdf kelihatan sebagai jalur hitam di tepi.
+            // Kunci kedudukan salinan sama tepat dengan kedudukan asal.
+            const origBox = document.querySelector('.html2pdf__container');
+            const cloneBox = clonedDocument.querySelector('.html2pdf__container');
+            if (origBox && cloneBox) {
+              Object.assign(cloneBox.style, { margin: '0', right: 'auto', left: `${origBox.getBoundingClientRect().left}px` });
+            }
             const clonedCertificate = clonedDocument.querySelector('[data-pdf-capture-root="true"]');
             if (!clonedCertificate) return;
             Object.assign(clonedCertificate.style, {
