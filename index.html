@@ -825,6 +825,9 @@
           <button onclick="switchAdminSub('walkin')" id="subBtnWalkin" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
             🚶 Pengunjung Walk-in
           </button>
+          <button onclick="switchAdminSub('certResend')" id="subBtnCertResend" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
+            📧 Hantar Semula e-Sijil
+          </button>
           <button onclick="switchAdminSub('reports')" id="subBtnReports" class="px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white">
             📊 Pelaporan & Analitik
           </button>
@@ -939,7 +942,7 @@
             <div class="glass-card p-4 rounded-2xl text-center border-emerald-500/40">
               <span class="text-[10px] text-emerald-300 uppercase font-semibold">Peserta Sah Hadir</span>
               <p id="hubAttendedCount" class="text-2xl font-black text-emerald-400 mt-1">0</p>
-              <p class="text-[10px] text-slate-500 mt-0.5">kuota maksimum 160</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">kuota maksimum 180</p>
             </div>
             <div class="glass-card p-4 rounded-2xl text-center border-cyan-500/40">
               <span class="text-[10px] text-cyan-300 uppercase font-semibold">Layak 11 Cop</span>
@@ -1218,6 +1221,72 @@
           </div>
           <div class="overflow-x-auto pb-4">
             <div id="printableQRCards" class="flex flex-wrap gap-6 justify-center"></div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB: HANTAR SEMULA e-SIJIL (PDF dijana di laptop admin & disemak sebelum dihantar) -->
+        <div id="adminCertResendSection" class="hidden space-y-6">
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="font-bold text-white text-base flex items-center gap-2"><span>📧</span> Hantar Semula e-Sijil</h3>
+            <p class="text-xs text-slate-300 mt-1">Untuk peserta yang telah lengkap maklum balas. Emel bertajuk <b>"[Hantar Semula] e-Sijil Penyertaan..."</b> dengan nota mohon maaf dan pegawai untuk dihubungi.</p>
+            <ol class="mt-3 text-[11px] text-slate-400 list-decimal pl-5 space-y-0.5">
+              <li>Tekan <b>⬇️ PDF</b> pada beberapa peserta dan buka fail untuk pastikan sijil penuh.</li>
+              <li>Hantar <b>ujian</b> ke emel anda sendiri dan semak lampiran di telefon.</li>
+              <li>Tandakan peserta (atau <b>Pilih Semua</b>), kemudian tekan <b>📧 Hantar Semula</b>. Jangan tutup tab ini sehingga selesai.</li>
+            </ol>
+            <p class="mt-2 text-[11px] text-amber-300">Setiap sijil disemak secara automatik sebelum dihantar. Sijil yang gagal semakan tidak dihantar dan ditanda "Gagal".</p>
+
+            <div class="mt-4 bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex flex-col md:flex-row gap-2 md:items-center">
+              <span class="text-xs font-bold text-cyan-300 whitespace-nowrap">🧪 Ujian:</span>
+              <input type="email" id="certTestEmail" placeholder="Emel anda (cth nama@motac.gov.my)"
+                class="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400 font-mono">
+              <button onclick="sendCertResendTest()" id="certTestBtn" class="px-3 py-2 bg-cyan-700 hover:bg-cyan-600 text-white rounded-xl text-xs font-bold whitespace-nowrap">
+                Hantar Ujian (sijil peserta pertama dipilih)
+              </button>
+            </div>
+
+            <div class="mt-3 bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex flex-col md:flex-row gap-2 md:items-center">
+              <input type="text" id="certResendSearch" oninput="renderCertResendPanel()" placeholder="Cari nama, emel atau bahagian..."
+                class="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400 font-mono">
+              <select id="certResendFilter" onchange="renderCertResendPanel()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none">
+                <option value="ALL">Semua (lengkap maklum balas)</option>
+                <option value="PENDING">Belum dihantar semula</option>
+                <option value="DONE">Sudah dihantar semula</option>
+                <option value="FAIL">Gagal</option>
+              </select>
+              <div class="flex gap-2">
+                <button onclick="selectCertResend(true)" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold whitespace-nowrap">Pilih Semua</button>
+                <button onclick="selectCertResend(false)" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold whitespace-nowrap">Nyahpilih</button>
+              </div>
+            </div>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <button onclick="startCertResend()" id="certResendBtn" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-sm font-black">
+                📧 Hantar Semula (<span id="certResendSelCount">0</span> dipilih)
+              </button>
+              <button onclick="certResendStop = true" id="certResendStopBtn" class="hidden px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-sm font-bold">⏹ Henti</button>
+              <span id="certResendSummary" class="text-[11px] text-slate-400"></span>
+            </div>
+            <div id="certResendProgressBox" class="hidden mt-3">
+              <div class="h-2.5 rounded-full bg-slate-800 overflow-hidden"><div id="certResendBar" class="h-full bg-emerald-400 transition-all" style="width:0%"></div></div>
+              <p id="certResendProgressText" class="mt-1 text-[11px] text-slate-300"></p>
+            </div>
+
+            <div class="mt-4 overflow-x-auto max-h-[60vh] overflow-y-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="sticky top-0 bg-slate-900 border-b border-slate-700 text-slate-300 uppercase">
+                  <tr>
+                    <th class="py-2.5 px-3 w-8"></th>
+                    <th class="py-2.5 px-3">Nama Peserta</th>
+                    <th class="py-2.5 px-3">Emel & Bahagian</th>
+                    <th class="py-2.5 px-3">Status Hantar Semula</th>
+                    <th class="py-2.5 px-3 text-right">Tindakan</th>
+                  </tr>
+                </thead>
+                <tbody id="certResendTable" class="divide-y divide-slate-800"></tbody>
+              </table>
+            </div>
+            <p id="certResendCount" class="mt-2 text-[11px] text-slate-400"></p>
           </div>
         </div>
 
@@ -3065,6 +3134,29 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       });
     }
 
+    // Semakan automatik sebelum PDF dihantar: sijil mesti penuh (saiz betul dan tiada kawasan
+    // kosong). Halaman dibahagi 4x4 petak; setiap petak mesti ada kandungan selain warna latar.
+    function checkCertCanvas(canvas) {
+      if (!canvas || canvas.width < 2000 || canvas.height < 1400) {
+        throw new Error(`Semakan sijil gagal: saiz imej tidak lengkap (${canvas ? canvas.width + 'x' + canvas.height : 'tiada'}).`);
+      }
+      const ctx = canvas.getContext('2d');
+      const N = 4, cw = Math.floor(canvas.width / N), ch = Math.floor(canvas.height / N);
+      for (let gy = 0; gy < N; gy++) {
+        for (let gx = 0; gx < N; gx++) {
+          const d = ctx.getImageData(gx * cw, gy * ch, cw, ch).data;
+          let filled = 0, total = 0;
+          for (let i = 0; i < d.length; i += 4 * 37) { // sampel setiap piksel ke-37
+            total++;
+            if (Math.abs(d[i] - 3) + Math.abs(d[i + 1] - 10) + Math.abs(d[i + 2] - 33) > 30) filled++;
+          }
+          if (filled / total < 0.01) {
+            throw new Error(`Semakan sijil gagal: kawasan ${gx >= N / 2 ? 'kanan' : 'kiri'} ${gy >= N / 2 ? 'bawah' : 'atas'} sijil kosong (terpotong).`);
+          }
+        }
+      }
+    }
+
     async function createCertificatePdfBase64(user) {
       if (!window.html2pdf) throw new Error('Modul jana PDF belum dimuatkan.');
       const certificate = document.getElementById('printableCertificateArea').cloneNode(true);
@@ -3179,6 +3271,14 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
           useCORS: true,
           allowTaint: false,
           backgroundColor: '#030a21',
+          // Tangkap seolah-olah tetingkap selebar halaman A4. Tanpa ini, di telefon (lebar ~390px)
+          // html2canvas memotong sijil mengikut lebar skrin: punca e-Sijil separuh dalam emel.
+          width: 1122,
+          height: 794,
+          windowWidth: 1122,
+          windowHeight: 794,
+          scrollX: 0,
+          scrollY: 0,
           onclone: clonedDocument => {
             const clonedCertificate = clonedDocument.querySelector('[data-pdf-capture-root="true"]');
             if (!clonedCertificate) return;
@@ -3211,7 +3311,7 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
           }
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-      }).from(page).outputPdf('datauristring');
+      }).from(page).toCanvas().get('canvas').then(checkCertCanvas).toPdf().outputPdf('datauristring');
 
       try {
         const dataUri = await renderPdf();
@@ -4760,6 +4860,197 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
       renderStageView();
     }
 
+    // ---------- HANTAR SEMULA e-SIJIL ----------
+    // Status disimpan di pelayan (Script Properties) supaya semua laptop admin nampak siapa sudah
+    // dihantar semula; status "Gagal" disimpan dalam pelayar ini sahaja.
+    const CERT_RESEND_KEY = 'motac_cert_resend_v1';
+    let certResendStatus = (() => { try { return JSON.parse(localStorage.getItem(CERT_RESEND_KEY)) || {}; } catch (e) { return {}; } })();
+    const certResendSel = new Set();
+    let certResendBusy = false, certResendStop = false;
+
+    function saveCertResendStatus() { localStorage.setItem(CERT_RESEND_KEY, JSON.stringify(certResendStatus)); }
+    function certResendEligible() { return participants.filter(p => p.feedbackDone); }
+
+    async function loadCertResent() {
+      if (!adminToken || !databaseWebAppUrl) return;
+      try {
+        const res = await adminApi('LIST_CERT_RESENT');
+        Object.entries(res.resent || {}).forEach(([email, at]) => {
+          certResendStatus[email.toLowerCase()] = { state: 'ok', at };
+        });
+        saveCertResendStatus();
+        renderCertResendPanel();
+      } catch (err) {
+        console.error('[MOTAC Cert Resend]', err);
+      }
+    }
+
+    function certResendFiltered() {
+      const q = (document.getElementById('certResendSearch')?.value || '').trim().toLowerCase();
+      const f = document.getElementById('certResendFilter')?.value || 'ALL';
+      return certResendEligible().filter(p => {
+        const st = (certResendStatus[p.email.toLowerCase()] || {}).state;
+        if (f === 'PENDING' && st === 'ok') return false;
+        if (f === 'DONE' && st !== 'ok') return false;
+        if (f === 'FAIL' && st !== 'fail') return false;
+        return !q || [p.name, p.email, p.agency].some(v => String(v || '').toLowerCase().includes(q));
+      });
+    }
+
+    function renderCertResendPanel() {
+      const tbody = document.getElementById('certResendTable');
+      if (!tbody) return;
+      const all = certResendEligible();
+      const list = certResendFiltered();
+      const done = all.filter(p => (certResendStatus[p.email.toLowerCase()] || {}).state === 'ok').length;
+      const fail = all.filter(p => (certResendStatus[p.email.toLowerCase()] || {}).state === 'fail').length;
+      document.getElementById('certResendSelCount').innerText = certResendSel.size;
+      document.getElementById('certResendCount').innerText =
+        `Menunjukkan ${list.length} daripada ${all.length} peserta lengkap maklum balas • Sudah dihantar semula: ${done} • Gagal: ${fail}`;
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-500">Tiada peserta sepadan.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(p => {
+        const key = p.email.toLowerCase();
+        const st = certResendStatus[key] || {};
+        const status = st.state === 'ok'
+          ? `<span class="text-emerald-300 font-bold">✅ Dihantar ${escapeHtml(new Date(st.at).toLocaleString('ms-MY', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }))}</span>`
+          : st.state === 'fail' ? `<span class="text-rose-300 font-bold">❌ Gagal</span><p class="text-[10px] text-rose-300/80">${escapeHtml(st.msg || '')}</p>`
+          : st.state === 'sending' ? '<span class="text-amber-300 font-bold">⏳ Sedang dihantar...</span>'
+          : '<span class="text-slate-500">Belum</span>';
+        return `<tr class="hover:bg-slate-800/40">
+          <td class="py-2 px-3"><input type="checkbox" ${certResendSel.has(key) ? 'checked' : ''} onchange="toggleCertResend('${escapeHtml(key)}', this.checked)" class="rounded text-emerald-500 focus:ring-0"></td>
+          <td class="py-2 px-3 font-semibold text-white">${escapeHtml(p.name)}</td>
+          <td class="py-2 px-3"><p class="text-cyan-300 font-mono text-[11px]">${escapeHtml(p.email)}</p><p class="text-slate-400 text-[10px]">${escapeHtml(p.agency)}</p></td>
+          <td class="py-2 px-3">${status}</td>
+          <td class="py-2 px-3 text-right whitespace-nowrap">
+            <button onclick="downloadCertPdf('${escapeHtml(key)}', this)" class="px-2 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 rounded text-[10px] font-bold">⬇️ PDF</button>
+            <button onclick="resendCertOne('${escapeHtml(key)}')" class="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 rounded text-[10px] font-bold">📧 Hantar</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function toggleCertResend(key, on) {
+      if (on) certResendSel.add(key); else certResendSel.delete(key);
+      document.getElementById('certResendSelCount').innerText = certResendSel.size;
+    }
+
+    // Pilih Semua = semua yang sedang dipaparkan (ikut carian & penapis)
+    function selectCertResend(on) {
+      if (on) certResendFiltered().forEach(p => certResendSel.add(p.email.toLowerCase()));
+      else certResendSel.clear();
+      renderCertResendPanel();
+    }
+
+    function findParticipantByEmail(key) {
+      return participants.find(p => p.email.toLowerCase() === key);
+    }
+
+    // Muat turun PDF yang SAMA seperti yang akan dihantar (untuk disemak dahulu)
+    async function downloadCertPdf(key, btn) {
+      const p = findParticipantByEmail(key);
+      if (!p) return;
+      const label = btn.innerText;
+      btn.disabled = true; btn.innerText = '⏳';
+      try {
+        const b64 = await createCertificatePdfBase64(p);
+        const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+        a.download = `e-Sijil-MOTAC-${p.name}.pdf`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+      } catch (err) {
+        alert(`Sijil ${p.name} tidak dapat dijana:\n${err.message}`);
+      } finally {
+        btn.disabled = false; btn.innerText = label;
+      }
+    }
+
+    async function resendCertTo(p, testTo) {
+      const pdfBase64 = await createCertificatePdfBase64(p); // termasuk semakan sijil penuh
+      return adminApi('RESEND_CERTIFICATE', { email: p.email, pdfBase64, testTo: testTo || '' });
+    }
+
+    async function sendCertResendTest() {
+      const to = document.getElementById('certTestEmail').value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { alert('Sila isi emel anda yang sah untuk ujian.'); return; }
+      const key = [...certResendSel][0] || (certResendEligible()[0] || {}).email;
+      const p = key && findParticipantByEmail(key.toLowerCase());
+      if (!p) { alert('Tiada peserta lengkap maklum balas.'); return; }
+      const btn = document.getElementById('certTestBtn');
+      btn.disabled = true;
+      try {
+        await resendCertTo(p, to);
+        alert(`Emel ujian (sijil ${p.name}) telah dihantar ke ${to}.\nSila semak Inbox/Spam dan buka lampiran PDF di telefon & komputer.`);
+      } catch (err) {
+        alert(`Ujian gagal: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function resendCertOne(key) {
+      const p = findParticipantByEmail(key);
+      if (!p || certResendBusy) return;
+      const st = certResendStatus[key] || {};
+      if (!confirm(`${st.state === 'ok' ? '⚠️ Peserta ini SUDAH dihantar semula sebelum ini.\n\n' : ''}Hantar semula e-Sijil kepada ${p.name} (${p.email})?`)) return;
+      runCertResend([p]);
+    }
+
+    function startCertResend() {
+      if (certResendBusy) return;
+      const list = certResendEligible().filter(p => certResendSel.has(p.email.toLowerCase()));
+      if (!list.length) { alert('Sila tandakan peserta terlebih dahulu (atau tekan Pilih Semua).'); return; }
+      const again = list.filter(p => (certResendStatus[p.email.toLowerCase()] || {}).state === 'ok').length;
+      if (!confirm(`Hantar semula e-Sijil kepada ${list.length} peserta?` +
+        (again ? `\n\n⚠️ ${again} daripadanya SUDAH dihantar semula sebelum ini dan akan menerima emel sekali lagi.` : '') +
+        `\n\nJangan tutup atau refresh tab ini sehingga selesai.`)) return;
+      runCertResend(list);
+    }
+
+    async function runCertResend(list) {
+      certResendBusy = true; certResendStop = false;
+      const bar = document.getElementById('certResendBar');
+      const text = document.getElementById('certResendProgressText');
+      document.getElementById('certResendProgressBox').classList.remove('hidden');
+      document.getElementById('certResendStopBtn').classList.remove('hidden');
+      document.getElementById('certResendBtn').disabled = true;
+      let ok = 0, fail = 0, quota = null, stopMsg = '';
+      for (let i = 0; i < list.length; i++) {
+        if (certResendStop) { stopMsg = 'Dihentikan oleh admin.'; break; }
+        const p = list[i], key = p.email.toLowerCase();
+        text.innerText = `Menjana & menghantar ${i + 1} / ${list.length}: ${p.name}`;
+        certResendStatus[key] = { state: 'sending' };
+        renderCertResendPanel();
+        try {
+          const res = await resendCertTo(p);
+          certResendStatus[key] = { state: 'ok', at: res.resentAt || new Date().toISOString() };
+          certResendSel.delete(key);
+          if (typeof res.quota === 'number') quota = res.quota;
+          ok++;
+        } catch (err) {
+          certResendStatus[key] = { state: 'fail', msg: err.message };
+          fail++;
+          const m = String(err.message);
+          if (m.startsWith('SESI_TAMAT') || m.startsWith('KUOTA_HABIS')) { stopMsg = m.replace(/^\w+: /, ''); break; }
+        }
+        saveCertResendStatus();
+        bar.style.width = `${Math.round((i + 1) / list.length * 100)}%`;
+        renderCertResendPanel();
+      }
+      certResendBusy = false;
+      document.getElementById('certResendStopBtn').classList.add('hidden');
+      document.getElementById('certResendBtn').disabled = false;
+      const summary = `Selesai: ${ok} berjaya, ${fail} gagal` + (quota !== null ? ` • Baki kuota emel hari ini: ${quota}` : '');
+      text.innerText = summary + (stopMsg ? ` • ${stopMsg}` : '');
+      document.getElementById('certResendSummary').innerText = summary;
+      renderCertResendPanel();
+      alert(summary + (stopMsg ? `\n\n${stopMsg}` : '') + (fail ? '\n\nPilih penapis "Gagal" untuk lihat sebab dan cuba semula.' : ''));
+    }
+
     // Tab Urus Akaun Admin: senarai dimuat dari pelayan (tab "Admin" dalam Sheet)
     async function loadAdminAccounts() {
       if (!adminToken) return;
@@ -4894,11 +5185,11 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
 
     function switchAdminSub(sub) {
       sessionStorage.setItem('motac_last_admin_sub', sub);
-      ['adminDrawSection', 'adminParticipantsHubSection', 'adminReportsSection', 'adminQRSection', 'adminAccountsSection', 'adminWalkinSection'].forEach(id => {
+      ['adminDrawSection', 'adminParticipantsHubSection', 'adminReportsSection', 'adminQRSection', 'adminAccountsSection', 'adminWalkinSection', 'adminCertResendSection'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
       });
-      ['subBtnDraw', 'subBtnHub', 'subBtnWalkin', 'subBtnReports', 'subBtnQR', 'subBtnAccounts'].forEach(id => {
+      ['subBtnDraw', 'subBtnHub', 'subBtnWalkin', 'subBtnCertResend', 'subBtnReports', 'subBtnQR', 'subBtnAccounts'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.className = "px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white";
       });
@@ -4916,6 +5207,11 @@ Kehadiran ${user.name} tidak boleh disahkan.`);
         document.getElementById('adminWalkinSection').classList.remove('hidden');
         document.getElementById('subBtnWalkin').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-violet-300";
         renderWalkinPanel();
+      } else if (sub === 'certResend') {
+        document.getElementById('adminCertResendSection').classList.remove('hidden');
+        document.getElementById('subBtnCertResend').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-emerald-300";
+        renderCertResendPanel();
+        loadCertResent();
       } else if (sub === 'reports') {
         document.getElementById('adminReportsSection').classList.remove('hidden');
         document.getElementById('subBtnReports').className = "px-3.5 py-2 rounded-lg font-bold bg-slate-800 text-cyan-300";
